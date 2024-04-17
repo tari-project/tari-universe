@@ -10,10 +10,14 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/material": "^5.15.15",
+    "@tariproject/wallet_jrpc_client": "file:../tari-dan/clients/javascript/wallet_daemon_client",
     "@tauri-apps/api": ">=2.0.0-beta.0",
-    "@tauri-apps/plugin-shell": ">=2.0.0-beta.0"
+    "@tauri-apps/plugin-shell": ">=2.0.0-beta.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

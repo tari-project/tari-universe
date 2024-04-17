@@ -32,3 +32,7 @@ Start `tari-dan` docker image like: `docker run -p 18000-18100:18000-18100 quay.
 run `cargo tauri dev`
 
 Logs are available in `log/wallet-daemon` folder and sqlite db is in `localnet/data`
+
+Change path for `"@tariproject/wallet_jrpc_client"` in `package.json` file
+
+Start [tapplet-example](https://github.com/MCozhusheck/tapplet-example) for nested tapplet to show up on the Tauri app
