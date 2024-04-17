@@ -35,4 +35,5 @@ Logs are available in `log/wallet-daemon` folder and sqlite db is in `localnet/d
 
 Change path for `"@tariproject/wallet_jrpc_client"` in `package.json` file
 
-Start [tapplet-example](https://github.com/MCozhusheck/tapplet-example) for nested tapplet to show up on the Tauri app
+The example tapplet comes from [tapplet-example](https://github.com/MCozhusheck/tapplet-example)
+You can replace viewed by building project and copying the files inside `dist` folder.

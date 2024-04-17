@@ -15,9 +15,9 @@ use tari_dan_wallet_sdk::apis::key_manager;
 use tari_shutdown::Shutdown;
 use tari_wallet_daemon_client::{
     types::{
-        AccountsCreateFreeTestCoinsRequest, AccountsCreateFreeTestCoinsResponse,
-        AccountsGetBalancesRequest, AccountsGetBalancesResponse, AuthLoginAcceptRequest,
-        AuthLoginAcceptResponse, AuthLoginRequest, AuthLoginResponse,
+        AccountsCreateFreeTestCoinsRequest, AccountsGetBalancesRequest,
+        AccountsGetBalancesResponse, AuthLoginAcceptRequest, AuthLoginAcceptResponse,
+        AuthLoginRequest, AuthLoginResponse,
     },
     ComponentAddressOrName,
 };
@@ -187,14 +187,12 @@ async fn free_coins(auth_token: String, permissions_token: String) -> Result<(),
         max_fee: None,
         key_id: None,
     };
-    let free_coins_res = make_request(
+    make_request(
         Some(permissions_token),
         "accounts.create_free_test_coins".to_string(),
         free_coins_params,
     )
     .await?;
-    let free_coins_res: AccountsCreateFreeTestCoinsResponse =
-        serde_json::from_value(free_coins_res)?;
 
     Ok(())
 }

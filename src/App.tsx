@@ -138,6 +138,7 @@ function App() {
   useEffect(() => {
     const handleMessage = async (event: any) => {
       const { methodName, args } = event.data;
+      console.log("methodName", methodName, "args", args);
       const result = await provider.runOne(methodName, args);
       event.source.postMessage({ id: event.id, result }, event.origin);
     };
@@ -188,12 +189,16 @@ function App() {
       >
         <button type="submit">Get balances</button>
       </form>
-      <Box>
-        <iframe src="http://localhost:5174/" width="100%" height="500"></iframe>
-      </Box>
       <Typography textAlign="center">
         balances: {JSON.stringify(balances)}
       </Typography>
+      <Box>
+        <iframe
+          src="../tapplets/tapplet-example/index.html"
+          width="100%"
+          height="500"
+        ></iframe>
+      </Box>
       <AccountTest />
       <SubstateTest />
     </div>
