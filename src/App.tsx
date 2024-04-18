@@ -138,7 +138,6 @@ function App() {
   useEffect(() => {
     const handleMessage = async (event: any) => {
       const { methodName, args } = event.data;
-      console.log("methodName", methodName, "args", args);
       const result = await provider.runOne(methodName, args);
       event.source.postMessage({ id: event.id, result }, event.origin);
     };
