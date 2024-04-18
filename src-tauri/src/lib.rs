@@ -15,9 +15,9 @@ use tari_dan_wallet_sdk::apis::key_manager;
 use tari_shutdown::Shutdown;
 use tari_wallet_daemon_client::{
     types::{
-        AccountsCreateFreeTestCoinsRequest, AccountsCreateFreeTestCoinsResponse,
-        AccountsGetBalancesRequest, AccountsGetBalancesResponse, AuthLoginAcceptRequest,
-        AuthLoginAcceptResponse, AuthLoginRequest, AuthLoginResponse,
+        AccountsCreateFreeTestCoinsRequest, AccountsGetBalancesRequest,
+        AccountsGetBalancesResponse, AuthLoginAcceptRequest, AuthLoginAcceptResponse,
+        AuthLoginRequest, AuthLoginResponse,
     },
     ComponentAddressOrName,
 };
@@ -54,9 +54,7 @@ async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), ()> {
     let permission_token = tokens.permission.lock().unwrap().clone();
     let auth_token = tokens.auth.lock().unwrap().clone();
     let handle = tauri::async_runtime::spawn(async move {
-        free_coins(auth_token.clone(), permission_token.clone())
-            .await
-            .unwrap()
+        free_coins(auth_token, permission_token).await.unwrap()
     });
     handle.await.unwrap();
     Ok(())
@@ -67,12 +65,27 @@ async fn get_balances(tokens: State<'_, Tokens>) -> Result<AccountsGetBalancesRe
     let permission_token = tokens.permission.lock().unwrap().clone();
     let auth_token = tokens.auth.lock().unwrap().clone();
     let handle = tauri::async_runtime::spawn(async move {
-        balances(auth_token.clone(), permission_token.clone())
-            .await
-            .unwrap()
+        balances(auth_token, permission_token).await.unwrap()
     });
     let balances = handle.await.unwrap();
     Ok(balances)
+}
+
+#[tauri::command]
+async fn call_wallet(
+    method: String,
+    params: String,
+    tokens: State<'_, Tokens>,
+) -> Result<serde_json::Value, ()> {
+    let permission_token = tokens.permission.lock().unwrap().clone();
+    let req_params: serde_json::Value = serde_json::from_str(&params).unwrap();
+    let handle = tauri::async_runtime::spawn(async move {
+        make_request(Some(permission_token), method, req_params)
+            .await
+            .unwrap()
+    });
+    let response = handle.await.unwrap();
+    Ok(response)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -88,7 +101,8 @@ pub fn run() {
             wallet_daemon,
             get_permission_token,
             get_free_coins,
-            get_balances
+            get_balances,
+            call_wallet
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -114,12 +128,10 @@ async fn start_wallet_daemon() -> Result<(), anyhow::Error> {
     config.dan_wallet_daemon.indexer_node_json_rpc_url =
         env::var("INDEXER_NODE_JSON_RPC_URL").unwrap();
     let derive_secret = env::var("DERIVE_SECRET").ok();
-    println!("base path: {:?}", config.common.base_path);
 
     if let Some(secret) = derive_secret {
         let index = secret.parse::<u64>().unwrap();
         let sdk = initialize_wallet_sdk(&config).unwrap();
-        println!("1 Deriving secret key at index {}", index);
         let secret = sdk
             .key_manager_api()
             .derive_key(key_manager::TRANSACTION_BRANCH, index)
@@ -153,20 +165,17 @@ async fn permission_token() -> Result<(String, String), anyhow::Error> {
         permissions: vec!["Admin".to_string()],
         duration: None,
     };
-    let address = env::var("JSON_CONNECT_ADDRESS").unwrap().parse().unwrap();
-    let req_res = make_request(address, None, "auth.request".to_string(), &req_params).await?;
+    let req_res = make_request(None, "auth.request".to_string(), &req_params).await?;
     let req_res: AuthLoginResponse = serde_json::from_value(req_res)?;
 
     let auth_token = req_res.auth_token;
-    println!("Auth token: {}", auth_token);
 
     let acc_params = AuthLoginAcceptRequest {
         auth_token: auth_token.clone(),
         name: auth_token.clone(),
     };
-    let acc_res = make_request(address, None, "auth.accept".to_string(), &acc_params).await?;
+    let acc_res = make_request(None, "auth.accept".to_string(), &acc_params).await?;
     let acc_res: AuthLoginAcceptResponse = serde_json::from_value(acc_res)?;
-    println!("Permissions token: {}", acc_res.permissions_token);
 
     Ok((acc_res.permissions_token, auth_token))
 }
@@ -178,18 +187,12 @@ async fn free_coins(auth_token: String, permissions_token: String) -> Result<(),
         max_fee: None,
         key_id: None,
     };
-    let address = env::var("JSON_CONNECT_ADDRESS").unwrap().parse().unwrap();
-    let free_coins_res = make_request(
-        address,
+    make_request(
         Some(permissions_token),
         "accounts.create_free_test_coins".to_string(),
         free_coins_params,
     )
     .await?;
-    let free_coins_res: AccountsCreateFreeTestCoinsResponse =
-        serde_json::from_value(free_coins_res)?;
-
-    println!("free_coins_res: {:?}", &free_coins_res);
 
     Ok(())
 }
@@ -202,9 +205,7 @@ async fn balances(
         account: Some(ComponentAddressOrName::Name(auth_token)),
         refresh: false,
     };
-    let address = env::var("JSON_CONNECT_ADDRESS").unwrap().parse().unwrap();
     let balance_res = make_request(
-        address,
         Some(permissions_token),
         "accounts.get_balances".to_string(),
         balance_req,
@@ -212,17 +213,15 @@ async fn balances(
     .await?;
     let balance_res: AccountsGetBalancesResponse = serde_json::from_value(balance_res)?;
 
-    println!("balance_res: {:?}", &balance_res);
-
     Ok(balance_res)
 }
 
 async fn make_request<T: Serialize>(
-    address: SocketAddr,
     token: Option<String>,
     method: String,
     params: T,
 ) -> Result<serde_json::Value, anyhow::Error> {
+    let address: SocketAddr = env::var("JSON_CONNECT_ADDRESS").unwrap().parse().unwrap();
     let url = format!("http://{}", address);
     let client = reqwest::Client::new();
     let body = JsonRpcRequest {
