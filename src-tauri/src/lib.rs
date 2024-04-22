@@ -1,9 +1,11 @@
 use serde::Serialize;
 use std::{env, fs, net::SocketAddr, panic, path::PathBuf, process, sync::Mutex};
-use tauri_plugin_http::reqwest::{self, header::AUTHORIZATION};
+use tauri_plugin_http::reqwest::{
+    self,
+    header::{AUTHORIZATION, CONTENT_TYPE},
+};
 
 use axum_jrpc::{JsonRpcAnswer, JsonRpcRequest, JsonRpcResponse};
-use reqwest::header::CONTENT_TYPE;
 use tari_common::initialize_logging;
 use tari_dan_app_utilities::configuration::load_configuration;
 
@@ -22,6 +24,9 @@ use tari_wallet_daemon_client::{
     ComponentAddressOrName,
 };
 use tauri::{self, State};
+
+mod tapplet_server;
+use tapplet_server::start;
 
 struct Tokens {
     auth: Mutex<String>,
@@ -68,6 +73,9 @@ async fn get_balances(tokens: State<'_, Tokens>) -> Result<AccountsGetBalancesRe
         balances(auth_token, permission_token).await.unwrap()
     });
     let balances = handle.await.unwrap();
+
+    let tapplet_handle = tauri::async_runtime::spawn(async move { start().await });
+    tapplet_handle.await.unwrap();
     Ok(balances)
 }
 

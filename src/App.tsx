@@ -192,11 +192,7 @@ function App() {
         balances: {JSON.stringify(balances)}
       </Typography>
       <Box>
-        <iframe
-          src="../tapplets/tapplet-example/index.html"
-          width="100%"
-          height="500"
-        ></iframe>
+        <iframe src="http://localhost:3001/" width="100%" height="500"></iframe>
       </Box>
       <AccountTest />
       <SubstateTest />
