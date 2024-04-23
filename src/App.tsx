@@ -141,9 +141,11 @@ function App() {
     setTappletAddress(await invoke("launch_tapplet", {}));
   }
 
-  async function close_tapplet() {
-    await invoke("close_tapplet", {});
-  }
+  useEffect(() => {
+    return () => {
+      invoke("close_tapplet", {});
+    };
+  }, []);
 
   useEffect(() => {
     const handleMessage = async (event: any) => {
@@ -209,15 +211,6 @@ function App() {
         }}
       >
         <button type="submit">Launch tapplet</button>
-      </form>
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          close_tapplet();
-        }}
-      >
-        <button type="submit">Close tapplet</button>
       </form>
       {tappletAddress}
       <Box>
