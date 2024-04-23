@@ -119,6 +119,8 @@ function SubstateTest() {
 
 function App() {
   const [balances, setBalances] = useState({});
+  const [tappletAddress, setTappletAddress] = useState("");
+
   async function start_wallet_daemon() {
     await invoke("wallet_daemon", {});
   }
@@ -133,6 +135,14 @@ function App() {
 
   async function get_balances() {
     setBalances(await invoke("get_balances", {}));
+  }
+
+  async function launch_tapplet() {
+    setTappletAddress(await invoke("launch_tapplet", {}));
+  }
+
+  async function close_tapplet() {
+    await invoke("close_tapplet", {});
   }
 
   useEffect(() => {
@@ -191,11 +201,32 @@ function App() {
       <Typography textAlign="center">
         balances: {JSON.stringify(balances)}
       </Typography>
+      <form
+        className="row"
+        onSubmit={(e) => {
+          e.preventDefault();
+          launch_tapplet();
+        }}
+      >
+        <button type="submit">Launch tapplet</button>
+      </form>
+      <form
+        className="row"
+        onSubmit={(e) => {
+          e.preventDefault();
+          close_tapplet();
+        }}
+      >
+        <button type="submit">Close tapplet</button>
+      </form>
+      {tappletAddress}
       <Box>
-        <iframe src="http://localhost:3001/" width="100%" height="500"></iframe>
+        <iframe
+          src={`http://${tappletAddress}`}
+          width="100%"
+          height="500"
+        ></iframe>
       </Box>
-      <AccountTest />
-      <SubstateTest />
     </div>
   );
 }

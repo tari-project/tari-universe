@@ -4,6 +4,7 @@ use tauri_plugin_http::reqwest::{
     self,
     header::{AUTHORIZATION, CONTENT_TYPE},
 };
+use tokio_util::sync::CancellationToken;
 
 use axum_jrpc::{JsonRpcAnswer, JsonRpcRequest, JsonRpcResponse};
 use tari_common::initialize_logging;
@@ -31,6 +32,7 @@ use tapplet_server::start;
 struct Tokens {
     auth: Mutex<String>,
     permission: Mutex<String>,
+    cancel_token: Mutex<CancellationToken>,
 }
 
 #[tauri::command]
@@ -74,9 +76,22 @@ async fn get_balances(tokens: State<'_, Tokens>) -> Result<AccountsGetBalancesRe
     });
     let balances = handle.await.unwrap();
 
-    let tapplet_handle = tauri::async_runtime::spawn(async move { start().await });
-    tapplet_handle.await.unwrap();
     Ok(balances)
+}
+
+#[tauri::command]
+async fn launch_tapplet(tokens: State<'_, Tokens>) -> Result<String, ()> {
+    let tapplet_handle = tauri::async_runtime::spawn(async move { start().await });
+    let (addr, cancel_token) = tapplet_handle.await.unwrap();
+    let mut state = tokens.cancel_token.lock().unwrap();
+    *state = cancel_token;
+    Ok(addr)
+}
+
+#[tauri::command]
+async fn close_tapplet(tokens: State<'_, Tokens>) -> Result<(), ()> {
+    tokens.cancel_token.lock().unwrap().cancel();
+    Ok(())
 }
 
 #[tauri::command]
@@ -104,12 +119,15 @@ pub fn run() {
         .manage(Tokens {
             permission: Mutex::new("".to_string()),
             auth: Mutex::new("".to_string()),
+            cancel_token: Mutex::new(CancellationToken::new()),
         })
         .invoke_handler(tauri::generate_handler![
             wallet_daemon,
             get_permission_token,
             get_free_coins,
             get_balances,
+            launch_tapplet,
+            close_tapplet,
             call_wallet
         ])
         .run(tauri::generate_context!())
