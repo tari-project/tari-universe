@@ -144,6 +144,7 @@ function App() {
   useEffect(() => {
     return () => {
       invoke("close_tapplet", {});
+      setTappletAddress("");
     };
   }, []);
 
