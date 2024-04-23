@@ -3,6 +3,7 @@ use tauri::{self};
 use tokio_util::sync::CancellationToken;
 
 mod commands;
+mod rpc;
 mod tapplet_server;
 mod wallet_daemon;
 
