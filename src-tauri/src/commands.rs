@@ -5,7 +5,7 @@ use crate::{
     rpc::{balances, free_coins, make_request, permission_token},
     tapplet_server::start,
     wallet_daemon::start_wallet_daemon,
-    Tokens,
+    ShutdownTokens, Tokens,
 };
 
 #[tauri::command]
@@ -53,17 +53,41 @@ pub async fn get_balances(tokens: State<'_, Tokens>) -> Result<AccountsGetBalanc
 }
 
 #[tauri::command]
-pub async fn launch_tapplet(tokens: State<'_, Tokens>) -> Result<String, ()> {
-    let tapplet_handle = tauri::async_runtime::spawn(async move { start().await });
+pub async fn launch_tapplet(
+    tapplet_id: String,
+    shutdown_tokens: State<'_, ShutdownTokens>,
+) -> Result<String, ()> {
+    let mut locked_tokens = shutdown_tokens.0.lock().await;
+    let tapplet_handle = tauri::async_runtime::spawn(async { start().await });
     let (addr, cancel_token) = tapplet_handle.await.unwrap();
-    let mut state = tokens.cancel_token.lock().unwrap();
-    *state = cancel_token;
-    Ok(addr)
+    match locked_tokens.insert(tapplet_id.clone(), cancel_token) {
+        Some(_) => {
+            println!("Tapplet already running with id: {}", tapplet_id.clone());
+        }
+        None => {
+            println!("Tapplet started with id: {}", tapplet_id.clone());
+        }
+    }
+    Ok(format!("http://{}", addr))
 }
 
 #[tauri::command]
-pub async fn close_tapplet(tokens: State<'_, Tokens>) -> Result<(), ()> {
-    tokens.cancel_token.lock().unwrap().cancel();
+pub async fn close_tapplet(
+    tapplet_id: String,
+    shutdown_tokens: State<'_, ShutdownTokens>,
+) -> Result<(), ()> {
+    let mut lock = shutdown_tokens.0.lock().await;
+    match lock.get(&tapplet_id) {
+        Some(token) => {
+            token.cancel();
+            lock.remove(&tapplet_id);
+            println!("Tapplet stopped with id: {}", tapplet_id.clone());
+        }
+        None => {
+            println!("Tapplet not found with id: {}", tapplet_id.clone());
+        }
+    }
+
     Ok(())
 }
 

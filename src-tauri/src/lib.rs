@@ -1,4 +1,8 @@
-use std::{env, sync::Mutex};
+use std::{
+    collections::HashMap,
+    env,
+    sync::{Arc, Mutex},
+};
 use tauri::{self};
 use tokio_util::sync::CancellationToken;
 
@@ -15,8 +19,9 @@ use commands::{
 pub struct Tokens {
     auth: Mutex<String>,
     permission: Mutex<String>,
-    cancel_token: Mutex<CancellationToken>,
 }
+#[derive(Default)]
+pub struct ShutdownTokens(Arc<tokio::sync::Mutex<HashMap<String, CancellationToken>>>);
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -26,8 +31,8 @@ pub fn run() {
         .manage(Tokens {
             permission: Mutex::new("".to_string()),
             auth: Mutex::new("".to_string()),
-            cancel_token: Mutex::new(CancellationToken::new()),
         })
+        .manage(ShutdownTokens::default())
         .invoke_handler(tauri::generate_handler![
             wallet_daemon,
             get_permission_token,
