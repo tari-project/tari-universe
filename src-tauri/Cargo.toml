@@ -39,13 +39,16 @@ log4rs = { version = "1.3", features = [
 tower-http = { version = "0.5.2", features = ["fs", "trace"] }
 tari_crypto = "0.20.0"
 
-tari_dan_wallet_daemon = { path = "/home/maciej/projects/tari/tari-dan/applications/tari_dan_wallet_daemon" }
-tari_dan_wallet_sdk = { path = "/home/maciej/projects/tari/tari-dan/dan_layer/wallet/sdk" }
-tari_dan_wallet_storage_sqlite = { path = "/home/maciej/projects/tari/tari-dan/dan_layer/wallet/storage_sqlite" }
-tari_dan_wallet_crypto = { path = "/home/maciej/projects/tari/tari-dan/dan_layer/wallet/crypto" }
-tari_dan_common_types = { path = "/home/maciej/projects/tari/tari-dan/dan_layer/common_types" }
-tari_dan_app_utilities = { path = "/home/maciej/projects/tari/tari-dan/applications/tari_dan_app_utilities" }
-tari_wallet_daemon_client = { path = "/home/maciej/projects/tari/tari-dan/clients/wallet_daemon_client" }
+tari_dan_wallet_daemon = { path = "/home/oski/Projects/tari/tari-dan/applications/tari_dan_wallet_daemon" }
+tari_dan_wallet_sdk = { path = "/home/oski/Projects/tari/tari-dan/dan_layer/wallet/sdk" }
+tari_dan_wallet_storage_sqlite = { path = "/home/oski/Projects/tari/tari-dan/dan_layer/wallet/storage_sqlite" }
+tari_dan_wallet_crypto = { path = "/home/oski/Projects/tari/tari-dan/dan_layer/wallet/crypto" }
+tari_dan_common_types = { path = "/home/oski/Projects/tari/tari-dan/dan_layer/common_types" }
+tari_dan_app_utilities = { path = "/home/oski/Projects/tari/tari-dan/applications/tari_dan_app_utilities" }
+tari_wallet_daemon_client = { path = "/home/oski/Projects/tari/tari-dan/clients/wallet_daemon_client" }
 
 tari_shutdown = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
 tari_common = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
+
+[target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
+tauri-plugin-http = "2.0.0-beta.4"
