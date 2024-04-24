@@ -38,6 +38,8 @@ log4rs = { version = "1.3", features = [
 ] }
 tower-http = { version = "0.5.2", features = ["fs", "trace"] }
 tari_crypto = "0.20.0"
+flate2 = "1.0.28"
+tar = "0.4.40"
 
 tari_dan_wallet_daemon = { path = "/home/oski/Projects/tari/tari-dan/applications/tari_dan_wallet_daemon" }
 tari_dan_wallet_sdk = { path = "/home/oski/Projects/tari/tari-dan/dan_layer/wallet/sdk" }
