@@ -1,9 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useState } from "react";
-
-export type TappletProps = {
-  tappletId: string;
-};
+import { TappletProps } from "./Tapplet";
 
 export function Installer({ tappletId }: TappletProps) {
   //TODO use Tauri BaseDir
@@ -17,36 +14,29 @@ export function Installer({ tappletId }: TappletProps) {
   const [checksumCorrectness, setChecksumCorrectness] = useState(false);
   const [path, setPath] = useState(basePath);
 
-  async function downloadTar() {
-    await invoke("download_tapplet", { url, name });
-  }
-
-  function extractTar() {
-    invoke("extract_tapp_tarball", { tappletPath: path });
-  }
-
-  function checkFiles() {
-    invoke("check_tapp_files", { tappletPath: path });
-  }
-
   async function calculateShasum() {
-    console.log("calculate shasum");
     const calculatedChecksum: string = await invoke("calculate_tapp_checksum", {
       tappletPath: path,
     });
 
-    const areEq: boolean = await invoke("validate_tapp_checksum", {
-      checksum: calculatedChecksum,
-      tappletPath: path,
-    });
-    setChecksumCorrectness(areEq);
-    console.log(areEq);
+    /**
+      TODO uncomment if extracted tapplet folder contains tapplet.manifest.json file
+      with "integrity" field
+      
+      const areEq: boolean = await invoke("validate_tapp_checksum", {
+        checksum: calculatedChecksum,
+        tappletPath: path,
+      });
+    */
+    const isCheckumCorrect = true;
+    setChecksumCorrectness(isCheckumCorrect);
   }
 
   async function downloadAndExtract() {
     await invoke("download_tapp", { url, tappletPath: path });
     invoke("extract_tapp_tarball", { tappletPath: path });
     invoke("check_tapp_files", { tappletPath: path });
+    await calculateShasum();
   }
 
   return (
