@@ -4,7 +4,7 @@ use flate2::read::GzDecoder;
 use tar::Archive;
 use serde_json::Value;
 
-pub async fn download_file(url: String, name: String) -> Result<(), anyhow::Error> {
+pub async fn download_file(url: String, tapplet_path: String) -> Result<(), anyhow::Error> {
   // Download the file
   let client = reqwest::Client::new();
   let mut response = client
@@ -16,7 +16,7 @@ pub async fn download_file(url: String, name: String) -> Result<(), anyhow::Erro
     });
 
   if response.status().is_success() {
-    println!("{} tapplet downloaded successfully!", name);
+    println!("Tapplet downloaded successfully! Path: {:?}", tapplet_path);
   } else if response.status().is_server_error() {
     println!("download server error!");
   } else {
@@ -25,14 +25,15 @@ pub async fn download_file(url: String, name: String) -> Result<(), anyhow::Erro
 
   // Ensure the request was successful
   if response.status().is_success() {
-    // Extract the file to the download directory
-    let base_path = env::current_dir().unwrap().parent().unwrap().to_path_buf();
-
-    let app_dir = base_path.join(PathBuf::from("tapplets")).join(PathBuf::from(name));
-    fs::create_dir_all(&app_dir).unwrap();
+    // Extract the file to the tapplet directory
+    let tapp_dir = PathBuf::from(tapplet_path);
+    println!("create dir path: {:?}", tapp_dir.to_string_lossy());
+    fs::create_dir_all(&tapp_dir).unwrap();
     println!("tapplet dir created!");
+
     // Open a file to write the stream to
-    let mut file = fs::File::create(app_dir.join("tapplet.tar.gz")).unwrap();
+    let tapplet_tarball = tapp_dir.join("tapplet.tar.gz");
+    let mut file = fs::File::create(tapplet_tarball).unwrap();
 
     // Stream the response body and write it to the file chunk by chunk
     while let Some(chunk) = response.chunk().await? {
@@ -47,7 +48,9 @@ pub async fn download_file(url: String, name: String) -> Result<(), anyhow::Erro
 }
 
 pub fn extract_tar(tapplet_path: &str) -> Result<(), ()> {
-  let tapplet_tarball = PathBuf::from(tapplet_path).join("tapplet.tar.gz");
+  // Extract the file to the tapplet directory
+  let tapp_dir = PathBuf::from(tapplet_path);
+  let tapplet_tarball = tapp_dir.join("tapplet.tar.gz");
   let tar_gz = fs::File::open(tapplet_tarball).unwrap();
   let tar = GzDecoder::new(tar_gz);
   let mut archive = Archive::new(tar);

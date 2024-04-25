@@ -23,3 +23,7 @@ localnet
 *.njsproj
 *.sln
 *.sw?
+
+# Tapplets installed
+tapplets
+tapplets_installed
