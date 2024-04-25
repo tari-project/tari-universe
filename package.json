@@ -12,6 +12,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
+    "@mui/icons-material": "^5.15.15",
     "@mui/material": "^5.15.15",
     "@tariproject/wallet_jrpc_client": "file:../tari-dan/clients/javascript/wallet_daemon_client",
     "@tauri-apps/api": ">=2.0.0-beta.0",
@@ -20,12 +21,12 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@tauri-apps/cli": ">=2.0.0-beta.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.2.1",
+    "internal-ip": "^7.0.0",
     "typescript": "^5.0.2",
-    "vite": "^5.0.0",
-    "@tauri-apps/cli": ">=2.0.0-beta.0",
-    "internal-ip": "^7.0.0"
+    "vite": "^5.0.0"
   }
 }
