@@ -24,6 +24,5 @@ localnet
 *.sln
 *.sw?
 
-# Tapplets installed
-tapplets
+# Tapplets installed dir
 tapplets_installed
