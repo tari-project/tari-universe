@@ -1,0 +1,78 @@
+{
+  "verifiedTapplets": {
+    "@company-name/tapplet-name": {
+      "id": "@company-name/tapplet-name",
+      "metadata": {
+        "displayName": "Tapplet human readable name",
+        "author": {
+          "name": "Author Name",
+          "website": "https://company-name.io/"
+        },
+        "about": {
+          "summary": "Short (a few words) summary.",
+          "description": "Longer (a few sentences) project description."
+        },
+        "audits": [
+          {
+            "auditor": "Auditor",
+            "report": "https://auditor-company.io/audits/tapplet-name"
+          }
+        ],
+        "category": "tapplet category",
+        "source": {
+          "location": {
+            "npm": {
+              "packageName": "@company-name/tapplet-name",
+              "registry": "https://registry.npmjs.org/"
+            }
+          }
+        }
+      },
+      "versions": {
+        "1.2.2": {
+          "checksum": "checksumv122"
+        },
+        "1.2.0": {
+          "checksum": "checksumv120"
+        }
+      }
+    },
+    "@company-another-name/tapplet-another-name": {
+      "id": "@company-another-name/tapplet-another-name",
+      "metadata": {
+        "displayName": "Tapplet human readable name",
+        "author": {
+          "name": "Author Name",
+          "website": "https://company-another-name.io/"
+        },
+        "about": {
+          "summary": "Short (a few words) summary.",
+          "description": "Longer (a few sentences) project description."
+        },
+        "audits": [
+          {
+            "auditor": "Auditor",
+            "report": "https://auditor-company.io/audits/tapplet-another-name"
+          }
+        ],
+        "category": "tapplet category",
+        "source": {
+          "location": {
+            "npm": {
+              "packageName": "@company-name/tapplet-another-name",
+              "registry": "https://registry.npmjs.org/"
+            }
+          }
+        }
+      },
+      "versions": {
+        "1.2.2": {
+          "checksum": "checksumv122"
+        },
+        "1.2.0": {
+          "checksum": "checksumv120"
+        }
+      }
+    }
+  }
+}
