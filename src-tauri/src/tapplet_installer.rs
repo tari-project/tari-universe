@@ -59,48 +59,8 @@ pub fn extract_tar(tapplet_path: &str) -> Result<(), ()> {
   Ok(())
 }
 
-pub fn calculate_shasum(path: &str) -> Result<String, String> {
-  // command to calculate shasum 512
-  // shasum -b -a 512 /path/tapplet.tar.gz | awk '{ print $1 }' | xxd -r -p | base64
-  let tarball_file = format!("{}{}", path, "/tapplet.tar.gz");
-  let mut shasum_command = Command::new("shasum");
-  println!("{}", tarball_file);
-  shasum_command.arg("-b").arg("-a").arg("512").arg(tarball_file);
-
-  let mut awk_command = Command::new("awk");
-  awk_command.arg("{ print $1 }");
-
-  let mut xxd_command = Command::new("xxd");
-  xxd_command.arg("-r").arg("-p");
-
-  let mut base64_command = Command::new("base64");
-
-  let shasum_output = shasum_command.stdout(Stdio::piped()).spawn().expect("failed to spawn shasum command");
-  let awk_output = awk_command
-    .stdin(shasum_output.stdout.unwrap())
-    .stdout(Stdio::piped())
-    .spawn()
-    .expect("failed to spawn awk command");
-  let xxd_output = xxd_command
-    .stdin(awk_output.stdout.unwrap())
-    .stdout(Stdio::piped())
-    .spawn()
-    .expect("failed to spawn xxd command");
-  let base64_output = base64_command
-    .stdin(xxd_output.stdout.unwrap())
-    .output()
-    .expect("failed to spawn base64 command");
-
-  // format output to match `integrity` field from manifest.json
-  let formatted_shasum = format!("{}{}", "sha512-", String::from_utf8_lossy(&base64_output.stdout).replace("\n", ""));
-  println!("new way cal -> {}", formatted_shasum);
-  Ok(formatted_shasum)
-}
-
 pub fn validate_checksum(checksum: &str, tapplet_path: &str) -> bool {
-  println!("validate_checksum path: {}", tapplet_path);
-  // // Extract the file to the specified directory
-  // let download_dir = tauri::api::path::download_dir().unwrap();
+  // Extract the file to the specified directory
   let manifest_file = PathBuf::from(tapplet_path).join("package").join("tapplet.manifest.json");
 
   // Open the JSON file
@@ -117,9 +77,6 @@ pub fn validate_checksum(checksum: &str, tapplet_path: &str) -> bool {
   let pkg_integrity_checksum = json["integrity"].as_str().expect("Failed to extract integrity");
 
   // Print the integrity value to the console
-  println!("pkg_integrity_checksum: {}", pkg_integrity_checksum);
-  println!("checksum: {}", checksum);
-  println!("are equal? {}", checksum == pkg_integrity_checksum);
   checksum == pkg_integrity_checksum
 }
 

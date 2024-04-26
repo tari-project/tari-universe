@@ -3,7 +3,8 @@ use tauri::{ self, State };
 
 use crate::{
   rpc::{ balances, free_coins, make_request, permission_token },
-  tapplet_installer::{ download_file, calculate_shasum, extract_tar, validate_checksum, check_extracted_files },
+  tapplet_installer::{ download_file, extract_tar, validate_checksum, check_extracted_files },
+  hash_calculator::calculate_shasum,
   tapplet_server::start,
   wallet_daemon::start_wallet_daemon,
   ShutdownTokens,

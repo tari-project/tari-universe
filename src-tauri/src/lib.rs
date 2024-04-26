@@ -7,6 +7,7 @@ mod rpc;
 mod tapplet_server;
 mod wallet_daemon;
 mod tapplet_installer;
+mod hash_calculator;
 
 use commands::{
   call_wallet,
