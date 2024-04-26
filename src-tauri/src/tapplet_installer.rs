@@ -15,16 +15,9 @@ pub async fn download_file(url: String, tapplet_path: String) -> Result<(), anyh
       std::process::exit(1);
     });
 
-  if response.status().is_success() {
-    println!("Tapplet downloaded successfully! Path: {:?}", tapplet_path);
-  } else if response.status().is_server_error() {
-    println!("download server error!");
-  } else {
-    println!("Download failed. Something else happened. Status: {:?}", response.status());
-  }
-
   // Ensure the request was successful
   if response.status().is_success() {
+    println!("Tapplet downloaded successfully! Path: {:?}", tapplet_path);
     // Extract the file to the tapplet directory
     let tapp_dir = PathBuf::from(tapplet_path);
     println!("create dir path: {:?}", tapp_dir.to_string_lossy());
@@ -39,11 +32,12 @@ pub async fn download_file(url: String, tapplet_path: String) -> Result<(), anyh
     while let Some(chunk) = response.chunk().await? {
       let _ = file.write_all(&chunk);
     }
-
-    println!("File downloaded successfully.");
+  } else if response.status().is_server_error() {
+    println!("download server error! Status: {:?}", response.status());
   } else {
-    eprintln!("Download error: {}", response.status());
+    println!("Download failed. Something else happened. Status: {:?}", response.status());
   }
+
   Ok(())
 }
 

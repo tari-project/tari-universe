@@ -101,34 +101,29 @@ pub async fn call_wallet(method: String, params: String, tokens: State<'_, Token
 pub async fn download_tapp(url: String, tapplet_path: String) -> Result<(), ()> {
   let handle = tauri::async_runtime::spawn(async move { download_file(url.clone(), tapplet_path.clone()).await });
   let _ = handle.await.unwrap();
-
   Ok(())
 }
 
 #[tauri::command]
 pub fn extract_tapp_tarball(tapplet_path: &str) -> Result<(), ()> {
-  let _ = extract_tar(tapplet_path).unwrap();
-
+  extract_tar(tapplet_path).unwrap();
   Ok(())
 }
 
 #[tauri::command]
 pub fn calculate_tapp_checksum(tapplet_path: &str) -> Result<String, String> {
   let response = calculate_shasum(tapplet_path).unwrap();
-
   Ok(response)
 }
 
 #[tauri::command]
 pub fn validate_tapp_checksum(checksum: &str, tapplet_path: &str) -> Result<bool, bool> {
   let response = validate_checksum(checksum, tapplet_path);
-
   Ok(response)
 }
 
 #[tauri::command]
 pub fn check_tapp_files(tapplet_path: &str) -> Result<(), ()> {
   let _ = check_extracted_files(tapplet_path);
-
   Ok(())
 }

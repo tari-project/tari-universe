@@ -34,8 +34,8 @@ export function Installer({ tappletId }: TappletProps) {
 
   async function downloadAndExtract() {
     await invoke("download_tapp", { url, tappletPath: path });
-    invoke("extract_tapp_tarball", { tappletPath: path });
-    invoke("check_tapp_files", { tappletPath: path });
+    await invoke("extract_tapp_tarball", { tappletPath: path });
+    await invoke("check_tapp_files", { tappletPath: path });
     await calculateShasum();
   }
 
