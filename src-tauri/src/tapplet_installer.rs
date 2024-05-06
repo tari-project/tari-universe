@@ -1,5 +1,5 @@
 use tauri_plugin_http::reqwest::{ self };
-use std::{ fs, io::{ Read, Write }, path::PathBuf, process::{ Command, Stdio } };
+use std::{ fs, io::{ Read, Write }, path::PathBuf };
 use flate2::read::GzDecoder;
 use tar::Archive;
 use serde_json::Value;
