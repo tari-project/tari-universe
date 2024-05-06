@@ -14,6 +14,7 @@ import {
 } from "./provider/permissions";
 import { Typography } from "@mui/material";
 import { Tapplet } from "./components/Tapplet";
+import { Installer } from "./components/Installer";
 
 let permissions = new TariPermissions();
 permissions.addPermission(new TariPermissionKeyList());
@@ -103,6 +104,7 @@ function App() {
         balances: {JSON.stringify(balances)}
       </Typography>
 
+      <Installer tappletId={TAPPLET_ID} />
       <Tapplet tappletId={TAPPLET_ID} />
     </div>
   );
