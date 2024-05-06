@@ -1,4 +1,3 @@
-import { invoke } from "@tauri-apps/api/core"
 import "./App.css"
 import { useEffect } from "react"
 import { TariPermissions, WalletDaemonParameters, WalletDaemonTariProvider } from "./provider"
@@ -11,7 +10,7 @@ import {
 import { Tapplet } from "./components/Tapplet"
 import { TabKey, Tabs } from "./views/Tabs"
 import { Wallet } from "./components/Wallet"
-import { RegisteredTapplet, TappletRegistry } from "./components/TappletRegistry"
+import { TappletListItemProps, TappletsList } from "./components/TappletsList"
 import reactLogo from "./assets/react.svg"
 
 let permissions = new TariPermissions()
@@ -28,14 +27,16 @@ const provider = await WalletDaemonTariProvider.build(params)
 
 const TAPPLET_ID = "tapplet_id"
 //TODO parse json to registry struct
-const tappletList: RegisteredTapplet[] = [
+const tappletRegistry: TappletListItemProps[] = [
   {
     name: "Ene",
     icon: reactLogo,
+    installed: true,
   },
   {
     name: "Due",
     icon: reactLogo,
+    installed: true,
   },
   {
     name: "Rike",
@@ -46,6 +47,21 @@ const tappletList: RegisteredTapplet[] = [
     icon: reactLogo,
   },
 ]
+
+//TODO parse json to registry struct
+const installedTappletList: TappletListItemProps[] = [
+  {
+    name: "Ene",
+    icon: reactLogo,
+    installed: true,
+  },
+  {
+    name: "Due",
+    icon: reactLogo,
+    installed: true,
+  },
+]
+
 function App() {
   useEffect(() => {
     const handleMessage = async (event: any) => {
@@ -74,13 +90,17 @@ function App() {
             {
               id: "tapplet-registry",
               name: "Tapplet Registry",
-              component: <TappletRegistry key={TabKey.TAPPLET_REGISTRY} tapplets={tappletList} />,
+              component: <TappletsList key={TabKey.TAPPLET_REGISTRY} tapplets={tappletRegistry} />,
             },
-
+            {
+              id: "installed-tapplets",
+              name: "Installed Tapplets",
+              component: <TappletsList key={TabKey.INSTALLED_TAPPLETS} tapplets={installedTappletList} />,
+            },
             {
               id: "tapplet",
               name: "Tapplet",
-              component: <Tapplet key={TabKey.TAPPLET} tappletId={TAPPLET_ID} />,
+              component: <Tapplet key={TabKey.ACTIVE_TAPPLET} tappletId={TAPPLET_ID} />,
             },
           ]}
         />

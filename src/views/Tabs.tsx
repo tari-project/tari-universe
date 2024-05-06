@@ -2,7 +2,8 @@ import React, { useState } from "react"
 
 export enum TabKey {
   TAPPLET_REGISTRY = "tapplet-registry",
-  TAPPLET = "tapplet",
+  INSTALLED_TAPPLETS = "installed-tapplets",
+  ACTIVE_TAPPLET = "active-tapplet",
   WALLET = "wallet",
 }
 
