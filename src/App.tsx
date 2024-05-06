@@ -8,10 +8,11 @@ import {
   TariPermissionTransactionSend,
 } from "./provider/permissions"
 import { Tapplet } from "./components/Tapplet"
-import { TabKey, Tabs } from "./views/Tabs"
+import { TabKey } from "./views/Tabs"
 import { Wallet } from "./components/Wallet"
 import { TappletListItemProps, TappletsList } from "./components/TappletsList"
 import reactLogo from "./assets/react.svg"
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
 
 let permissions = new TariPermissions()
 permissions.addPermission(new TariPermissionKeyList())
@@ -25,25 +26,30 @@ const params: WalletDaemonParameters = {
 }
 const provider = await WalletDaemonTariProvider.build(params)
 
+const linkStyle = {
+  margin: "1rem",
+  color: "white",
+}
+
 const TAPPLET_ID = "tapplet_id"
 //TODO parse json to registry struct
 const tappletRegistry: TappletListItemProps[] = [
   {
-    name: "Ene",
+    name: "Installed tapplet example",
     icon: reactLogo,
     installed: true,
   },
   {
-    name: "Due",
+    name: "Tapplet 2",
     icon: reactLogo,
-    installed: true,
+    installed: false,
   },
   {
-    name: "Rike",
+    name: "Tapplet 3",
     icon: reactLogo,
   },
   {
-    name: "Fake",
+    name: "Tapplet 4",
     icon: reactLogo,
   },
 ]
@@ -51,12 +57,7 @@ const tappletRegistry: TappletListItemProps[] = [
 //TODO parse json to registry struct
 const installedTappletList: TappletListItemProps[] = [
   {
-    name: "Ene",
-    icon: reactLogo,
-    installed: true,
-  },
-  {
-    name: "Due",
+    name: "Installed tapplet example",
     icon: reactLogo,
     installed: true,
   },
@@ -79,31 +80,52 @@ function App() {
 
   return (
     <div className="container">
-      <div style={{ marginTop: "24px" }}>
-        <Tabs
-          tabs={[
-            {
-              id: "wallet",
-              name: "Wallet",
-              component: <Wallet key={TabKey.WALLET} />,
-            },
-            {
-              id: "tapplet-registry",
-              name: "Tapplet Registry",
-              component: <TappletsList key={TabKey.TAPPLET_REGISTRY} tapplets={tappletRegistry} />,
-            },
-            {
-              id: "installed-tapplets",
-              name: "Installed Tapplets",
-              component: <TappletsList key={TabKey.INSTALLED_TAPPLETS} tapplets={installedTappletList} />,
-            },
-            {
-              id: "tapplet",
-              name: "Tapplet",
-              component: <Tapplet key={TabKey.ACTIVE_TAPPLET} tappletId={TAPPLET_ID} />,
-            },
-          ]}
-        />
+      <div style={{ marginTop: "1px" }}>
+        <BrowserRouter>
+          <div className="links">
+            <Link to={TabKey.WALLET} style={linkStyle}>
+              {" "}
+              Wallet{" "}
+            </Link>
+            <Link to={TabKey.TAPPLET_REGISTRY} style={linkStyle}>
+              {" "}
+              Tapplet Registry{" "}
+            </Link>
+            <Link to={TabKey.INSTALLED_TAPPLETS} style={linkStyle}>
+              {" "}
+              Installed Tapplets{" "}
+            </Link>
+            <Link to={TabKey.ACTIVE_TAPPLET} style={linkStyle}>
+              {" "}
+              Active Tapplet{" "}
+            </Link>
+          </div>
+
+          <Routes>
+            <Route path={TabKey.WALLET} element={<Wallet key={TabKey.WALLET}></Wallet>} />
+            <Route
+              path={TabKey.TAPPLET_REGISTRY}
+              element={<TappletsList tapplets={tappletRegistry} key={TabKey.TAPPLET_REGISTRY} />}
+            />
+            <Route
+              path={TabKey.INSTALLED_TAPPLETS}
+              element={<TappletsList tapplets={installedTappletList} key={TabKey.INSTALLED_TAPPLETS} />}
+            />
+
+            <Route
+              path={TabKey.ACTIVE_TAPPLET}
+              element={<Tapplet key={TabKey.ACTIVE_TAPPLET} tappletId={TAPPLET_ID} />}
+            />
+            <Route
+              path={`${TabKey.TAPPLET_REGISTRY}/active-tapplet`}
+              element={<Tapplet key={TabKey.ACTIVE_TAPPLET} tappletId={TAPPLET_ID} />}
+            />
+            <Route
+              path={`${TabKey.INSTALLED_TAPPLETS}/active-tapplet`}
+              element={<Tapplet key={TabKey.ACTIVE_TAPPLET} tappletId={TAPPLET_ID} />}
+            />
+          </Routes>
+        </BrowserRouter>
       </div>
     </div>
   )

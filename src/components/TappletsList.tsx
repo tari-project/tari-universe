@@ -1,5 +1,7 @@
 import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText } from "@mui/material"
 import { InstallDesktop, Launch } from "@mui/icons-material"
+import { TabKey } from "../views/Tabs"
+import { NavLink } from "react-router-dom"
 
 export type TappletsListProps = {
   tapplets: TappletListItemProps[]
@@ -28,9 +30,12 @@ export const TappletsList: React.FC<TappletsListProps> = ({ tapplets }) => {
           <ListItem
             key={i}
             secondaryAction={
+              // TODO this is just mvp- component refactor needed
               item.installed ? (
                 <IconButton aria-label="install" edge="start">
-                  <Launch onClick={handleLaunch} color="primary" />
+                  <NavLink to={TabKey.ACTIVE_TAPPLET}>
+                    <Launch onClick={handleLaunch} color="primary" />
+                  </NavLink>
                 </IconButton>
               ) : (
                 <IconButton aria-label="install" edge="start">
