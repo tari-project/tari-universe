@@ -80,9 +80,8 @@ pub fn check_extracted_files(tapplet_path: &str) -> Result<bool, String> {
   // TODO check manifest
   // let manifest_file_path = package_dir.join("tapplet.manifest.json");
 
-  println!("check files {}", tapplet_path);
   if pkg_json_file_path.exists() {
-    println!("files gitowa");
+    println!("Tapplet files check completed successfully");
     Ok(true)
   } else {
     Err(format!("Extracted tapplet files missing"))

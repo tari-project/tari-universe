@@ -1,7 +1,6 @@
-import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText } from "@mui/material"
-import { InstallDesktop, Launch } from "@mui/icons-material"
-import { TabKey } from "../views/Tabs"
-import { NavLink } from "react-router-dom"
+import { List } from "@mui/material"
+import { TappletInstaller } from "./TappletInstaller"
+import { TappletLauncher } from "./TappletLauncher"
 
 export type TappletsListProps = {
   tapplets: TappletListItemProps[]
@@ -14,41 +13,11 @@ export type TappletListItemProps = {
 }
 
 export const TappletsList: React.FC<TappletsListProps> = ({ tapplets }) => {
-  //TODO
-  const handleInstall = () => {
-    console.log("install tapplet")
-  }
-
-  const handleLaunch = () => {
-    console.log("launch tapplet")
-  }
-
   return (
     <div>
-      {tapplets.map((item, i) => (
+      {tapplets.map((item) => (
         <List>
-          <ListItem
-            key={i}
-            secondaryAction={
-              // TODO this is just mvp- component refactor needed
-              item.installed ? (
-                <IconButton aria-label="install" edge="start">
-                  <NavLink to={TabKey.ACTIVE_TAPPLET}>
-                    <Launch onClick={handleLaunch} color="primary" />
-                  </NavLink>
-                </IconButton>
-              ) : (
-                <IconButton aria-label="install" edge="start">
-                  <InstallDesktop onClick={handleInstall} color="primary" />
-                </IconButton>
-              )
-            }
-          >
-            <ListItemAvatar>
-              <Avatar src={item.icon} />
-            </ListItemAvatar>
-            <ListItemText primary={item.name} />
-          </ListItem>
+          {item.installed ? <TappletLauncher tappletId={item.name} /> : <TappletInstaller tappletId={item.name} />}
         </List>
       ))}
     </div>
