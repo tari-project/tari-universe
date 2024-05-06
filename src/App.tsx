@@ -26,11 +26,6 @@ const params: WalletDaemonParameters = {
 }
 const provider = await WalletDaemonTariProvider.build(params)
 
-const linkStyle = {
-  margin: "1rem",
-  color: "white",
-}
-
 const TAPPLET_ID = "tapplet_id"
 //TODO parse json to registry struct
 const tappletRegistry: TappletListItemProps[] = [
@@ -82,20 +77,20 @@ function App() {
     <div className="container">
       <div style={{ marginTop: "1px" }}>
         <BrowserRouter>
-          <div className="links">
-            <Link to={TabKey.WALLET} style={linkStyle}>
+          <div>
+            <Link to={TabKey.WALLET} className="nav-item">
               {" "}
               Wallet{" "}
             </Link>
-            <Link to={TabKey.TAPPLET_REGISTRY} style={linkStyle}>
+            <Link to={TabKey.TAPPLET_REGISTRY} className="nav-item">
               {" "}
               Tapplet Registry{" "}
             </Link>
-            <Link to={TabKey.INSTALLED_TAPPLETS} style={linkStyle}>
+            <Link to={TabKey.INSTALLED_TAPPLETS} className="nav-item">
               {" "}
               Installed Tapplets{" "}
             </Link>
-            <Link to={TabKey.ACTIVE_TAPPLET} style={linkStyle}>
+            <Link to={TabKey.ACTIVE_TAPPLET} className="nav-item">
               {" "}
               Active Tapplet{" "}
             </Link>
