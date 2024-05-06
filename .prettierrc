@@ -1,4 +1,9 @@
 {
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": false,
+  "trailingComma": "all",
+  "endOfLine": "auto",
   "overrides": [
     {
       "files": ["*.ts", "*.js", "*.tsx"],
@@ -14,6 +19,21 @@
         "tabWidth": 2,
         "trailingComma": "es5",
         "singleQuote": false
+      }
+    },
+    {
+      "files": ["**/*.rs"],
+      "options": {
+        "printWidth": 120,
+        "tabWidth": 2,
+        "useTabs": false,
+        "semi": true,
+        "singleQuote": false,
+        "trailingComma": "all",
+        "bracketSpacing": true,
+        "bracketSameLine": false,
+        "arrowParens": "always",
+        "endOfLine": "auto"
       }
     }
   ]
