@@ -1,10 +1,10 @@
+use base64::{ engine::general_purpose, Engine as _ };
 use sha2::Digest;
 use std::fs;
 use std::fs::read_dir;
 use std::io::Read;
-use std::path::Path;
 use std::num::ParseIntError;
-use base64::{ Engine as _, engine::general_purpose  };
+use std::path::Path;
 
 fn calculate_hash(data: &[u8], sha: usize) -> String {
   let strout: String = match sha {
