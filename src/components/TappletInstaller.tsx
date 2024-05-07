@@ -8,17 +8,18 @@ import { TappletListItemProps } from "./TappletsList"
 import tariLogo from "../assets/tari.svg"
 import { TabKey } from "../views/Tabs"
 
-export function TappletInstaller({ tappletId }: TappletProps) {
+export function TappletInstaller(tapplet: TappletListItemProps) {
   //TODO use Tauri BaseDir
   const basePath = "/home/oski/Projects/tari/tari-universe/tapplets_installed"
+  const baseUrl = "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz"
 
-  //TODO get tapplet data from registry with tappletId
-  const [name, setName] = useState("tapplet-name")
-  const [url, setUrl] = useState("https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz")
   const [checksumCorrectness, setChecksumCorrectness] = useState(false)
-  const [path, setPath] = useState(basePath)
+  //TODO get tapplet data from registry with tappletId
+  // const [name, setName] = useState("tapplet-name")
+  // const [url, setUrl] = useState(baseUrl)
+  // const [path, setPath] = useState(basePath)
 
-  async function calculateShasum() {
+  async function calculateShasum(path: string) {
     const calculatedChecksum: string = await invoke("calculate_tapp_checksum", {
       tappletPath: path,
     })
@@ -36,27 +37,31 @@ export function TappletInstaller({ tappletId }: TappletProps) {
     setChecksumCorrectness(isCheckumValid)
   }
 
-  async function downloadAndExtract() {
+  async function downloadAndExtract(url: string, path: string) {
     await invoke("download_tapp", { url, tappletPath: path })
     await invoke("extract_tapp_tarball", { tappletPath: path })
     await invoke("check_tapp_files", { tappletPath: path })
-    await calculateShasum()
+    await calculateShasum(path)
   }
 
   //TODO
   const handleInstall = () => {
-    downloadAndExtract()
+    const _url = tapplet.url ?? baseUrl
+    const _path = tapplet.path ?? basePath
+    downloadAndExtract(_url, _path)
   }
 
-  const item: TappletListItemProps = {
-    name: "tst",
-    icon: tariLogo,
-    installed: false,
-  }
+  // const item: TappletListItemProps = {
+  //   name: "tst",
+  //   icon: tariLogo,
+  //   installed: false,
+  //   path: basePath,
+  //   url: "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz",
+  // }
 
   return (
     <ListItem
-      key={tappletId}
+      key={tapplet.name}
       secondaryAction={
         // TODO this is just mvp- component refactor needed
         <IconButton aria-label="install" edge="start">
@@ -65,9 +70,9 @@ export function TappletInstaller({ tappletId }: TappletProps) {
       }
     >
       <ListItemAvatar>
-        <Avatar src={item.icon} />
+        <Avatar src={tapplet.icon} />
       </ListItemAvatar>
-      <ListItemText primary={tappletId} />
+      <ListItemText primary={tapplet.name} />
     </ListItem>
   )
 }

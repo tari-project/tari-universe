@@ -30,14 +30,18 @@ const TAPPLET_ID = "tapplet_id"
 //TODO parse json to registry struct
 const tappletRegistry: TappletListItemProps[] = [
   {
-    name: "Installed tapplet example",
-    icon: tariLogo,
-    installed: true,
-  },
-  {
-    name: "Tapplet 2",
+    name: "OK Tapp Example",
     icon: tariLogo,
     installed: false,
+    url: "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz",
+    path: "/home/oski/Projects/tari/tari-universe/tapplets_installed/tapp-example",
+  },
+  {
+    name: "MC Tapplet example",
+    icon: tariLogo,
+    installed: false,
+    url: "https://registry.npmjs.org/tapplet-example/-/tapplet-example-0.0.2.tgz",
+    path: "/home/oski/Projects/tari/tari-universe/tapplets_installed/tapplet-example",
   },
   {
     name: "Tapplet 3",

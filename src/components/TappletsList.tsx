@@ -10,6 +10,8 @@ export type TappletListItemProps = {
   name: string
   icon: string
   installed?: boolean
+  url?: string
+  path?: string
 }
 
 export const TappletsList: React.FC<TappletsListProps> = ({ tapplets }) => {
@@ -17,7 +19,11 @@ export const TappletsList: React.FC<TappletsListProps> = ({ tapplets }) => {
     <div>
       {tapplets.map((item) => (
         <List>
-          {item.installed ? <TappletLauncher tappletId={item.name} /> : <TappletInstaller tappletId={item.name} />}
+          {item.installed ? (
+            <TappletLauncher tappletId={item.name} />
+          ) : (
+            <TappletInstaller name={item.name} icon={item.icon} path={item.path} url={item.url} />
+          )}
         </List>
       ))}
     </div>
