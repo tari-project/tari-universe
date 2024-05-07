@@ -42,6 +42,8 @@ export function TappletInstaller(tapplet: TappletListItemProps) {
     await invoke("extract_tapp_tarball", { tappletPath: path })
     await invoke("check_tapp_files", { tappletPath: path })
     await calculateShasum(path)
+    // TODO insert tapp to installed_tapplet db
+    // await invoke("insert_db", {})
   }
 
   //TODO

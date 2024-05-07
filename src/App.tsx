@@ -10,8 +10,7 @@ import {
 import { Tapplet } from "./components/Tapplet"
 import { TabKey } from "./views/Tabs"
 import { Wallet } from "./components/Wallet"
-import { TappletListItemProps, TappletsList } from "./components/TappletsList"
-import tariLogo from "./assets/tari.svg"
+import { TappletsList } from "./components/TappletsList"
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
 
 let permissions = new TariPermissions()
@@ -27,40 +26,6 @@ const params: WalletDaemonParameters = {
 const provider = await WalletDaemonTariProvider.build(params)
 
 const TAPPLET_ID = "tapplet_id"
-//TODO parse json to registry struct
-const tappletRegistry: TappletListItemProps[] = [
-  {
-    name: "OK Tapp Example",
-    icon: tariLogo,
-    installed: false,
-    url: "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz",
-    path: "/home/oski/Projects/tari/tari-universe/tapplets_installed/tapp-example",
-  },
-  {
-    name: "MC Tapplet example",
-    icon: tariLogo,
-    installed: false,
-    url: "https://registry.npmjs.org/tapplet-example/-/tapplet-example-0.0.2.tgz",
-    path: "/home/oski/Projects/tari/tari-universe/tapplets_installed/tapplet-example",
-  },
-  {
-    name: "Tapplet 3",
-    icon: tariLogo,
-  },
-  {
-    name: "Tapplet 4",
-    icon: tariLogo,
-  },
-]
-
-//TODO parse json to registry struct
-const installedTappletList: TappletListItemProps[] = [
-  {
-    name: "Installed tapplet example",
-    icon: tariLogo,
-    installed: true,
-  },
-]
 
 function App() {
   useEffect(() => {
@@ -104,11 +69,11 @@ function App() {
             <Route path={TabKey.WALLET} element={<Wallet key={TabKey.WALLET}></Wallet>} />
             <Route
               path={TabKey.TAPPLET_REGISTRY}
-              element={<TappletsList tapplets={tappletRegistry} key={TabKey.TAPPLET_REGISTRY} />}
+              element={<TappletsList installed={false} key={TabKey.TAPPLET_REGISTRY} />}
             />
             <Route
               path={TabKey.INSTALLED_TAPPLETS}
-              element={<TappletsList tapplets={installedTappletList} key={TabKey.INSTALLED_TAPPLETS} />}
+              element={<TappletsList installed={true} key={TabKey.INSTALLED_TAPPLETS} />}
             />
 
             <Route

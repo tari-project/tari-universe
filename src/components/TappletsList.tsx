@@ -1,9 +1,10 @@
 import { List } from "@mui/material"
 import { TappletInstaller } from "./TappletInstaller"
 import { TappletLauncher } from "./TappletLauncher"
+import tariLogo from "../assets/tari.svg"
 
 export type TappletsListProps = {
-  tapplets: TappletListItemProps[]
+  installed: boolean
 }
 
 export type TappletListItemProps = {
@@ -14,7 +15,46 @@ export type TappletListItemProps = {
   path?: string
 }
 
-export const TappletsList: React.FC<TappletsListProps> = ({ tapplets }) => {
+export const TappletsList: React.FC<TappletsListProps> = ({ installed }) => {
+  const TAPPLET_ID = "tapplet_id"
+  //TODO parse json to registry struct
+  const tappletRegistry: TappletListItemProps[] = [
+    {
+      name: "OK Tapp Example",
+      icon: tariLogo,
+      installed: false,
+      url: "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz",
+      path: "/home/oski/Projects/tari/tari-universe/tapplets_installed/tapp-example",
+    },
+    {
+      name: "MC Tapplet example",
+      icon: tariLogo,
+      installed: false,
+      url: "https://registry.npmjs.org/tapplet-example/-/tapplet-example-0.0.2.tgz",
+      path: "/home/oski/Projects/tari/tari-universe/tapplets_installed/tapplet-example",
+    },
+    {
+      name: "Tapplet 3",
+      icon: tariLogo,
+    },
+    {
+      name: "Tapplet 4",
+      icon: tariLogo,
+    },
+  ]
+
+  //TODO parse json to registry struct
+  const installedTappletList: TappletListItemProps[] = [
+    {
+      name: "Installed tapplet example",
+      icon: tariLogo,
+      installed: true,
+    },
+  ]
+  // lista zarejestrowanych item.installed?
+
+  const tapplets = installed ? installedTappletList : tappletRegistry
+
   return (
     <div>
       {tapplets.map((item) => (
