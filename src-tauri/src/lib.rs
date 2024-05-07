@@ -1,28 +1,34 @@
+use diesel::SqliteConnection;
 use std::{ collections::HashMap, env, sync::{ Arc, Mutex } };
-use tauri::{ self };
+use tauri::{ self, Manager };
 use tokio_util::sync::CancellationToken;
 
 mod commands;
+mod database;
+mod hash_calculator;
 mod rpc;
+mod tapplet_installer;
 mod tapplet_server;
 mod wallet_daemon;
-mod tapplet_installer;
-mod hash_calculator;
 
 use commands::{
+  calculate_tapp_checksum,
   call_wallet,
+  check_tapp_files,
   close_tapplet,
+  delete_db,
+  download_tapp,
+  extract_tapp_tarball,
   get_balances,
   get_free_coins,
-  get_permission_token,
+  insert_db,
   launch_tapplet,
-  wallet_daemon,
-  download_tapp,
-  calculate_tapp_checksum,
+  read_db,
+  update_db,
   validate_tapp_checksum,
-  check_tapp_files,
-  extract_tapp_tarball,
 };
+
+use crate::{ rpc::permission_token, wallet_daemon::start_wallet_daemon };
 
 pub struct Tokens {
   auth: Mutex<String>,
@@ -30,6 +36,7 @@ pub struct Tokens {
 }
 #[derive(Default)]
 pub struct ShutdownTokens(Arc<tokio::sync::Mutex<HashMap<String, CancellationToken>>>);
+pub struct DatabaseConnection(Arc<Mutex<SqliteConnection>>);
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -42,15 +49,18 @@ pub fn run() {
       auth: Mutex::new("".to_string()),
     })
     .manage(ShutdownTokens::default())
+    .manage(DatabaseConnection(Arc::new(Mutex::new(database::establish_connection()))))
     .invoke_handler(
       tauri::generate_handler![
-        wallet_daemon,
-        get_permission_token,
         get_free_coins,
         get_balances,
         launch_tapplet,
         close_tapplet,
         call_wallet,
+        insert_db,
+        read_db,
+        update_db,
+        delete_db,
         download_tapp,
         calculate_tapp_checksum,
         validate_tapp_checksum,
@@ -58,6 +68,25 @@ pub fn run() {
         extract_tapp_tarball
       ]
     )
+    .setup(|app| {
+      tauri::async_runtime::spawn(async move {
+        start_wallet_daemon().await.unwrap();
+      });
+
+      let handle = tauri::async_runtime::spawn(async move { permission_token().await.unwrap() });
+      let (permission_token, auth_token) = tauri::async_runtime::block_on(handle).unwrap();
+      let tokens = app.state::<Tokens>();
+      tokens.permission
+        .lock()
+        .unwrap()
+        .replace_range(.., &permission_token);
+      tokens.auth
+        .lock()
+        .unwrap()
+        .replace_range(.., &auth_token);
+
+      Ok(())
+    })
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

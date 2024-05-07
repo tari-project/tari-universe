@@ -1,8 +1,8 @@
 use tauri_plugin_http::reqwest::{ self };
 use std::{ fs, io::{ Read, Write }, path::PathBuf };
 use flate2::read::GzDecoder;
-use tar::Archive;
 use serde_json::Value;
+use tar::Archive;
 
 pub async fn download_file(url: String, tapplet_path: String) -> Result<(), anyhow::Error> {
   // Download the file

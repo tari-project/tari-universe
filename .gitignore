@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 localnet
+data/tari_universe.sqlite3
 
 # Editor directories and files
 .vscode/*
