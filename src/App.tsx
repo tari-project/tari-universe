@@ -31,13 +31,6 @@ const provider = await WalletDaemonTariProvider.build(params);
 const TAPPLET_ID = "tapplet_id";
 function App() {
   const [balances, setBalances] = useState({});
-  async function start_wallet_daemon() {
-    await invoke("wallet_daemon", {});
-  }
-
-  async function get_permission_token() {
-    await invoke("get_permission_token", {});
-  }
 
   async function get_free_coins() {
     await invoke("get_free_coins", {});
@@ -64,24 +57,6 @@ function App() {
   return (
     <div className="container">
       <h1>Tauri wallet daemon</h1>
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          start_wallet_daemon();
-        }}
-      >
-        <button type="submit">Start wallet daemon</button>
-      </form>
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          get_permission_token();
-        }}
-      >
-        <button type="submit">Get permission token</button>
-      </form>
       <form
         className="row"
         onSubmit={(e) => {
