@@ -14,7 +14,7 @@ export function TappletInstaller({ tappletId }: TappletProps) {
 
   //TODO get tapplet data from registry with tappletId
   const [name, setName] = useState("tapplet-name")
-  const [url, setUrl] = useState("https://registry.npmjs.org/aa-schnorr-multisig/-/aa-schnorr-multisig-1.0.6.tgz")
+  const [url, setUrl] = useState("https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz")
   const [checksumCorrectness, setChecksumCorrectness] = useState(false)
   const [path, setPath] = useState(basePath)
 
@@ -26,14 +26,14 @@ export function TappletInstaller({ tappletId }: TappletProps) {
     /**
       TODO uncomment if extracted tapplet folder contains tapplet.manifest.json file
       with "integrity" field
-      
-      const areEq: boolean = await invoke("validate_tapp_checksum", {
-        checksum: calculatedChecksum,
-        tappletPath: path,
-      });
-    */
-    const isCheckumCorrect = true
-    setChecksumCorrectness(isCheckumCorrect)
+      const isCheckumCorrect = true
+      */
+
+    const isCheckumValid: boolean = await invoke("validate_tapp_checksum", {
+      checksum: calculatedChecksum,
+      tappletPath: path,
+    })
+    setChecksumCorrectness(isCheckumValid)
   }
 
   async function downloadAndExtract() {
