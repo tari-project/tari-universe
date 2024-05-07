@@ -5,7 +5,7 @@ import { Avatar, IconButton, ListItem, ListItemAvatar, ListItemText } from "@mui
 import { NavLink } from "react-router-dom"
 import { InstallDesktop, Launch } from "@mui/icons-material"
 import { TappletListItemProps } from "./TappletsList"
-import reactLogo from "../assets/react.svg"
+import tariLogo from "../assets/tari.svg"
 import { TabKey } from "../views/Tabs"
 
 export function TappletInstaller({ tappletId }: TappletProps) {
@@ -47,13 +47,10 @@ export function TappletInstaller({ tappletId }: TappletProps) {
   const handleInstall = () => {
     downloadAndExtract()
   }
-  const handleLaunch = () => {
-    console.log("launch tapplet")
-  }
 
   const item: TappletListItemProps = {
     name: "tst",
-    icon: reactLogo,
+    icon: tariLogo,
     installed: false,
   }
 

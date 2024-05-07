@@ -11,7 +11,7 @@ import { Tapplet } from "./components/Tapplet"
 import { TabKey } from "./views/Tabs"
 import { Wallet } from "./components/Wallet"
 import { TappletListItemProps, TappletsList } from "./components/TappletsList"
-import reactLogo from "./assets/react.svg"
+import tariLogo from "./assets/tari.svg"
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
 
 let permissions = new TariPermissions()
@@ -31,21 +31,21 @@ const TAPPLET_ID = "tapplet_id"
 const tappletRegistry: TappletListItemProps[] = [
   {
     name: "Installed tapplet example",
-    icon: reactLogo,
+    icon: tariLogo,
     installed: true,
   },
   {
     name: "Tapplet 2",
-    icon: reactLogo,
+    icon: tariLogo,
     installed: false,
   },
   {
     name: "Tapplet 3",
-    icon: reactLogo,
+    icon: tariLogo,
   },
   {
     name: "Tapplet 4",
-    icon: reactLogo,
+    icon: tariLogo,
   },
 ]
 
@@ -53,7 +53,7 @@ const tappletRegistry: TappletListItemProps[] = [
 const installedTappletList: TappletListItemProps[] = [
   {
     name: "Installed tapplet example",
-    icon: reactLogo,
+    icon: tariLogo,
     installed: true,
   },
 ]
