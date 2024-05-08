@@ -13,6 +13,7 @@ export function TappletLauncher({ tappletId }: TappletProps) {
   const basePath = "/home/oski/Projects/tari/tari-universe/tapplets_installed"
 
   const handleLaunch = () => {
+    invoke("read_db", {})
     console.log("launch tapplet")
   }
 

@@ -34,12 +34,18 @@ export const TappletsList: React.FC<TappletsListProps> = ({ installed }) => {
       path: "/home/oski/Projects/tari/tari-universe/tapplets_installed/tapplet-example",
     },
     {
-      name: "Tapplet 3",
+      name: "OK Tapp Example Second",
       icon: tariLogo,
+      installed: false,
+      url: "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz",
+      path: "/home/oski/Projects/tari/tari-universe/tapplets_installed/tapp-example_two",
     },
     {
-      name: "Tapplet 4",
+      name: "OK Tapp Example Third",
       icon: tariLogo,
+      installed: false,
+      url: "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz",
+      path: "/home/oski/Projects/tari/tari-universe/tapplets_installed/tapp-example_three",
     },
   ]
 

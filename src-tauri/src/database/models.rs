@@ -1,5 +1,6 @@
 use crate::database::schema::*;
 use diesel::prelude::*;
+use serde::Deserialize;
 
 #[derive(Queryable, Selectable, Debug)]
 #[diesel(table_name = installed_tapplet)]
@@ -40,7 +41,7 @@ pub struct Tapplet {
   pub description: String,
 }
 
-#[derive(Insertable, Debug)]
+#[derive(Insertable, Debug, Deserialize)]
 #[diesel(table_name = tapplet)]
 pub struct CreateTapplet<'a> {
   pub package_name: &'a str,

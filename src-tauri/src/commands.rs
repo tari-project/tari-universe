@@ -107,22 +107,28 @@ pub fn check_tapp_files(tapplet_path: &str) -> Result<(), ()> {
 }
 
 #[tauri::command]
-pub fn insert_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+pub fn insert_db(tapplet: CreateTapplet, db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+  println!("insert_db new tapplet...");
+  println!("{:?}", tapplet);
+  println!("insert_db in progres...");
   let new_tapplet = CreateTapplet {
-    description: "test",
-    display_name: "test",
+    description: tapplet.description,
+    display_name: tapplet.display_name,
     image_id: None,
-    package_name: "test",
-    version: "test",
+    package_name: tapplet.package_name,
+    version: tapplet.version,
   };
+  println!("{:?}", new_tapplet);
 
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   tapplet_store.create(&new_tapplet);
+  println!("insert_db success");
   Ok(())
 }
 
 #[tauri::command]
 pub fn read_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+  println!("read_db in progres...");
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   let tapplets: Vec<Tapplet> = tapplet_store.get_all();
   for tapplet in tapplets {
