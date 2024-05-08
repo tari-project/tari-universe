@@ -2,8 +2,8 @@ use tari_wallet_daemon_client::types::AccountsGetBalancesResponse;
 use tauri::{ self, State };
 
 use crate::{
-  database::{ models::{ CreateTapplet, Tapplet, UpdateTapplet }, store::{ SqliteStore, Store } },
-  deserializers::VerifiedTapplets,
+  database::{ models::{ CreateTapplet, CreateTappletVersion }, store::{ SqliteStore, Store } },
+  registry_types::VerifiedTapplets,
   hash_calculator::calculate_shasum,
   rpc::{ balances, free_coins, make_request },
   tapplet_installer::{ check_extracted_files, download_file, extract_tar, validate_checksum },
@@ -111,60 +111,20 @@ pub fn check_tapp_files(tapplet_path: &str) -> Result<(), ()> {
 pub fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
   let registry = include_str!("../../registry.json");
   let tapplets: VerifiedTapplets = serde_json::from_str(registry).unwrap();
-  for (id, tapplet_manifest) in tapplets.verified_tapplets {
-    println!("ID: {}", id);
-    println!("Metadata: {:?}", tapplet_manifest.metadata);
-    println!("Versions: {:?}", tapplet_manifest.versions);
+  for (_, tapplet_manifest) in tapplets.verified_tapplets {
+    let mut store = SqliteStore::new(db_connection.0.clone());
+    let inserted_tapplet = store.create(&CreateTapplet::from(&tapplet_manifest));
+    let tapplet_db_id = inserted_tapplet.iter().next().unwrap().id.unwrap();
+
+    tapplet_manifest.versions.iter().for_each(|(version, checksum)| {
+      store.create(
+        &(CreateTappletVersion {
+          tapplet_id: Some(tapplet_db_id),
+          version: version.clone(),
+          checksum: checksum.checksum.clone(),
+        })
+      );
+    });
   }
-  Ok(())
-}
-
-#[tauri::command]
-pub fn insert_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
-  let new_tapplet = CreateTapplet {
-    description: "test",
-    display_name: "test",
-    image_id: None,
-    package_name: "test",
-    version: "test",
-  };
-
-  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  tapplet_store.create(&new_tapplet);
-  Ok(())
-}
-
-#[tauri::command]
-pub fn read_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
-  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  let tapplets: Vec<Tapplet> = tapplet_store.get_all();
-  for tapplet in tapplets {
-    println!("{:?}", tapplet);
-  }
-  Ok(())
-}
-
-#[tauri::command]
-pub fn update_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
-  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  let new_tapplet = UpdateTapplet {
-    description: "test2".to_string(),
-    display_name: "test2".to_string(),
-    image_id: None,
-    package_name: "test2".to_string(),
-    version: "test2".to_string(),
-  };
-  let tapplets: Vec<Tapplet> = tapplet_store.get_all();
-  let first: Tapplet = tapplets.into_iter().next().unwrap();
-  tapplet_store.update(first, &new_tapplet);
-  Ok(())
-}
-
-#[tauri::command]
-pub fn delete_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
-  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  let tapplets: Vec<Tapplet> = tapplet_store.get_all();
-  let first: Tapplet = tapplets.into_iter().next().unwrap();
-  tapplet_store.delete(first);
   Ok(())
 }

@@ -13,7 +13,7 @@ pub struct TappletManifest {
   pub versions: HashMap<String, Version>,
 }
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize, Clone)]
 pub struct Metadata {
   #[serde(rename = "displayName")]
   pub display_name: String,
@@ -24,44 +24,42 @@ pub struct Metadata {
   pub source: Source,
 }
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize, Clone)]
 pub struct Version {
   pub checksum: String,
 }
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize, Clone)]
 pub struct Author {
   pub name: String,
   pub website: String,
 }
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize, Clone)]
 pub struct About {
   pub summary: String,
   pub description: String,
 }
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize, Clone)]
 pub struct Audit {
   pub auditor: String,
   pub report: String,
 }
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize, Clone)]
 pub struct Source {
   pub location: Location,
 }
 
-#[derive(Debug, serde::Deserialize)]
-pub enum Location {
-  #[serde(rename = "npm")] Npm {
-    #[serde(rename = "packageName")]
-    package_name: String,
-    registry: String,
-  },
-  #[serde(rename = "cargo")] Cargo {
-    #[serde(rename = "packageName")]
-    package_name: String,
-    registry: String,
-  },
+#[derive(Debug, serde::Deserialize, Clone)]
+pub struct Location {
+  pub npm: Npm,
+}
+
+#[derive(Debug, serde::Deserialize, Clone)]
+pub struct Npm {
+  #[serde(rename = "packageName")]
+  pub package_name: String,
+  pub registry: String,
 }
