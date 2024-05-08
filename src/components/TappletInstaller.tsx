@@ -47,7 +47,7 @@ export function TappletInstaller(tapplet: TappletListItemProps) {
 
     const tapp: RegisteredTapplet = {
       package_name: tapplet.name,
-      version: "1.0.3",
+      version: "1.1.9",
       description: "demo tapp",
       display_name: "Example tapp",
       image_id: 0,

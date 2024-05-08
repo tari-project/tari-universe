@@ -134,14 +134,14 @@ pub fn insert_tapp_registry_db(tapplet: CreateTapplet, db_connection: State<'_, 
 }
 
 #[tauri::command]
-pub fn read_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+pub fn read_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Result<Vec<Tapplet>, ()> {
   println!("read_tapp_registry_db in progres...");
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   let tapplets: Vec<Tapplet> = tapplet_store.get_all();
-  for tapplet in tapplets {
-    println!("{:?}", tapplet);
-  }
-  Ok(())
+  // for tapplet in tapplets {
+  //   println!("{:?}", tapplet);
+  // }
+  Ok(tapplets)
 }
 
 #[tauri::command]

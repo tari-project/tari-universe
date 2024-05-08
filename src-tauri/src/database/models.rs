@@ -1,6 +1,6 @@
 use crate::database::schema::*;
 use diesel::prelude::*;
-use serde::Deserialize;
+use serde::{ Deserialize, Serialize };
 
 #[derive(Queryable, Selectable, Debug)]
 #[diesel(table_name = installed_tapplet)]
@@ -31,7 +31,7 @@ pub struct UpdateInstalledTapplet {
   pub path_to_dist: Option<String>,
 }
 
-#[derive(Queryable, Selectable, Debug)]
+#[derive(Queryable, Selectable, Debug, Serialize)]
 #[diesel(table_name = tapplet)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Tapplet {
