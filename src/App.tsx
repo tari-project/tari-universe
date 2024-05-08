@@ -12,6 +12,7 @@ import { TabKey } from "./views/Tabs"
 import { Wallet } from "./components/Wallet"
 import { TappletsList } from "./components/TappletsList"
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
+import { TappletsRegistered } from "./components/TappletsRegistered"
 
 let permissions = new TariPermissions()
 permissions.addPermission(new TariPermissionKeyList())
@@ -67,10 +68,7 @@ function App() {
 
           <Routes>
             <Route path={TabKey.WALLET} element={<Wallet key={TabKey.WALLET}></Wallet>} />
-            <Route
-              path={TabKey.TAPPLET_REGISTRY}
-              element={<TappletsList installed={false} key={TabKey.TAPPLET_REGISTRY} />}
-            />
+            <Route path={TabKey.TAPPLET_REGISTRY} element={<TappletsRegistered key={TabKey.TAPPLET_REGISTRY} />} />
             <Route
               path={TabKey.INSTALLED_TAPPLETS}
               element={<TappletsList installed={true} key={TabKey.INSTALLED_TAPPLETS} />}
