@@ -2,7 +2,10 @@ use tari_wallet_daemon_client::types::AccountsGetBalancesResponse;
 use tauri::{ self, State };
 
 use crate::{
-  database::{ models::{ CreateTapplet, Tapplet, UpdateTapplet }, store::{ SqliteStore, Store } },
+  database::{
+    models::{ CreateInstalledTapplet, CreateTapplet, InstalledTapplet, Tapplet, UpdateInstalledTapplet, UpdateTapplet },
+    store::{ SqliteStore, Store },
+  },
   hash_calculator::calculate_shasum,
   rpc::{ balances, free_coins, make_request },
   tapplet_installer::{ check_extracted_files, download_file, extract_tar, validate_checksum },
@@ -106,11 +109,15 @@ pub fn check_tapp_files(tapplet_path: &str) -> Result<(), ()> {
   Ok(())
 }
 
+/**
+ * TAPPLETS REGISTRY - STORES ALL REGISTERED TAPPLETS IN THE TARI UNIVERSE
+ */
+
 #[tauri::command]
-pub fn insert_db(tapplet: CreateTapplet, db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
-  println!("insert_db new tapplet...");
+pub fn insert_tapp_registry_db(tapplet: CreateTapplet, db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+  println!("insert_tapp_registry_db new tapplet...");
   println!("{:?}", tapplet);
-  println!("insert_db in progres...");
+  println!("insert_tapp_registry_db in progres...");
   let new_tapplet = CreateTapplet {
     description: tapplet.description,
     display_name: tapplet.display_name,
@@ -122,13 +129,13 @@ pub fn insert_db(tapplet: CreateTapplet, db_connection: State<'_, DatabaseConnec
 
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   tapplet_store.create(&new_tapplet);
-  println!("insert_db success");
+  println!("insert_tapp_registry_db success");
   Ok(())
 }
 
 #[tauri::command]
-pub fn read_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
-  println!("read_db in progres...");
+pub fn read_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+  println!("read_tapp_registry_db in progres...");
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   let tapplets: Vec<Tapplet> = tapplet_store.get_all();
   for tapplet in tapplets {
@@ -138,7 +145,7 @@ pub fn read_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
 }
 
 #[tauri::command]
-pub fn update_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+pub fn update_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   let new_tapplet = UpdateTapplet {
     description: "test2".to_string(),
@@ -154,10 +161,74 @@ pub fn update_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()>
 }
 
 #[tauri::command]
-pub fn delete_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+pub fn delete_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   let tapplets: Vec<Tapplet> = tapplet_store.get_all();
   let first: Tapplet = tapplets.into_iter().next().unwrap();
+  tapplet_store.delete(first);
+  Ok(())
+}
+
+/**
+ * INSTALLED TAPPLETS - STORES ALL THE USER'S INSTALLED TAPPLETS
+ */
+
+#[tauri::command]
+pub fn insert_installed_tapp_db(
+  tapplet: CreateInstalledTapplet,
+  db_connection: State<'_, DatabaseConnection>
+) -> Result<(), ()> {
+  println!("insert_installed_tapp_db new tapplet...");
+  println!("{:?}", tapplet);
+  println!("insert_installed_tapp_db in progres...");
+  let new_tapplet = CreateInstalledTapplet {
+    tapplet_id: tapplet.tapplet_id,
+    is_dev_mode: tapplet.is_dev_mode,
+    dev_mode_endpoint: tapplet.dev_mode_endpoint,
+    path_to_dist: tapplet.path_to_dist,
+  };
+  println!("{:?}", new_tapplet);
+
+  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
+  tapplet_store.create(&new_tapplet);
+  println!("insert_installed_tapp_db success");
+  Ok(())
+}
+
+#[tauri::command]
+pub fn read_installed_tapp_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+  println!("read_installed_tapp_db in progres...");
+  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
+  let tapplets: Vec<InstalledTapplet> = tapplet_store.get_all();
+  for tapplet in tapplets {
+    println!("{:?}", tapplet);
+  }
+  Ok(())
+}
+
+#[tauri::command]
+pub fn update_installed_tapp_db(
+  tapplet: UpdateInstalledTapplet,
+  db_connection: State<'_, DatabaseConnection>
+) -> Result<(), ()> {
+  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
+  let new_tapplet = UpdateInstalledTapplet {
+    tapplet_id: tapplet.tapplet_id,
+    is_dev_mode: tapplet.is_dev_mode,
+    dev_mode_endpoint: tapplet.dev_mode_endpoint,
+    path_to_dist: tapplet.path_to_dist,
+  };
+  let tapplets: Vec<InstalledTapplet> = tapplet_store.get_all();
+  let first: InstalledTapplet = tapplets.into_iter().next().unwrap();
+  tapplet_store.update(first, &new_tapplet);
+  Ok(())
+}
+
+#[tauri::command]
+pub fn delete_installed_tapp_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
+  let tapplets: Vec<InstalledTapplet> = tapplet_store.get_all();
+  let first: InstalledTapplet = tapplets.into_iter().next().unwrap();
   tapplet_store.delete(first);
   Ok(())
 }

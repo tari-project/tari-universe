@@ -7,6 +7,7 @@ import { InstallDesktop, Launch } from "@mui/icons-material"
 import { TappletListItemProps } from "./TappletsList"
 import tariLogo from "../assets/tari.svg"
 import { TabKey } from "../views/Tabs"
+import { RegisteredTapplet } from "../types/tapplet/Tapplet"
 
 export function TappletInstaller(tapplet: TappletListItemProps) {
   //TODO use Tauri BaseDir
@@ -43,22 +44,16 @@ export function TappletInstaller(tapplet: TappletListItemProps) {
     await invoke("check_tapp_files", { tappletPath: path })
     await calculateShasum(path)
     // TODO insert tapp to installed_tapplet db
-    type InstalledTapp = {
-      package_name: string
-      version: string
-      display_name: string
-      description: string
-      image_id?: number
-    }
-    const tapp: InstalledTapp = {
+
+    const tapp: RegisteredTapplet = {
       package_name: tapplet.name,
-      version: "1.0.0",
+      version: "1.0.3",
       description: "demo tapp",
       display_name: "Example tapp",
       image_id: 0,
     }
-    invoke("insert_db", { tapplet: tapp })
-    invoke("read_db", {})
+    invoke("insert_tapp_registry_db", { tapplet: tapp })
+    invoke("read_tapp_registry_db", {})
   }
 
   //TODO

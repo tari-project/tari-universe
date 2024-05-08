@@ -13,7 +13,7 @@ export function TappletLauncher({ tappletId }: TappletProps) {
   const basePath = "/home/oski/Projects/tari/tari-universe/tapplets_installed"
 
   const handleLaunch = () => {
-    invoke("read_db", {})
+    invoke("read_installed_tapp_db", {})
     console.log("launch tapplet")
   }
 
@@ -30,9 +30,9 @@ export function TappletLauncher({ tappletId }: TappletProps) {
         // TODO this is just mvp- component refactor needed
 
         <IconButton aria-label="install" edge="start">
-          <NavLink to={TabKey.ACTIVE_TAPPLET}>
-            <Launch onClick={handleLaunch} color="primary" />
-          </NavLink>
+          {/* <NavLink to={TabKey.ACTIVE_TAPPLET}> */}
+          <Launch onClick={handleLaunch} color="primary" />
+          {/* </NavLink> */}
         </IconButton>
       }
     >

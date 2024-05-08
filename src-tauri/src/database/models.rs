@@ -13,17 +13,19 @@ pub struct InstalledTapplet {
   pub path_to_dist: Option<String>,
 }
 
-#[derive(Insertable, Debug)]
+#[derive(Insertable, Debug, Deserialize)]
 #[diesel(table_name = installed_tapplet)]
 pub struct CreateInstalledTapplet<'a> {
+  pub tapplet_id: Option<i32>,
   pub is_dev_mode: bool,
   pub dev_mode_endpoint: &'a str,
   pub path_to_dist: &'a str,
 }
 
-#[derive(Debug, AsChangeset)]
+#[derive(Debug, AsChangeset, Deserialize)]
 #[diesel(table_name = installed_tapplet)]
 pub struct UpdateInstalledTapplet {
+  pub tapplet_id: Option<i32>,
   pub is_dev_mode: bool,
   pub dev_mode_endpoint: Option<String>,
   pub path_to_dist: Option<String>,
