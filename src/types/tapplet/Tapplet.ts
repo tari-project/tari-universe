@@ -1,3 +1,4 @@
+//TODO tauri commands cammelCase to snake
 export type RegisteredTapplet = {
   package_name: string
   version: string
@@ -7,8 +8,8 @@ export type RegisteredTapplet = {
 }
 
 export type InstalledTapplet = {
-  tappletId: number
-  isDevMode: boolean
-  devModeEndpoint: string
-  pathToDist: string
+  tapplet_id: number
+  is_dev_mode: boolean
+  dev_mode_endpoint: string
+  path_to_dist: string
 }
