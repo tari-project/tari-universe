@@ -53,6 +53,7 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
     diesel
       ::insert_into(tapplet::table)
       .values(item)
+      .on_conflict_do_nothing()
       .execute(self.get_connection().deref_mut())
       .expect("Error saving new tapplet");
   }
@@ -92,6 +93,7 @@ impl<'a> Store<InstalledTapplet, CreateInstalledTapplet<'a>, UpdateInstalledTapp
     diesel
       ::insert_into(installed_tapplet::table)
       .values(item)
+      .on_conflict_do_nothing()
       .execute(self.get_connection().deref_mut())
       .expect("Error saving new installed tapplet");
   }
@@ -115,6 +117,7 @@ impl<'a> Store<InstalledTapplet, CreateInstalledTapplet<'a>, UpdateInstalledTapp
       .expect("Error deleting installed tapplet");
   }
 }
+
 impl<'a> Store<Asset, CreateAsset<'a>, UpdateAsset> for SqliteStore {
   fn get_all(&mut self) -> Vec<Asset> {
     use crate::database::schema::asset::dsl::*;
@@ -128,6 +131,7 @@ impl<'a> Store<Asset, CreateAsset<'a>, UpdateAsset> for SqliteStore {
     diesel
       ::insert_into(asset::table)
       .values(item)
+      .on_conflict_do_nothing()
       .execute(self.get_connection().deref_mut())
       .expect("Error saving new asset");
   }

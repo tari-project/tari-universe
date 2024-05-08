@@ -3,6 +3,7 @@ use tauri::{ self, State };
 
 use crate::{
   database::{ models::{ CreateTapplet, Tapplet, UpdateTapplet }, store::{ SqliteStore, Store } },
+  deserializers::VerifiedTapplets,
   hash_calculator::calculate_shasum,
   rpc::{ balances, free_coins, make_request },
   tapplet_installer::{ check_extracted_files, download_file, extract_tar, validate_checksum },
@@ -103,6 +104,18 @@ pub fn validate_tapp_checksum(checksum: &str, tapplet_path: &str) -> Result<bool
 #[tauri::command]
 pub fn check_tapp_files(tapplet_path: &str) -> Result<(), ()> {
   let _ = check_extracted_files(tapplet_path);
+  Ok(())
+}
+
+#[tauri::command]
+pub fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+  let registry = include_str!("../../registry.json");
+  let tapplets: VerifiedTapplets = serde_json::from_str(registry).unwrap();
+  for (id, tapplet_manifest) in tapplets.verified_tapplets {
+    println!("ID: {}", id);
+    println!("Metadata: {:?}", tapplet_manifest.metadata);
+    println!("Versions: {:?}", tapplet_manifest.versions);
+  }
   Ok(())
 }
 

@@ -10,6 +10,7 @@ mod rpc;
 mod tapplet_installer;
 mod tapplet_server;
 mod wallet_daemon;
+mod deserializers;
 
 use commands::{
   calculate_tapp_checksum,
@@ -26,6 +27,7 @@ use commands::{
   read_db,
   update_db,
   validate_tapp_checksum,
+  fetch_tapplets,
 };
 
 use crate::{ rpc::permission_token, wallet_daemon::start_wallet_daemon };
@@ -65,7 +67,8 @@ pub fn run() {
         calculate_tapp_checksum,
         validate_tapp_checksum,
         check_tapp_files,
-        extract_tapp_tarball
+        extract_tapp_tarball,
+        fetch_tapplets
       ]
     )
     .setup(|app| {
