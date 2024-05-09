@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { InstalledTapplet } from "../types/tapplet/Tapplet"
+import { InstalledTapplet, RegisteredTapplet } from "../types/tapplet/Tapplet"
 import { invoke } from "@tauri-apps/api/core"
 import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText } from "@mui/material"
 import { Launch, Delete } from "@mui/icons-material"
@@ -14,6 +14,7 @@ export const TappletsInstalled: React.FC = () => {
     const fetchTapplets = async () => {
       try {
         const _tapplets: InstalledTapplet[] = await invoke("read_installed_tapp_db")
+        // TODO refactor db to store tapplet name and siplay it on the list
         if (_tapplets) setInstalledTappletsList(_tapplets)
         console.log("TAPPLET INSTALLED LIST UPDATED")
         console.log(_tapplets)
@@ -24,8 +25,12 @@ export const TappletsInstalled: React.FC = () => {
     fetchTapplets()
   }, [])
 
-  const handleLaunch = () => {
-    console.log("launch tapplet")
+  //TODO refactor if 'active tapplet' component is done
+  const handleLaunch = async (item: InstalledTapplet) => {
+    console.log("=>>>", item.tapplet_id)
+    const _id = item.tapplet_id ?? 1
+    const tap: RegisteredTapplet = await invoke("get_by_id_tapp_registry_db", { tappletId: _id })
+    console.log("=>>>", tap.display_name)
   }
 
   const handleDelete = async () => {
@@ -45,9 +50,9 @@ export const TappletsInstalled: React.FC = () => {
               </ListItemAvatar>
               <ListItemText primary={item.tapplet_id} />
               <IconButton aria-label="launch" style={{ marginRight: 10 }}>
-                <NavLink to={TabKey.ACTIVE_TAPPLET} style={{ display: "contents" }}>
-                  <Launch onClick={handleLaunch} color="primary" />
-                </NavLink>
+                {/* <NavLink to={TabKey.ACTIVE_TAPPLET} style={{ display: "contents" }}> */}
+                <Launch onClick={() => handleLaunch(item)} color="primary" />
+                {/* </NavLink> */}
               </IconButton>
               <IconButton aria-label="delete" style={{ marginRight: 10 }}>
                 <Delete onClick={handleDelete} color="primary" />

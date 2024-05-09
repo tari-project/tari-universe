@@ -220,6 +220,21 @@ pub fn delete_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> 
   Ok(())
 }
 
+#[tauri::command]
+pub fn get_by_id_tapp_registry_db(
+  tapplet_id: i32,
+  db_connection: State<'_, DatabaseConnection>
+) -> Result<Tapplet, ()> {
+  println!("fetching tapp by id");
+  println!("{}", tapplet_id);
+  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
+  let tapplet: Option<Tapplet> = tapplet_store.get_by_id(tapplet_id);
+  match tapplet {
+    Some(tapp) => Ok(tapp),
+    None => Err(()),
+  }
+}
+
 /**
  * INSTALLED TAPPLETS - STORES ALL THE USER'S INSTALLED TAPPLETS
  */

@@ -11,7 +11,10 @@ export const TappletsRegistered: React.FC = () => {
   useEffect(() => {
     const fetchTapplets = async () => {
       try {
-        const _tapplets: RegisteredTapplet[] = await invoke("fetch_tapplets")
+        // fetch data from json to db
+        await invoke("fetch_tapplets")
+        // read from db
+        const _tapplets: RegisteredTapplet[] = await invoke("read_tapp_registry_db")
         if (_tapplets) setRegisteredTappletsList(_tapplets)
         console.log(_tapplets)
       } catch (error) {
@@ -45,7 +48,7 @@ export const TappletsRegistered: React.FC = () => {
 
   const handleInstall = async (tapplet: RegisteredTapplet) => {
     //TODO fetch path & url from registry
-    const basePath = "/home/oski/Projects/tari/tari-universe/tapplets_installed"
+    const basePath = `/home/oski/Projects/tari/tari-universe/tapplets_installed/${tapplet.registry_id}/${tapplet.id}`
     const baseUrl = "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz"
     await installTapplet(baseUrl, basePath)
 
@@ -55,6 +58,7 @@ export const TappletsRegistered: React.FC = () => {
       path_to_dist: "",
       tapplet_id: tapplet.id ?? 0,
     }
+
     invoke("insert_installed_tapp_db", { tapplet: tapp })
   }
 
