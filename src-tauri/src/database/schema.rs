@@ -20,15 +20,35 @@ diesel::table! {
 diesel::table! {
     tapplet (id) {
         id -> Nullable<Integer>,
-        package_name -> Text,
-        version -> Text,
-        image_id -> Nullable<Integer>,
+        registry_id -> Text,
         display_name -> Text,
-        description -> Text,
+        author_name -> Text,
+        author_website -> Text,
+        about_summary -> Text,
+        about_description -> Text,
+        category -> Text,
+        package_name -> Text,
+        registry_url -> Text,
+        image_id -> Nullable<Integer>,
+    }
+}
+
+diesel::table! {
+    tapplet_version (id) {
+        id -> Nullable<Integer>,
+        tapplet_id -> Nullable<Integer>,
+        version -> Text,
+        checksum -> Text,
     }
 }
 
 diesel::joinable!(installed_tapplet -> tapplet (tapplet_id));
 diesel::joinable!(tapplet -> asset (image_id));
+diesel::joinable!(tapplet_version -> tapplet (tapplet_id));
 
-diesel::allow_tables_to_appear_in_same_query!(asset, installed_tapplet, tapplet);
+diesel::allow_tables_to_appear_in_same_query!(
+    asset,
+    installed_tapplet,
+    tapplet,
+    tapplet_version,
+);

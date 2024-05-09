@@ -1,0 +1,75 @@
+{
+  "verifiedTapplets": {
+    "@karczuRF/tapp-example": {
+      "id": "@karczuRF/tapp-example",
+      "metadata": {
+        "displayName": "Tapplet example #1",
+        "author": {
+          "name": "karczuRF",
+          "website": "https://github.com/karczuRF/tapp-example"
+        },
+        "about": {
+          "summary": "Short (a few words) summary.",
+          "description": "Longer (a few sentences) project description."
+        },
+        "audits": [
+          {
+            "auditor": "Auditor",
+            "report": "https://auditor-company.io/audits/tapplet-name"
+          }
+        ],
+        "category": "tapplet category",
+        "source": {
+          "location": {
+            "npm": {
+              "packageName": "@karczuRF/tapp-example",
+              "registry": "https://registry.npmjs.org/tapp-example"
+            }
+          }
+        }
+      },
+      "versions": {
+        "1.0.0": {
+          "checksum": "Teya54P3ObC68rLu8E0IvPfjju0hlIgrej9llyIcNMF5CXoO5eCIBbvNnMaDt6z5nRqrWi6tHFZwlCK1yYpMaw=="
+        }
+      }
+    },
+    "@MCozhusheck/tapplet-example": {
+      "id": "@MCozhusheck/tapplet-example",
+      "metadata": {
+        "displayName": "Tapplet example #2",
+        "author": {
+          "name": "MCozhusheck",
+          "website": "https://github.com/MCozhusheck/tapplet-example"
+        },
+        "about": {
+          "summary": "Short (a few words) summary.",
+          "description": "Longer (a few sentences) project description."
+        },
+        "audits": [
+          {
+            "auditor": "Auditor",
+            "report": "https://auditor-company.io/audits/tapplet-example"
+          }
+        ],
+        "category": "tapplet category",
+        "source": {
+          "location": {
+            "npm": {
+              "packageName": "@MCozhusheck/tapplet-example",
+              "registry": "https://registry.npmjs.org/tapplet-example"
+            }
+          }
+        }
+      },
+      "versions": {
+        "0.0.2": {
+          "checksum": "ivQM1oWaCaZrHARDCD2rib/RFmNDdSDuCQofOsEc3HLo/zgGjLXiySwm/uu3s/5lt9S+/oPC6wFE3m5agzdizA=="
+        },
+        "0.0.1": {
+          "checksum": "O56CWu0UvRPMieWp6HBPsQ+8OzDiWMmLUap7tarHLAKdx7vlYXo036OvQjHfpcAD79CRiJzrn4/GGvFlx5yU9w=="
+        }
+      }
+    }
+  }
+}

@@ -10,7 +10,7 @@ export function Tapplet({ tappletId }: TappletProps) {
   const [tappletAddress, setTappletAddress] = useState("");
 
   useEffect(() => {
-    invoke("launch_tapplet", { tappletId: tappletId })
+    invoke("launch_tapplet", { tappletId })
       .then((res: unknown) => {
         setTappletAddress(res as string);
       })
@@ -18,7 +18,7 @@ export function Tapplet({ tappletId }: TappletProps) {
         console.log("error", err);
       });
     return () => {
-      invoke("close_tapplet", { tappletId: tappletId });
+      invoke("close_tapplet", { tappletId });
       setTappletAddress("");
     };
   }, []);

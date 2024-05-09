@@ -10,6 +10,7 @@ mod rpc;
 mod tapplet_installer;
 mod tapplet_server;
 mod wallet_daemon;
+mod interface;
 
 use commands::{
   calculate_tapp_checksum,
@@ -73,7 +74,8 @@ pub fn run() {
         calculate_tapp_checksum,
         validate_tapp_checksum,
         check_tapp_files,
-        extract_tapp_tarball
+        extract_tapp_tarball,
+        fetch_tapplets
       ]
     )
     .setup(|app| {
