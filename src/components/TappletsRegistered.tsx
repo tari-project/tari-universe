@@ -7,12 +7,13 @@ import tariLogo from "../assets/tari.svg"
 
 export const TappletsRegistered: React.FC = () => {
   const [registeredTappletsList, setRegisteredTappletsList] = useState<RegisteredTapplet[]>([])
-  //TODO use Tauri BaseDir
+
   useEffect(() => {
     const fetchTapplets = async () => {
       try {
         const _tapplets: RegisteredTapplet[] = await invoke("read_tapp_registry_db")
         if (_tapplets) setRegisteredTappletsList(_tapplets)
+        console.log(_tapplets)
       } catch (error) {
         console.error("Error:", error)
       }
@@ -20,16 +21,41 @@ export const TappletsRegistered: React.FC = () => {
     fetchTapplets()
   }, [])
 
-  //TODO
-  const handleInstall = (tapplet: RegisteredTapplet) => {
+  async function downloadAndExtract(url: string, path: string) {
+    await invoke("download_tapp", { url, tappletPath: path })
+    await invoke("extract_tapp_tarball", { tappletPath: path })
+    await invoke("check_tapp_files", { tappletPath: path })
+  }
+
+  async function validateChecksum(path: string) {
+    const calculatedChecksum: string = await invoke("calculate_tapp_checksum", {
+      tappletPath: path,
+    })
+    //  TODO handle case if checksum is incorrect
+    const isCheckumValid: boolean = await invoke("validate_tapp_checksum", {
+      checksum: calculatedChecksum,
+      tappletPath: path,
+    })
+  }
+
+  async function installTapplet(url: string, path: string) {
+    await downloadAndExtract(url, path)
+    await validateChecksum(path)
+  }
+
+  const handleInstall = async (tapplet: RegisteredTapplet) => {
+    //TODO fetch path & url from registry
+    const basePath = "/home/oski/Projects/tari/tari-universe/tapplets_installed"
+    const baseUrl = "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz"
+    await installTapplet(baseUrl, basePath)
+
     const tapp: InstalledTapplet = {
-      is_dev_mode: true,
+      is_dev_mode: true, //TODO
       dev_mode_endpoint: "",
       path_to_dist: "",
-      tapplet_id: 2,
+      tapplet_id: tapplet.id ?? 0,
     }
     invoke("insert_installed_tapp_db", { tapplet: tapp })
-    invoke("read_installed_tapp_db", {})
   }
 
   return (
@@ -43,7 +69,7 @@ export const TappletsRegistered: React.FC = () => {
                   <Avatar src={tariLogo} />
                 </ListItemAvatar>
                 <ListItemText primary={item.package_name} />
-                <IconButton aria-label="install" style={{ margin: 10 }}>
+                <IconButton aria-label="install">
                   <InstallDesktop onClick={() => handleInstall(item)} color="primary" />
                 </IconButton>
               </ListItem>
