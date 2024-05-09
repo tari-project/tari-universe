@@ -10,22 +10,20 @@ mod rpc;
 mod tapplet_installer;
 mod tapplet_server;
 mod wallet_daemon;
+mod interface;
 
 use commands::{
   calculate_tapp_checksum,
   call_wallet,
   check_tapp_files,
   close_tapplet,
-  delete_db,
   download_tapp,
   extract_tapp_tarball,
   get_balances,
   get_free_coins,
-  insert_db,
   launch_tapplet,
-  read_db,
-  update_db,
   validate_tapp_checksum,
+  fetch_tapplets,
 };
 
 use crate::{ rpc::permission_token, wallet_daemon::start_wallet_daemon };
@@ -57,15 +55,12 @@ pub fn run() {
         launch_tapplet,
         close_tapplet,
         call_wallet,
-        insert_db,
-        read_db,
-        update_db,
-        delete_db,
         download_tapp,
         calculate_tapp_checksum,
         validate_tapp_checksum,
         check_tapp_files,
-        extract_tapp_tarball
+        extract_tapp_tarball,
+        fetch_tapplets
       ]
     )
     .setup(|app| {

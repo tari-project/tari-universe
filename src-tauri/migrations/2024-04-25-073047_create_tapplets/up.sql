@@ -2,13 +2,26 @@
 -- This file should undo anything in `up.sql`
 CREATE TABLE tapplet (
   id INTEGER PRIMARY KEY,
-  package_name TEXT NOT NULL,
-  version TEXT NOT NULL,
-  image_id INTEGER,
+  registry_id TEXT NOT NULL,
   display_name TEXT NOT NULL,
-  description TEXT NOT NULL,
-  UNIQUE(package_name, version),
+  author_name TEXT NOT NULL,
+  author_website TEXT NOT NULL,
+  about_summary TEXT NOT NULL,
+  about_description TEXT NOT NULL,
+  category TEXT NOT NULL,
+  package_name TEXT NOT NULL,
+  registry_url TEXT NOT NULL,
+  image_id INTEGER,
+  UNIQUE(package_name),
   FOREIGN KEY (image_id) REFERENCES asset(id)
+);
+
+CREATE TABLE tapplet_version (
+  id INTEGER PRIMARY KEY,
+  tapplet_id INTEGER,
+  version TEXT NOT NULL,
+  checksum TEXT NOT NULL,
+  FOREIGN KEY (tapplet_id) REFERENCES tapplet(id)
 );
 
 CREATE TABLE installed_tapplet (
