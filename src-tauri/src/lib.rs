@@ -66,7 +66,7 @@ pub fn run() {
     .setup(|app| {
       tauri::async_runtime::spawn(async move {
         start_wallet_daemon().await.unwrap();
-      });
+      }); // TODO wait for wallet daemon to start responding https://github.com/orgs/tari-project/projects/18/views/1?pane=issue&itemId=62414850
 
       let handle = tauri::async_runtime::spawn(async move { permission_token().await.unwrap() });
       let (permission_token, auth_token) = tauri::async_runtime::block_on(handle).unwrap();

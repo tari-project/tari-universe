@@ -4,7 +4,7 @@ use tokio::select;
 use tokio_util::sync::CancellationToken;
 use tower_http::services::ServeDir;
 
-const TAPPLET_DIR: &str = "../tapplets_installed"; // TODO store in config
+const TAPPLET_DIR: &str = "../tapplets_installed"; // TODO store in config https://github.com/orgs/tari-project/projects/18/views/1?pane=issue&itemId=62386233
 
 pub async fn start(tapplet_path: &str) -> (String, CancellationToken) {
   serve(using_serve_dir(tapplet_path), 0).await
