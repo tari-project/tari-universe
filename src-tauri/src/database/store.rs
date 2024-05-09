@@ -38,6 +38,7 @@ impl SqliteStore {
 
 pub trait Store<T, U, G> {
   fn get_all(&mut self) -> Vec<T>;
+  fn get_by_id(&mut self, id: i32) -> Option<T>;
   fn create(&mut self, item: &U) -> Vec<T>;
   fn delete(&mut self, entity: T);
   fn update(&mut self, old: T, new: &G);
@@ -48,6 +49,12 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
     use crate::database::schema::tapplet::dsl::*;
 
     tapplet.load::<Tapplet>(self.get_connection().deref_mut()).expect("Error loading tapplets")
+  }
+
+  fn get_by_id(&mut self, tapplet_id: i32) -> Option<Tapplet> {
+    use crate::database::schema::tapplet::dsl::*;
+
+    tapplet.filter(id.eq(tapplet_id)).first::<Tapplet>(self.get_connection().deref_mut()).ok()
   }
 
   fn create(&mut self, item: &CreateTapplet) -> Vec<Tapplet> {
@@ -92,6 +99,15 @@ impl<'a> Store<InstalledTapplet, CreateInstalledTapplet<'a>, UpdateInstalledTapp
       .expect("Error loading installed tapplets")
   }
 
+  fn get_by_id(&mut self, installed_tapplet_id: i32) -> Option<InstalledTapplet> {
+    use crate::database::schema::installed_tapplet::dsl::*;
+
+    installed_tapplet
+      .filter(id.eq(installed_tapplet_id))
+      .first::<InstalledTapplet>(self.get_connection().deref_mut())
+      .ok()
+  }
+
   fn create(&mut self, item: &CreateInstalledTapplet) -> Vec<InstalledTapplet> {
     use crate::database::schema::installed_tapplet;
 
@@ -130,6 +146,12 @@ impl<'a> Store<Asset, CreateAsset<'a>, UpdateAsset> for SqliteStore {
     asset.load::<Asset>(self.get_connection().deref_mut()).expect("Error loading assets")
   }
 
+  fn get_by_id(&mut self, asset_id: i32) -> Option<Asset> {
+    use crate::database::schema::asset::dsl::*;
+
+    asset.filter(id.eq(asset_id)).first::<Asset>(self.get_connection().deref_mut()).ok()
+  }
+
   fn create(&mut self, item: &CreateAsset) -> Vec<Asset> {
     use crate::database::schema::asset;
 
@@ -166,6 +188,12 @@ impl<'a> Store<TappletVersion, CreateTappletVersion<'a>, UpdateTappletVersion> f
     use crate::database::schema::tapplet_version::dsl::*;
 
     tapplet_version.load::<TappletVersion>(self.get_connection().deref_mut()).expect("Error loading tapplet versions")
+  }
+
+  fn get_by_id(&mut self, tapplet_version_id: i32) -> Option<TappletVersion> {
+    use crate::database::schema::tapplet_version::dsl::*;
+
+    tapplet_version.filter(id.eq(tapplet_version_id)).first::<TappletVersion>(self.get_connection().deref_mut()).ok()
   }
 
   fn create(&mut self, item: &CreateTappletVersion) -> Vec<TappletVersion> {

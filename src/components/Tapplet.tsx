@@ -3,14 +3,14 @@ import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 
 export type TappletProps = {
-  tappletId: string;
+  installedTappletId: number;
 };
 
-export function Tapplet({ tappletId }: TappletProps) {
+export function Tapplet({ installedTappletId }: TappletProps) {
   const [tappletAddress, setTappletAddress] = useState("");
 
   useEffect(() => {
-    invoke("launch_tapplet", { tappletId })
+    invoke("launch_tapplet", { installedTappletId })
       .then((res: unknown) => {
         setTappletAddress(res as string);
       })
@@ -18,7 +18,7 @@ export function Tapplet({ tappletId }: TappletProps) {
         console.log("error", err);
       });
     return () => {
-      invoke("close_tapplet", { tappletId });
+      invoke("close_tapplet", { installedTappletId });
       setTappletAddress("");
     };
   }, []);

@@ -40,7 +40,7 @@ pub struct Tokens {
   permission: Mutex<String>,
 }
 #[derive(Default)]
-pub struct ShutdownTokens(Arc<tokio::sync::Mutex<HashMap<String, CancellationToken>>>);
+pub struct ShutdownTokens(Arc<tokio::sync::Mutex<HashMap<i32, CancellationToken>>>);
 pub struct DatabaseConnection(Arc<Mutex<SqliteConnection>>);
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
