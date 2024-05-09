@@ -40,10 +40,6 @@ function App() {
     setBalances(await invoke("get_balances", {}));
   }
 
-  async function fetch_tapplets() {
-    setBalances(await invoke("fetch_tapplets", {}));
-  }
-
   useEffect(() => {
     const handleMessage = async (event: any) => {
       const { methodName, args } = event.data;
@@ -82,15 +78,6 @@ function App() {
       <Typography textAlign="center">
         balances: {JSON.stringify(balances)}
       </Typography>
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          fetch_tapplets();
-        }}
-      >
-        <button type="submit">fetch_tapplets</button>
-      </form>
 
       <Installer tappletId={TAPPLET_ID} />
       <Tapplet tappletId={TAPPLET_ID} />
