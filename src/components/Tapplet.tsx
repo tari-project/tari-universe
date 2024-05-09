@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 
 export type TappletProps = {
-  tappletId: string;
+  tappletId: number;
 };
 
 export function Tapplet({ tappletId }: TappletProps) {

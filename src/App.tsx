@@ -28,7 +28,7 @@ const params: WalletDaemonParameters = {
 };
 const provider = await WalletDaemonTariProvider.build(params);
 
-const TAPPLET_ID = "tapplet_id";
+const TAPPLET_ID = 1;
 function App() {
   const [balances, setBalances] = useState({});
 

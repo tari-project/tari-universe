@@ -43,6 +43,17 @@ pub trait Store<T, U, G> {
   fn update(&mut self, old: T, new: &G);
 }
 
+impl SqliteStore {
+  pub fn get_installed_tapplet_by_registry_id(&mut self, _taplet_id: i32) -> InstalledTapplet {
+    use crate::database::schema::installed_tapplet::dsl::*;
+
+    installed_tapplet
+      .filter(tapplet_id.eq(_taplet_id))
+      .first::<InstalledTapplet>(self.get_connection().deref_mut())
+      .expect("Error loading installed tapplet")
+  }
+}
+
 impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
   fn get_all(&mut self) -> Vec<Tapplet> {
     use crate::database::schema::tapplet::dsl::*;
