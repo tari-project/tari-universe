@@ -11,8 +11,8 @@ export const TappletsRegistered: React.FC = () => {
   useEffect(() => {
     const fetchTapplets = async () => {
       try {
-        const registeredTapplets: RegisteredTapplet[] = await invoke("read_tapp_registry_db")
-        setRegisteredTappletsList(registeredTapplets)
+        const _tapplets: RegisteredTapplet[] = await invoke("read_tapp_registry_db")
+        if (_tapplets) setRegisteredTappletsList(_tapplets)
       } catch (error) {
         console.error("Error:", error)
       }
@@ -34,19 +34,25 @@ export const TappletsRegistered: React.FC = () => {
 
   return (
     <div>
-      {registeredTappletsList.map((item) => (
-        <List>
-          <ListItem key={item.package_name}>
-            <ListItemAvatar>
-              <Avatar src={tariLogo} />
-            </ListItemAvatar>
-            <ListItemText primary={item.package_name} />
-            <IconButton aria-label="install" style={{ margin: 10 }}>
-              <InstallDesktop onClick={() => handleInstall(item)} color="primary" />
-            </IconButton>
-          </ListItem>
-        </List>
-      ))}
+      {registeredTappletsList.length > 0 ? (
+        <div>
+          {registeredTappletsList.map((item) => (
+            <List>
+              <ListItem key={item.package_name}>
+                <ListItemAvatar>
+                  <Avatar src={tariLogo} />
+                </ListItemAvatar>
+                <ListItemText primary={item.package_name} />
+                <IconButton aria-label="install" style={{ margin: 10 }}>
+                  <InstallDesktop onClick={() => handleInstall(item)} color="primary" />
+                </IconButton>
+              </ListItem>
+            </List>
+          ))}
+        </div>
+      ) : (
+        <div>Registered tapplets list is empty</div>
+      )}
     </div>
   )
 }
