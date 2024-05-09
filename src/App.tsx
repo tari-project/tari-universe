@@ -28,7 +28,7 @@ const params: WalletDaemonParameters = {
 };
 const provider = await WalletDaemonTariProvider.build(params);
 
-const TAPPLET_ID = 1;
+const INSTALLED_TAPPLET_ID = 1;
 function App() {
   const [balances, setBalances] = useState({});
 
@@ -79,8 +79,8 @@ function App() {
         balances: {JSON.stringify(balances)}
       </Typography>
 
-      <Installer tappletId={TAPPLET_ID} />
-      <Tapplet tappletId={TAPPLET_ID} />
+      <Installer installedTappletId={INSTALLED_TAPPLET_ID} />
+      <Tapplet installedTappletId={INSTALLED_TAPPLET_ID} />
     </div>
   );
 }
