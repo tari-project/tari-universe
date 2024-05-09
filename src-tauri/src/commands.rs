@@ -111,20 +111,20 @@ pub fn check_tapp_files(tapplet_path: &str) -> Result<(), ()> {
 pub fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
   let registry = include_str!("../../registry.json");
   let tapplets: VerifiedTapplets = serde_json::from_str(registry).unwrap();
-  for (_, tapplet_manifest) in tapplets.verified_tapplets {
-    let mut store = SqliteStore::new(db_connection.0.clone());
-    let inserted_tapplet = store.create(&CreateTapplet::from(&tapplet_manifest));
+  let mut store = SqliteStore::new(db_connection.0.clone());
+  tapplets.verified_tapplets.iter().for_each(|(_, tapplet_manifest)| {
+    let inserted_tapplet = store.create(&CreateTapplet::from(tapplet_manifest));
     let tapplet_db_id = inserted_tapplet.iter().next().unwrap().id.unwrap();
 
     tapplet_manifest.versions.iter().for_each(|(version, checksum)| {
       store.create(
         &(CreateTappletVersion {
           tapplet_id: Some(tapplet_db_id),
-          version: version.clone(),
-          checksum: checksum.checksum.clone(),
+          version: &version,
+          checksum: &checksum.checksum,
         })
       );
     });
-  }
+  });
   Ok(())
 }

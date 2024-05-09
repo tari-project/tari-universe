@@ -43,7 +43,7 @@ pub trait Store<T, U, G> {
   fn update(&mut self, old: T, new: &G);
 }
 
-impl Store<Tapplet, CreateTapplet, UpdateTapplet> for SqliteStore {
+impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
   fn get_all(&mut self) -> Vec<Tapplet> {
     use crate::database::schema::tapplet::dsl::*;
 
@@ -81,7 +81,7 @@ impl Store<Tapplet, CreateTapplet, UpdateTapplet> for SqliteStore {
   }
 }
 
-impl Store<InstalledTapplet, CreateInstalledTapplet, UpdateInstalledTapplet> for SqliteStore {
+impl<'a> Store<InstalledTapplet, CreateInstalledTapplet<'a>, UpdateInstalledTapplet> for SqliteStore {
   fn get_all(&mut self) -> Vec<InstalledTapplet> {
     use crate::database::schema::installed_tapplet::dsl::*;
 
@@ -121,7 +121,7 @@ impl Store<InstalledTapplet, CreateInstalledTapplet, UpdateInstalledTapplet> for
   }
 }
 
-impl Store<Asset, CreateAsset, UpdateAsset> for SqliteStore {
+impl<'a> Store<Asset, CreateAsset<'a>, UpdateAsset> for SqliteStore {
   fn get_all(&mut self) -> Vec<Asset> {
     use crate::database::schema::asset::dsl::*;
 
@@ -159,7 +159,7 @@ impl Store<Asset, CreateAsset, UpdateAsset> for SqliteStore {
   }
 }
 
-impl Store<TappletVersion, CreateTappletVersion, UpdateTappletVersion> for SqliteStore {
+impl<'a> Store<TappletVersion, CreateTappletVersion<'a>, UpdateTappletVersion> for SqliteStore {
   fn get_all(&mut self) -> Vec<TappletVersion> {
     use crate::database::schema::tapplet_version::dsl::*;
 
