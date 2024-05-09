@@ -63,7 +63,7 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
     diesel
       ::insert_into(tapplet::table)
       .values(item)
-      .on_conflict(tapplet::registry_id)
+      .on_conflict(tapplet::package_name)
       .do_update()
       .set(UpdateTapplet::from(item))
       .get_results(self.get_connection().deref_mut())
@@ -202,7 +202,7 @@ impl<'a> Store<TappletVersion, CreateTappletVersion<'a>, UpdateTappletVersion> f
     diesel
       ::insert_into(tapplet_version::table)
       .values(item)
-      .on_conflict(tapplet_version::version)
+      .on_conflict((tapplet_version::version, tapplet_version::tapplet_id))
       .do_update()
       .set(UpdateTappletVersion::from(item))
       .get_results(self.get_connection().deref_mut())

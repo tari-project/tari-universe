@@ -1,12 +1,12 @@
 {
   "verifiedTapplets": {
-    "@company-name/tapplet-name": {
-      "id": "@company-name/tapplet-name",
+    "@karczuRF/tapp-example": {
+      "id": "@karczuRF/tapp-example",
       "metadata": {
-        "displayName": "Tapplet human readable name",
+        "displayName": "Tapplet example #1",
         "author": {
-          "name": "Author Name",
-          "website": "https://company-name.io/"
+          "name": "karczuRF",
+          "website": "https://github.com/karczuRF/tapp-example"
         },
         "about": {
           "summary": "Short (a few words) summary.",
@@ -22,28 +22,25 @@
         "source": {
           "location": {
             "npm": {
-              "packageName": "@company-name/tapplet-name",
-              "registry": "https://registry.npmjs.org/"
+              "packageName": "@karczuRF/tapp-example",
+              "registry": "https://registry.npmjs.org/tapp-example"
             }
           }
         }
       },
       "versions": {
-        "1.2.2": {
-          "checksum": "checksumv122"
-        },
-        "1.2.0": {
-          "checksum": "checksumv120"
+        "1.0.0": {
+          "checksum": "Teya54P3ObC68rLu8E0IvPfjju0hlIgrej9llyIcNMF5CXoO5eCIBbvNnMaDt6z5nRqrWi6tHFZwlCK1yYpMaw=="
         }
       }
     },
-    "@company-another-name/tapplet-another-name": {
-      "id": "@company-another-name/tapplet-another-name",
+    "@MCozhusheck/tapplet-example": {
+      "id": "@MCozhusheck/tapplet-example",
       "metadata": {
-        "displayName": "Tapplet human readable name",
+        "displayName": "Tapplet example #2",
         "author": {
-          "name": "Author Name",
-          "website": "https://company-another-name.io/"
+          "name": "MCozhusheck",
+          "website": "https://github.com/MCozhusheck/tapplet-example"
         },
         "about": {
           "summary": "Short (a few words) summary.",
@@ -52,25 +49,25 @@
         "audits": [
           {
             "auditor": "Auditor",
-            "report": "https://auditor-company.io/audits/tapplet-another-name"
+            "report": "https://auditor-company.io/audits/tapplet-example"
           }
         ],
         "category": "tapplet category",
         "source": {
           "location": {
             "npm": {
-              "packageName": "@company-name/tapplet-another-name",
-              "registry": "https://registry.npmjs.org/"
+              "packageName": "@MCozhusheck/tapplet-example",
+              "registry": "https://registry.npmjs.org/tapplet-example"
             }
           }
         }
       },
       "versions": {
-        "1.2.2": {
-          "checksum": "checksumv122"
+        "0.0.2": {
+          "checksum": "ivQM1oWaCaZrHARDCD2rib/RFmNDdSDuCQofOsEc3HLo/zgGjLXiySwm/uu3s/5lt9S+/oPC6wFE3m5agzdizA=="
         },
-        "1.2.0": {
-          "checksum": "checksumv120"
+        "0.0.1": {
+          "checksum": "O56CWu0UvRPMieWp6HBPsQ+8OzDiWMmLUap7tarHLAKdx7vlYXo036OvQjHfpcAD79CRiJzrn4/GGvFlx5yU9w=="
         }
       }
     }

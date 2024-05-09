@@ -163,6 +163,33 @@ pub fn read_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Re
   Ok(tapplets)
 }
 
+/**
+ *  REGISTERED TAPPLETS - FETCH DATA FROM MANIFEST JSON
+ */
+#[tauri::command]
+pub fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+  println!("fetching registry in progres...");
+  let registry = include_str!("../../tapplets-registry.manifest.json");
+  let tapplets: VerifiedTapplets = serde_json::from_str(registry).unwrap();
+  let mut store = SqliteStore::new(db_connection.0.clone());
+  tapplets.verified_tapplets.iter().for_each(|(_, tapplet_manifest)| {
+    let inserted_tapplet = store.create(&CreateTapplet::from(tapplet_manifest));
+    let tapplet_db_id = inserted_tapplet.iter().next().unwrap().id.unwrap();
+
+    tapplet_manifest.versions.iter().for_each(|(version, checksum)| {
+      store.create(
+        &(CreateTappletVersion {
+          tapplet_id: Some(tapplet_db_id),
+          version: &version,
+          checksum: &checksum.checksum,
+        })
+      );
+    });
+  });
+  println!("fetching registry db done");
+  Ok(())
+}
+
 #[tauri::command]
 pub fn update_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
@@ -251,31 +278,5 @@ pub fn delete_installed_tapp_db(db_connection: State<'_, DatabaseConnection>) ->
   let first: InstalledTapplet = tapplets.into_iter().next().unwrap();
   // TODO delete specified tapp - not the first one
   tapplet_store.delete(first);
-  Ok(())
-}
-
-
-/**
- *  REGISTERED TAPPLETS - FETCH DATA FROM MANIFEST JSON
- */
-#[tauri::command]
-pub fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
-  let registry = include_str!("../../registry.json");
-  let tapplets: VerifiedTapplets = serde_json::from_str(registry).unwrap();
-  let mut store = SqliteStore::new(db_connection.0.clone());
-  tapplets.verified_tapplets.iter().for_each(|(_, tapplet_manifest)| {
-    let inserted_tapplet = store.create(&CreateTapplet::from(tapplet_manifest));
-    let tapplet_db_id = inserted_tapplet.iter().next().unwrap().id.unwrap();
-
-    tapplet_manifest.versions.iter().for_each(|(version, checksum)| {
-      store.create(
-        &(CreateTappletVersion {
-          tapplet_id: Some(tapplet_db_id),
-          version: &version,
-          checksum: &checksum.checksum,
-        })
-      );
-    });
-  });
   Ok(())
 }

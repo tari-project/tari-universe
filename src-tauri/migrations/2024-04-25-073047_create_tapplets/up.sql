@@ -21,6 +21,7 @@ CREATE TABLE tapplet_version (
   tapplet_id INTEGER,
   version TEXT NOT NULL,
   checksum TEXT NOT NULL,
+  UNIQUE(version, tapplet_id),
   FOREIGN KEY (tapplet_id) REFERENCES tapplet(id)
 );
 

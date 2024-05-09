@@ -31,6 +31,7 @@ use commands::{
   read_tapp_registry_db,
   update_tapp_registry_db,
   delete_tapp_registry_db,
+  fetch_tapplets,
 };
 
 use crate::{ rpc::permission_token, wallet_daemon::start_wallet_daemon };

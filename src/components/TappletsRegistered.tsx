@@ -11,7 +11,7 @@ export const TappletsRegistered: React.FC = () => {
   useEffect(() => {
     const fetchTapplets = async () => {
       try {
-        const _tapplets: RegisteredTapplet[] = await invoke("read_tapp_registry_db")
+        const _tapplets: RegisteredTapplet[] = await invoke("fetch_tapplets")
         if (_tapplets) setRegisteredTappletsList(_tapplets)
         console.log(_tapplets)
       } catch (error) {
