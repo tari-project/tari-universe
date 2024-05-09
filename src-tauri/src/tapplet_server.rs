@@ -3,12 +3,15 @@ use std::net::SocketAddr;
 use tokio::select;
 use tokio_util::sync::CancellationToken;
 use tower_http::services::ServeDir;
-pub async fn start() -> (String, CancellationToken) {
-  serve(using_serve_dir(), 0).await
+
+const TAPPLET_DIR: &str = "../tapplets_installed"; // TODO store in config
+
+pub async fn start(tapplet_path: &str) -> (String, CancellationToken) {
+  serve(using_serve_dir(tapplet_path), 0).await
 }
 
-pub fn using_serve_dir() -> Router {
-  let serve_dir = ServeDir::new("../tapplets_installed/tapplet-example");
+pub fn using_serve_dir(tapplet_path: &str) -> Router {
+  let serve_dir = ServeDir::new(format!("{}/{}", TAPPLET_DIR, tapplet_path));
   Router::new().nest_service("/", serve_dir)
 }
 

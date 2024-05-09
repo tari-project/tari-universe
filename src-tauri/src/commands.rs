@@ -2,9 +2,9 @@ use tari_wallet_daemon_client::types::AccountsGetBalancesResponse;
 use tauri::{ self, State };
 
 use crate::{
-  database::{ models::{ CreateTapplet, CreateTappletVersion }, store::{ SqliteStore, Store } },
-  interface::VerifiedTapplets,
+  database::{ models::{ CreateTapplet, CreateTappletVersion, InstalledTapplet }, store::{ SqliteStore, Store } },
   hash_calculator::calculate_shasum,
+  interface::VerifiedTapplets,
   rpc::{ balances, free_coins, make_request },
   tapplet_installer::{ check_extracted_files, download_file, extract_tar, validate_checksum },
   tapplet_server::start,
@@ -33,32 +33,40 @@ pub async fn get_balances(tokens: State<'_, Tokens>) -> Result<AccountsGetBalanc
 }
 
 #[tauri::command]
-pub async fn launch_tapplet(tapplet_id: String, shutdown_tokens: State<'_, ShutdownTokens>) -> Result<String, ()> {
+pub async fn launch_tapplet(
+  installed_tapplet_id: i32,
+  shutdown_tokens: State<'_, ShutdownTokens>,
+  db_connection: State<'_, DatabaseConnection>
+) -> Result<String, ()> {
   let mut locked_tokens = shutdown_tokens.0.lock().await;
-  let tapplet_handle = tauri::async_runtime::spawn(async { start().await });
+  let mut store = SqliteStore::new(db_connection.0.clone());
+
+  let installed_tapplet: InstalledTapplet = store.get_by_id(installed_tapplet_id).unwrap();
+  let tapplet_handle = tauri::async_runtime::spawn(async { start(&installed_tapplet.path_to_dist.unwrap()).await });
+
   let (addr, cancel_token) = tapplet_handle.await.unwrap();
-  match locked_tokens.insert(tapplet_id.clone(), cancel_token) {
+  match locked_tokens.insert(installed_tapplet_id.clone(), cancel_token) {
     Some(_) => {
-      println!("Tapplet already running with id: {}", tapplet_id.clone());
+      println!("Tapplet already running with id: {}", installed_tapplet_id.clone());
     }
     None => {
-      println!("Tapplet started with id: {}", tapplet_id.clone());
+      println!("Tapplet started with id: {}", installed_tapplet_id.clone());
     }
   }
   Ok(format!("http://{}", addr))
 }
 
 #[tauri::command]
-pub async fn close_tapplet(tapplet_id: String, shutdown_tokens: State<'_, ShutdownTokens>) -> Result<(), ()> {
+pub async fn close_tapplet(installed_tapplet_id: i32, shutdown_tokens: State<'_, ShutdownTokens>) -> Result<(), ()> {
   let mut lock = shutdown_tokens.0.lock().await;
-  match lock.get(&tapplet_id) {
+  match lock.get(&installed_tapplet_id) {
     Some(token) => {
       token.cancel();
-      lock.remove(&tapplet_id);
-      println!("Tapplet stopped with id: {}", tapplet_id.clone());
+      lock.remove(&installed_tapplet_id);
+      println!("Tapplet stopped with id: {}", installed_tapplet_id.clone());
     }
     None => {
-      println!("Tapplet not found with id: {}", tapplet_id.clone());
+      println!("Tapplet not found with id: {}", installed_tapplet_id.clone());
     }
   }
 
