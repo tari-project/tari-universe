@@ -10,7 +10,6 @@ import {
 import { Tapplet } from "./components/Tapplet"
 import { TabKey } from "./views/Tabs"
 import { Wallet } from "./components/Wallet"
-import { TappletsList } from "./components/TappletsList"
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
 import { TappletsRegistered } from "./components/TappletsRegistered"
 import { TappletsInstalled } from "./components/TappletsInstalled"

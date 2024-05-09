@@ -25,11 +25,13 @@ export const TappletsInstalled: React.FC = () => {
   }, [])
 
   const handleLaunch = () => {
-    console.log("launch eloszki")
+    console.log("launch tapplet")
   }
 
-  const handleDelete = () => {
-    console.log("delete  eloszki")
+  const handleDelete = async () => {
+    console.log("delete tapplet")
+    //TODO delete single tapplet by given id
+    await invoke("delete_installed_tapp_db")
   }
 
   return (

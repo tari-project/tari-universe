@@ -117,7 +117,6 @@ pub fn check_tapp_files(tapplet_path: &str) -> Result<(), ()> {
 pub fn insert_tapp_registry_db(tapplet: CreateTapplet, db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
   println!("insert_tapp_registry_db new tapplet...");
   println!("{:?}", tapplet);
-  println!("insert_tapp_registry_db in progres...");
   let new_tapplet = CreateTapplet {
     description: tapplet.description,
     display_name: tapplet.display_name,
@@ -178,7 +177,6 @@ pub fn insert_installed_tapp_db(
 ) -> Result<(), ()> {
   println!("insert_installed_tapp_db new tapplet...");
   println!("{:?}", tapplet);
-  println!("insert_installed_tapp_db in progres...");
   let new_tapplet = CreateInstalledTapplet {
     tapplet_id: tapplet.tapplet_id,
     is_dev_mode: tapplet.is_dev_mode,
@@ -224,6 +222,7 @@ pub fn delete_installed_tapp_db(db_connection: State<'_, DatabaseConnection>) ->
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   let tapplets: Vec<InstalledTapplet> = tapplet_store.get_all();
   let first: InstalledTapplet = tapplets.into_iter().next().unwrap();
+  // TODO delete specified tapp - not the first one
   tapplet_store.delete(first);
   Ok(())
 }
