@@ -10,7 +10,7 @@ mod rpc;
 mod tapplet_installer;
 mod tapplet_server;
 mod wallet_daemon;
-mod registry_types;
+mod interface;
 
 use commands::{
   calculate_tapp_checksum,

@@ -56,7 +56,9 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
     diesel
       ::insert_into(tapplet::table)
       .values(item)
-      .on_conflict_do_nothing()
+      .on_conflict(tapplet::registry_id)
+      .do_update()
+      .set(UpdateTapplet::from(item))
       .get_results(self.get_connection().deref_mut())
       .expect("Error saving new tapplet")
   }
@@ -96,7 +98,9 @@ impl<'a> Store<InstalledTapplet, CreateInstalledTapplet<'a>, UpdateInstalledTapp
     diesel
       ::insert_into(installed_tapplet::table)
       .values(item)
-      .on_conflict_do_nothing()
+      .on_conflict(installed_tapplet::tapplet_id) // should we allow multiple installs of the same tapplet?
+      .do_update()
+      .set(UpdateInstalledTapplet::from(item))
       .get_results(self.get_connection().deref_mut())
       .expect("Error saving new installed tapplet")
   }
@@ -172,7 +176,9 @@ impl<'a> Store<TappletVersion, CreateTappletVersion<'a>, UpdateTappletVersion> f
     diesel
       ::insert_into(tapplet_version::table)
       .values(item)
-      .on_conflict_do_nothing()
+      .on_conflict(tapplet_version::version)
+      .do_update()
+      .set(UpdateTappletVersion::from(item))
       .get_results(self.get_connection().deref_mut())
       .expect("Error saving new tapplet version")
   }

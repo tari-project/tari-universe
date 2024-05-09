@@ -3,7 +3,7 @@ use tauri::{ self, State };
 
 use crate::{
   database::{ models::{ CreateTapplet, CreateTappletVersion }, store::{ SqliteStore, Store } },
-  registry_types::VerifiedTapplets,
+  interface::VerifiedTapplets,
   hash_calculator::calculate_shasum,
   rpc::{ balances, free_coins, make_request },
   tapplet_installer::{ check_extracted_files, download_file, extract_tar, validate_checksum },

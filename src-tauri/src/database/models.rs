@@ -1,5 +1,5 @@
 use crate::database::schema::*;
-use crate::registry_types::TappletManifest;
+use crate::interface::TappletManifest;
 use diesel::prelude::*;
 use serde::Deserialize;
 
@@ -20,6 +20,16 @@ pub struct CreateInstalledTapplet<'a> {
   pub is_dev_mode: bool,
   pub dev_mode_endpoint: &'a str,
   pub path_to_dist: &'a str,
+}
+
+impl<'a> From<&CreateInstalledTapplet<'a>> for UpdateInstalledTapplet {
+  fn from(create_installed_tapplet: &CreateInstalledTapplet) -> Self {
+    UpdateInstalledTapplet {
+      is_dev_mode: create_installed_tapplet.is_dev_mode,
+      dev_mode_endpoint: Some(create_installed_tapplet.dev_mode_endpoint.to_string()),
+      path_to_dist: Some(create_installed_tapplet.path_to_dist.to_string()),
+    }
+  }
 }
 
 #[derive(Debug, AsChangeset)]
@@ -79,6 +89,23 @@ impl<'a> From<&'a TappletManifest> for CreateTapplet<'a> {
   }
 }
 
+impl<'a> From<&CreateTapplet<'a>> for UpdateTapplet {
+  fn from(create_tapplet: &CreateTapplet) -> Self {
+    UpdateTapplet {
+      registry_id: create_tapplet.registry_id.to_string(),
+      display_name: create_tapplet.display_name.to_string(),
+      author_name: create_tapplet.author_name.to_string(),
+      author_website: create_tapplet.author_website.to_string(),
+      about_summary: create_tapplet.about_summary.to_string(),
+      about_description: create_tapplet.about_description.to_string(),
+      category: create_tapplet.category.to_string(),
+      package_name: create_tapplet.package_name.to_string(),
+      registry_url: create_tapplet.registry_url.to_string(),
+      image_id: create_tapplet.image_id,
+    }
+  }
+}
+
 #[derive(Debug, AsChangeset)]
 #[diesel(table_name = tapplet)]
 pub struct UpdateTapplet {
@@ -108,6 +135,14 @@ pub struct CreateAsset<'a> {
   pub rel_path: &'a str,
 }
 
+impl<'a> From<&CreateAsset<'a>> for UpdateAsset {
+  fn from(create_asset: &CreateAsset) -> Self {
+    UpdateAsset {
+      rel_path: create_asset.rel_path.to_string(),
+    }
+  }
+}
+
 #[derive(Debug, AsChangeset)]
 #[diesel(table_name = asset)]
 pub struct UpdateAsset {
@@ -130,6 +165,16 @@ pub struct CreateTappletVersion<'a> {
   pub tapplet_id: Option<i32>,
   pub version: &'a str,
   pub checksum: &'a str,
+}
+
+impl<'a> From<&CreateTappletVersion<'a>> for UpdateTappletVersion {
+  fn from(create_tapplet_version: &CreateTappletVersion) -> Self {
+    UpdateTappletVersion {
+      tapplet_id: create_tapplet_version.tapplet_id,
+      version: create_tapplet_version.version.to_string(),
+      checksum: create_tapplet_version.checksum.to_string(),
+    }
+  }
 }
 
 #[derive(Debug, AsChangeset)]
