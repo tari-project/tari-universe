@@ -261,10 +261,12 @@ pub fn insert_installed_tapp_db(
 }
 
 #[tauri::command]
-pub fn read_installed_tapp_db(db_connection: State<'_, DatabaseConnection>) -> Result<Vec<InstalledTapplet>, ()> {
+pub fn read_installed_tapp_db(
+  db_connection: State<'_, DatabaseConnection>
+) -> Result<Vec<(InstalledTapplet, std::string::String)>, ()> {
   println!("read_installed_tapp_db in progres...");
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  let tapplets: Vec<InstalledTapplet> = tapplet_store.get_all();
+  let tapplets: Vec<(InstalledTapplet, std::string::String)> = tapplet_store.get_installed_tapplets_with_display_name();
   Ok(tapplets)
 }
 

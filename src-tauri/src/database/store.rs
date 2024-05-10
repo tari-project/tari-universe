@@ -90,6 +90,19 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
   }
 }
 
+impl SqliteStore {
+  pub fn get_installed_tapplets_with_display_name(&mut self) -> Vec<(InstalledTapplet, String)> {
+    use crate::database::schema::installed_tapplet::dsl::*;
+    use crate::database::schema::tapplet;
+
+    installed_tapplet
+      .inner_join(tapplet::table)
+      .select((installed_tapplet::all_columns(), tapplet::display_name))
+      .load::<(InstalledTapplet, String)>(self.get_connection().deref_mut())
+      .expect("Error loading installed tapplets with display name")
+  }
+}
+
 impl<'a> Store<InstalledTapplet, CreateInstalledTapplet<'a>, UpdateInstalledTapplet> for SqliteStore {
   fn get_all(&mut self) -> Vec<InstalledTapplet> {
     use crate::database::schema::installed_tapplet::dsl::*;
