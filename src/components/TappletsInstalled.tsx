@@ -33,10 +33,13 @@ export const TappletsInstalled: React.FC = () => {
     console.log("=>>>", tap.display_name)
   }
 
-  const handleDelete = async () => {
+  const handleDelete = async (item: InstalledTapplet) => {
     console.log("delete tapplet")
+    console.log("=>>>", item.tapplet_id)
+    const _id = item.id ?? 1
     //TODO delete single tapplet by given id
-    await invoke("delete_installed_tapp_db")
+    await invoke("delete_installed_tapp_db", { tappletId: _id })
+    // TODO refresh the list
   }
 
   return (
@@ -55,7 +58,7 @@ export const TappletsInstalled: React.FC = () => {
                 {/* </NavLink> */}
               </IconButton>
               <IconButton aria-label="delete" style={{ marginRight: 10 }}>
-                <Delete onClick={handleDelete} color="primary" />
+                <Delete onClick={() => handleDelete(item)} color="primary" />
               </IconButton>
             </ListItem>
           </List>

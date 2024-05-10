@@ -287,11 +287,26 @@ pub fn update_installed_tapp_db(
 }
 
 #[tauri::command]
-pub fn delete_installed_tapp_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+pub fn delete_installed_tapp_db(tapplet_id: i32, db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+  println!("deleting tapp by id");
+  println!("{}", tapplet_id.clone());
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  let tapplets: Vec<InstalledTapplet> = tapplet_store.get_all();
-  let first: InstalledTapplet = tapplets.into_iter().next().unwrap();
+
+  println!("store loaded");
+  let installed_tapplet: Option<InstalledTapplet> = tapplet_store.get_by_id(tapplet_id);
+  match installed_tapplet {
+    Some(tapp) => {
+      println!("tapp found");
+      tapplet_store.delete(tapp);
+      println!("tapp deleted");
+      return Ok(());
+    }
+
+    None => Err(()),
+  }
+
+  // let tapplets: Vec<InstalledTapplet> = tapplet_store.get_all();
+  // let first: InstalledTapplet = tapplets.into_iter().next().unwrap();
   // TODO delete specified tapp - not the first one
-  tapplet_store.delete(first);
-  Ok(())
+  // Ok(())
 }
