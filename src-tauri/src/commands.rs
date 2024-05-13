@@ -4,10 +4,24 @@ use tauri::{ self, State };
 use crate::{
   database::{
     models::{
-      CreateInstalledTapplet, CreateTapplet, CreateTappletVersion, InstalledTapplet, Tapplet, UpdateInstalledTapplet, UpdateTapplet
+      CreateInstalledTapplet,
+      CreateTapplet,
+      CreateTappletVersion,
+      InstalledTapplet,
+      Tapplet,
+      UpdateInstalledTapplet,
+      UpdateTapplet,
     },
     store::{ SqliteStore, Store },
-  }, hash_calculator::calculate_shasum, interface::{InstalledTappletWithName, VerifiedTapplets}, rpc::{ balances, free_coins, make_request }, tapplet_installer::{ check_extracted_files, download_file, extract_tar, validate_checksum }, tapplet_server::start, DatabaseConnection, ShutdownTokens, Tokens
+  },
+  hash_calculator::calculate_shasum,
+  interface::{ InstalledTappletWithName, VerifiedTapplets },
+  rpc::{ balances, free_coins, make_request },
+  tapplet_installer::{ check_extracted_files, download_file, extract_tar, validate_checksum },
+  tapplet_server::start,
+  DatabaseConnection,
+  ShutdownTokens,
+  Tokens,
 };
 
 #[tauri::command]
@@ -292,9 +306,4 @@ pub fn delete_installed_tapp_db(tapplet_id: i32, db_connection: State<'_, Databa
 
     None => Err(()),
   }
-
-  // let tapplets: Vec<InstalledTapplet> = tapplet_store.get_all();
-  // let first: InstalledTapplet = tapplets.into_iter().next().unwrap();
-  // TODO delete specified tapp - not the first one
-  // Ok(())
 }

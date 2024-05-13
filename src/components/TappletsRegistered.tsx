@@ -48,12 +48,14 @@ export const TappletsRegistered: React.FC = () => {
 
   const handleInstall = async (tapplet: RegisteredTapplet) => {
     //TODO fetch path & url from registry
-    const basePath = `/home/maciej/projects/tari/tari-universe/tapplets_installed/${tapplet.registry_id}/${tapplet.id}`
-    const baseUrl = "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz"
+    //TODO add separate folder for different version
+    const basePath = `../tapplets_installed/${tapplet.registry_id}/${tapplet.id}`
+    //TODO set url for different versions - registry json refactor needed
+    const baseUrl = `${tapplet.registry_url}`
     await installTapplet(baseUrl, basePath)
 
     const tapp: InstalledTapplet = {
-      is_dev_mode: true, //TODO
+      is_dev_mode: true, //TODO dev mode
       dev_mode_endpoint: "",
       path_to_dist: "",
       tapplet_id: tapplet.id ?? 0,

@@ -56,7 +56,8 @@ impl SqliteStore {
       .load::<(InstalledTapplet, String)>(self.get_connection().deref_mut())
       .expect("Error loading installed tapplets with display name")
       .into_iter()
-      .map(|(tapplet, display_name)| InstalledTappletWithName { installed_tapplet: tapplet, display_name }).collect()
+      .map(|(tapplet, display_name)| InstalledTappletWithName { installed_tapplet: tapplet, display_name })
+      .collect()
   }
 }
 

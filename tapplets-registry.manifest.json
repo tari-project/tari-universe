@@ -3,7 +3,7 @@
     "@karczuRF/tapp-example": {
       "id": "@karczuRF/tapp-example",
       "metadata": {
-        "displayName": "Tapplet example #1",
+        "displayName": "Demo tapp by karczuRF",
         "author": {
           "name": "karczuRF",
           "website": "https://github.com/karczuRF/tapp-example"
@@ -23,7 +23,7 @@
           "location": {
             "npm": {
               "packageName": "@karczuRF/tapp-example",
-              "registry": "https://registry.npmjs.org/tapp-example"
+              "registry": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz"
             }
           }
         }
@@ -37,7 +37,7 @@
     "@MCozhusheck/tapplet-example": {
       "id": "@MCozhusheck/tapplet-example",
       "metadata": {
-        "displayName": "Tapplet example #2",
+        "displayName": "Demo tapp by MCozhusheck",
         "author": {
           "name": "MCozhusheck",
           "website": "https://github.com/MCozhusheck/tapplet-example"
@@ -57,7 +57,7 @@
           "location": {
             "npm": {
               "packageName": "@MCozhusheck/tapplet-example",
-              "registry": "https://registry.npmjs.org/tapplet-example"
+              "registry": "https://registry.npmjs.org/tapplet-example/-/tapplet-example-0.0.2.tgz"
             }
           }
         }
