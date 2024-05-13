@@ -1,88 +1,88 @@
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
-import { useEffect, useState } from "react";
-import {
-  TariPermissions,
-  WalletDaemonParameters,
-  WalletDaemonTariProvider,
-} from "./provider";
+import "./App.css"
+import { useEffect } from "react"
+import { TariPermissions, WalletDaemonParameters, WalletDaemonTariProvider } from "./provider"
 import {
   TariPermissionAccountInfo,
   TariPermissionKeyList,
   TariPermissionSubstatesRead,
   TariPermissionTransactionSend,
-} from "./provider/permissions";
-import { Typography } from "@mui/material";
-import { Tapplet } from "./components/Tapplet";
-import { Installer } from "./components/Installer";
+} from "./provider/permissions"
+import { Tapplet } from "./components/Tapplet"
+import { TabKey } from "./views/Tabs"
+import { Wallet } from "./components/Wallet"
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
+import { TappletsRegistered } from "./components/TappletsRegistered"
+import { TappletsInstalled } from "./components/TappletsInstalled"
 
-let permissions = new TariPermissions();
-permissions.addPermission(new TariPermissionKeyList());
-permissions.addPermission(new TariPermissionAccountInfo());
-permissions.addPermission(new TariPermissionTransactionSend());
-permissions.addPermission(new TariPermissionSubstatesRead());
-let optionalPermissions = new TariPermissions();
+let permissions = new TariPermissions()
+permissions.addPermission(new TariPermissionKeyList())
+permissions.addPermission(new TariPermissionAccountInfo())
+permissions.addPermission(new TariPermissionTransactionSend())
+permissions.addPermission(new TariPermissionSubstatesRead())
+let optionalPermissions = new TariPermissions()
 const params: WalletDaemonParameters = {
   permissions,
   optionalPermissions,
-};
-const provider = await WalletDaemonTariProvider.build(params);
+}
+const provider = await WalletDaemonTariProvider.build(params)
+const INSTALLED_TAPPLET_ID = 1
 
-const INSTALLED_TAPPLET_ID = 1;
 function App() {
-  const [balances, setBalances] = useState({});
-
-  async function get_free_coins() {
-    await invoke("get_free_coins", {});
-  }
-
-  async function get_balances() {
-    setBalances(await invoke("get_balances", {}));
-  }
-
   useEffect(() => {
     const handleMessage = async (event: any) => {
-      const { methodName, args } = event.data;
-      const result = await provider.runOne(methodName, args);
-      event.source.postMessage({ id: event.id, result }, event.origin);
-    };
+      const { methodName, args } = event.data
+      const result = await provider.runOne(methodName, args)
+      event.source.postMessage({ id: event.id, result }, event.origin)
+    }
 
-    window.addEventListener("message", handleMessage, false);
+    window.addEventListener("message", handleMessage, false)
 
     return () => {
-      window.removeEventListener("message", handleMessage);
-    };
-  }, []);
+      window.removeEventListener("message", handleMessage)
+    }
+  }, [])
 
   return (
     <div className="container">
-      <h1>Tauri wallet daemon</h1>
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          get_free_coins();
-        }}
-      >
-        <button type="submit">Get free coins</button>
-      </form>
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          get_balances();
-        }}
-      >
-        <button type="submit">Get balances</button>
-      </form>
-      <Typography textAlign="center">
-        balances: {JSON.stringify(balances)}
-      </Typography>
+      <div style={{ marginTop: "1px" }}>
+        <BrowserRouter>
+          <div>
+            <Link to={TabKey.WALLET} className="nav-item">
+              {" "}
+              Wallet{" "}
+            </Link>
+            <Link to={TabKey.TAPPLET_REGISTRY} className="nav-item">
+              {" "}
+              Tapplet Registry{" "}
+            </Link>
+            <Link to={TabKey.INSTALLED_TAPPLETS} className="nav-item">
+              {" "}
+              Installed Tapplets{" "}
+            </Link>
+            <Link to={TabKey.ACTIVE_TAPPLET} className="nav-item">
+              {" "}
+              Active Tapplet{" "}
+            </Link>
+          </div>
 
-      <Installer installedTappletId={INSTALLED_TAPPLET_ID} />
-      <Tapplet installedTappletId={INSTALLED_TAPPLET_ID} />
+          <Routes>
+            <Route path={TabKey.WALLET} element={<Wallet key={TabKey.WALLET}></Wallet>} />
+            <Route path={TabKey.TAPPLET_REGISTRY} element={<TappletsRegistered key={TabKey.TAPPLET_REGISTRY} />} />
+            <Route path={TabKey.INSTALLED_TAPPLETS} element={<TappletsInstalled key={TabKey.INSTALLED_TAPPLETS} />} />
+
+            <Route
+              path={TabKey.ACTIVE_TAPPLET}
+              element={<Tapplet key={TabKey.ACTIVE_TAPPLET} installedTappletId={INSTALLED_TAPPLET_ID} />}
+            />
+            <Route
+              path={`${TabKey.INSTALLED_TAPPLETS}/active-tapplet`}
+              element={<Tapplet key={TabKey.ACTIVE_TAPPLET} installedTappletId={INSTALLED_TAPPLET_ID} />}
+            />
+          </Routes>
+        </BrowserRouter>
+      </div>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

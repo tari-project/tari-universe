@@ -1,9 +1,9 @@
 use crate::database::schema::*;
 use crate::interface::TappletManifest;
 use diesel::prelude::*;
-use serde::Deserialize;
+use serde::{ Deserialize, Serialize };
 
-#[derive(Queryable, Selectable, Debug)]
+#[derive(Queryable, Selectable, Debug, Serialize)]
 #[diesel(table_name = installed_tapplet)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct InstalledTapplet {
@@ -17,6 +17,7 @@ pub struct InstalledTapplet {
 #[derive(Insertable, Debug, Deserialize)]
 #[diesel(table_name = installed_tapplet)]
 pub struct CreateInstalledTapplet<'a> {
+  pub tapplet_id: Option<i32>,
   pub is_dev_mode: bool,
   pub dev_mode_endpoint: &'a str,
   pub path_to_dist: &'a str,
@@ -25,6 +26,7 @@ pub struct CreateInstalledTapplet<'a> {
 impl<'a> From<&CreateInstalledTapplet<'a>> for UpdateInstalledTapplet {
   fn from(create_installed_tapplet: &CreateInstalledTapplet) -> Self {
     UpdateInstalledTapplet {
+      tapplet_id: create_installed_tapplet.tapplet_id,
       is_dev_mode: create_installed_tapplet.is_dev_mode,
       dev_mode_endpoint: Some(create_installed_tapplet.dev_mode_endpoint.to_string()),
       path_to_dist: Some(create_installed_tapplet.path_to_dist.to_string()),
@@ -32,15 +34,16 @@ impl<'a> From<&CreateInstalledTapplet<'a>> for UpdateInstalledTapplet {
   }
 }
 
-#[derive(Debug, AsChangeset)]
+#[derive(Debug, AsChangeset, Deserialize)]
 #[diesel(table_name = installed_tapplet)]
 pub struct UpdateInstalledTapplet {
+  pub tapplet_id: Option<i32>,
   pub is_dev_mode: bool,
   pub dev_mode_endpoint: Option<String>,
   pub path_to_dist: Option<String>,
 }
 
-#[derive(Queryable, Selectable, Debug)]
+#[derive(Queryable, Selectable, Debug, Serialize)]
 #[diesel(table_name = tapplet)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Tapplet {

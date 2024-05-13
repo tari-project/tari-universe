@@ -16,6 +16,7 @@ use crate::database::models::{
   Tapplet,
   UpdateTapplet,
 };
+use crate::interface::InstalledTappletWithName;
 
 use super::models::CreateTappletVersion;
 use super::models::UpdateAsset;
@@ -44,6 +45,22 @@ pub trait Store<T, U, G> {
   fn update(&mut self, old: T, new: &G);
 }
 
+impl SqliteStore {
+  pub fn get_installed_tapplets_with_display_name(&mut self) -> Vec<InstalledTappletWithName> {
+    use crate::database::schema::installed_tapplet::dsl::*;
+    use crate::database::schema::tapplet;
+
+    installed_tapplet
+      .inner_join(tapplet::table)
+      .select((installed_tapplet::all_columns(), tapplet::display_name))
+      .load::<(InstalledTapplet, String)>(self.get_connection().deref_mut())
+      .expect("Error loading installed tapplets with display name")
+      .into_iter()
+      .map(|(tapplet, display_name)| InstalledTappletWithName { installed_tapplet: tapplet, display_name })
+      .collect()
+  }
+}
+
 impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
   fn get_all(&mut self) -> Vec<Tapplet> {
     use crate::database::schema::tapplet::dsl::*;
@@ -63,7 +80,7 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
     diesel
       ::insert_into(tapplet::table)
       .values(item)
-      .on_conflict(tapplet::registry_id)
+      .on_conflict(tapplet::package_name)
       .do_update()
       .set(UpdateTapplet::from(item))
       .get_results(self.get_connection().deref_mut())
@@ -202,7 +219,7 @@ impl<'a> Store<TappletVersion, CreateTappletVersion<'a>, UpdateTappletVersion> f
     diesel
       ::insert_into(tapplet_version::table)
       .values(item)
-      .on_conflict(tapplet_version::version)
+      .on_conflict((tapplet_version::version, tapplet_version::tapplet_id))
       .do_update()
       .set(UpdateTappletVersion::from(item))
       .get_results(self.get_connection().deref_mut())

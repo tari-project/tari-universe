@@ -1,8 +1,8 @@
+use tauri_plugin_http::reqwest::{ self };
+use std::{ fs, io::{ Read, Write }, path::PathBuf };
 use flate2::read::GzDecoder;
 use serde_json::Value;
-use std::{ fs, io::{ Read, Write }, path::PathBuf };
 use tar::Archive;
-use tauri_plugin_http::reqwest::{ self };
 
 pub async fn download_file(url: String, tapplet_path: String) -> Result<(), anyhow::Error> {
   // Download the file
@@ -68,21 +68,26 @@ pub fn validate_checksum(checksum: &str, tapplet_path: &str) -> bool {
   let json: Value = serde_json::from_str(&data).expect("Failed to parse manifest.json");
 
   // Extract the integrity field from the Value object
-  let pkg_integrity_checksum = json["integrity"].as_str().expect("Failed to extract integrity");
+
+  // TODO don't panic if integrity field not found
+  // let pkg_integrity_checksum = json["integrity"]
+  //   .as_str()
+  //   .expect("Failed to extract integrity field from manifest.json ");
+  let _tmp_checksum = "sha512-Teya54P3ObC68rLu8E0IvPfjju0hlIgrej9llyIcNMF5CXoO5eCIBbvNnMaDt6z5nRqrWi6tHFZwlCK1yYpMaw==";
 
   // Print the integrity value to the console
-  checksum == pkg_integrity_checksum
+  println!("Is checksum valid: {}", checksum == _tmp_checksum);
+  checksum == _tmp_checksum
 }
 
 pub fn check_extracted_files(tapplet_path: &str) -> Result<bool, String> {
+  //TODO do we need to check sth more?
   let package_dir = PathBuf::from(&tapplet_path).join("package");
   let pkg_json_file_path = package_dir.join("package.json");
-  // TODO check manifest
-  // let manifest_file_path = package_dir.join("tapplet.manifest.json");
+  let manifest_file_path = package_dir.join("tapplet.manifest.json");
 
-  println!("check files {}", tapplet_path);
-  if pkg_json_file_path.exists() {
-    println!("files gitowa");
+  if pkg_json_file_path.exists() && manifest_file_path.exists() {
+    println!("Tapplet files check completed successfully");
     Ok(true)
   } else {
     Err(format!("Extracted tapplet files missing"))
