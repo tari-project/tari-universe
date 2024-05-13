@@ -1,13 +1,17 @@
 import { Box } from "@mui/material"
 import { invoke } from "@tauri-apps/api/core"
 import { useEffect, useState } from "react"
+import { useParams } from "react-router-dom"
 
 export type TappletProps = {
-  installedTappletId: number
+  id: number
 }
 
-export function Tapplet({ installedTappletId }: TappletProps) {
+export function Tapplet() {
   const [tappletAddress, setTappletAddress] = useState("")
+  const { id } = useParams()
+  const installedTappletId = Number(id)
+  console.log(installedTappletId)
 
   useEffect(() => {
     invoke("launch_tapplet", { installedTappletId })

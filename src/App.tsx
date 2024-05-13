@@ -25,7 +25,6 @@ const params: WalletDaemonParameters = {
   optionalPermissions,
 }
 const provider = await WalletDaemonTariProvider.build(params)
-const INSTALLED_TAPPLET_ID = 1
 
 function App() {
   useEffect(() => {
@@ -70,13 +69,10 @@ function App() {
             <Route path={TabKey.TAPPLET_REGISTRY} element={<TappletsRegistered key={TabKey.TAPPLET_REGISTRY} />} />
             <Route path={TabKey.INSTALLED_TAPPLETS} element={<TappletsInstalled key={TabKey.INSTALLED_TAPPLETS} />} />
 
-            <Route
-              path={TabKey.ACTIVE_TAPPLET}
-              element={<Tapplet key={TabKey.ACTIVE_TAPPLET} installedTappletId={INSTALLED_TAPPLET_ID} />}
-            />
+            <Route path={`${TabKey.ACTIVE_TAPPLET}/:id`} element={<Tapplet key={TabKey.ACTIVE_TAPPLET} />} />
             <Route
               path={`${TabKey.INSTALLED_TAPPLETS}/active-tapplet`}
-              element={<Tapplet key={TabKey.ACTIVE_TAPPLET} installedTappletId={INSTALLED_TAPPLET_ID} />}
+              element={<Tapplet key={TabKey.ACTIVE_TAPPLET} />}
             />
           </Routes>
         </BrowserRouter>

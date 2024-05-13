@@ -4,6 +4,8 @@ import { invoke } from "@tauri-apps/api/core"
 import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText } from "@mui/material"
 import { Launch, Delete } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
+import { NavLink } from "react-router-dom"
+import { TabKey } from "../views/Tabs"
 
 interface InstalledTappletWithName {
   installed_tapplet: InstalledTapplet
@@ -20,11 +22,6 @@ export const TappletsInstalled: React.FC = () => {
 
     fetchTapplets()
   }, [])
-
-  //TODO refactor if 'active tapplet' component is done
-  const handleLaunch = async (item: InstalledTappletWithName) => {
-    console.log(item.display_name)
-  }
 
   const handleDelete = async (item: InstalledTappletWithName) => {
     const _id = item.installed_tapplet.id
@@ -43,9 +40,9 @@ export const TappletsInstalled: React.FC = () => {
               </ListItemAvatar>
               <ListItemText primary={item.display_name} />
               <IconButton aria-label="launch" style={{ marginRight: 10 }}>
-                {/* <NavLink to={TabKey.ACTIVE_TAPPLET} style={{ display: "contents" }}> */}
-                <Launch onClick={() => handleLaunch(item)} color="primary" />
-                {/* </NavLink> */}
+                <NavLink to={`/${TabKey.ACTIVE_TAPPLET}/${item.installed_tapplet.id}`} style={{ display: "contents" }}>
+                  <Launch color="primary" />
+                </NavLink>
               </IconButton>
               <IconButton aria-label="delete" style={{ marginRight: 10 }}>
                 <Delete onClick={() => handleDelete(item)} color="primary" />
