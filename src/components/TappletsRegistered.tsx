@@ -48,7 +48,7 @@ export const TappletsRegistered: React.FC = () => {
 
   const handleInstall = async (tapplet: RegisteredTapplet) => {
     //TODO fetch path & url from registry
-    const basePath = `/home/oski/Projects/tari/tari-universe/tapplets_installed/${tapplet.registry_id}/${tapplet.id}`
+    const basePath = `/home/maciej/projects/tari/tari-universe/tapplets_installed/${tapplet.registry_id}/${tapplet.id}`
     const baseUrl = "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz"
     await installTapplet(baseUrl, basePath)
 

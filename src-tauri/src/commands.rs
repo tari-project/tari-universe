@@ -4,24 +4,10 @@ use tauri::{ self, State };
 use crate::{
   database::{
     models::{
-      CreateInstalledTapplet,
-      CreateTapplet,
-      InstalledTapplet,
-      Tapplet,
-      UpdateInstalledTapplet,
-      UpdateTapplet,
-      CreateTappletVersion,
+      CreateInstalledTapplet, CreateTapplet, CreateTappletVersion, InstalledTapplet, Tapplet, UpdateInstalledTapplet, UpdateTapplet
     },
     store::{ SqliteStore, Store },
-  },
-  interface::VerifiedTapplets,
-  hash_calculator::calculate_shasum,
-  rpc::{ balances, free_coins, make_request },
-  tapplet_installer::{ check_extracted_files, download_file, extract_tar, validate_checksum },
-  tapplet_server::start,
-  DatabaseConnection,
-  ShutdownTokens,
-  Tokens,
+  }, hash_calculator::calculate_shasum, interface::{InstalledTappletWithName, VerifiedTapplets}, rpc::{ balances, free_coins, make_request }, tapplet_installer::{ check_extracted_files, download_file, extract_tar, validate_checksum }, tapplet_server::start, DatabaseConnection, ShutdownTokens, Tokens
 };
 
 #[tauri::command]
@@ -263,10 +249,10 @@ pub fn insert_installed_tapp_db(
 #[tauri::command]
 pub fn read_installed_tapp_db(
   db_connection: State<'_, DatabaseConnection>
-) -> Result<Vec<(InstalledTapplet, std::string::String)>, ()> {
+) -> Result<Vec<InstalledTappletWithName>, ()> {
   println!("read_installed_tapp_db in progres...");
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  let tapplets: Vec<(InstalledTapplet, std::string::String)> = tapplet_store.get_installed_tapplets_with_display_name();
+  let tapplets: Vec<InstalledTappletWithName> = tapplet_store.get_installed_tapplets_with_display_name();
   Ok(tapplets)
 }
 

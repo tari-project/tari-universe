@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react"
-import { InstalledTapplet, RegisteredTapplet } from "../types/tapplet/Tapplet"
+import { InstalledTapplet } from "../types/tapplet/Tapplet"
 import { invoke } from "@tauri-apps/api/core"
 import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText } from "@mui/material"
 import { Launch, Delete } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
 
 interface InstalledTappletWithName {
-  tapplet: InstalledTapplet
-  tappletName: string
+  installed_tapplet: InstalledTapplet
+  display_name: string
 }
 
 export const TappletsInstalled: React.FC = () => {
@@ -15,20 +15,7 @@ export const TappletsInstalled: React.FC = () => {
 
   useEffect(() => {
     const fetchTapplets = async () => {
-      try {
-        const response: [InstalledTapplet, string][] = await invoke("read_installed_tapp_db")
-        // map response because of type errors
-        const _tapplets: InstalledTappletWithName[] = response.map(([tapp, tappName]) => {
-          return { tapplet: tapp, tappletName: tappName }
-        })
-        if (Array.isArray(_tapplets)) {
-          setInstalledTappletsList(_tapplets)
-        } else {
-          console.warn("Expected an array of Installed Tapplets, but received:", response)
-        }
-      } catch (error) {
-        console.error("Error:", error)
-      }
+      setInstalledTappletsList(await invoke("read_installed_tapp_db"))
     }
 
     fetchTapplets()
@@ -36,25 +23,25 @@ export const TappletsInstalled: React.FC = () => {
 
   //TODO refactor if 'active tapplet' component is done
   const handleLaunch = async (item: InstalledTappletWithName) => {
-    console.log(item.tappletName)
+    console.log(item.display_name)
   }
 
   const handleDelete = async (item: InstalledTappletWithName) => {
-    const _id = item.tapplet.id
+    const _id = item.installed_tapplet.id
     await invoke("delete_installed_tapp_db", { tappletId: _id })
-    // TODO refresh the list
+    setInstalledTappletsList(await invoke("read_installed_tapp_db"))
   }
 
   return (
     <div>
-      {installedTappletsList &&
-        installedTappletsList.map((item, index) => (
-          <List>
+      <List>
+        {installedTappletsList &&
+          installedTappletsList.map((item, index) => (
             <ListItem key={index}>
               <ListItemAvatar>
                 <Avatar src={tariLogo} />
               </ListItemAvatar>
-              <ListItemText primary={item.tappletName} />
+              <ListItemText primary={item.display_name} />
               <IconButton aria-label="launch" style={{ marginRight: 10 }}>
                 {/* <NavLink to={TabKey.ACTIVE_TAPPLET} style={{ display: "contents" }}> */}
                 <Launch onClick={() => handleLaunch(item)} color="primary" />
@@ -64,8 +51,8 @@ export const TappletsInstalled: React.FC = () => {
                 <Delete onClick={() => handleDelete(item)} color="primary" />
               </IconButton>
             </ListItem>
-          </List>
-        ))}
+          ))}
+      </List>
     </div>
   )
 }

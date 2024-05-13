@@ -16,6 +16,7 @@ use crate::database::models::{
   Tapplet,
   UpdateTapplet,
 };
+use crate::interface::InstalledTappletWithName;
 
 use super::models::CreateTappletVersion;
 use super::models::UpdateAsset;
@@ -42,6 +43,21 @@ pub trait Store<T, U, G> {
   fn create(&mut self, item: &U) -> Vec<T>;
   fn delete(&mut self, entity: T);
   fn update(&mut self, old: T, new: &G);
+}
+
+impl SqliteStore {
+  pub fn get_installed_tapplets_with_display_name(&mut self) -> Vec<InstalledTappletWithName> {
+    use crate::database::schema::installed_tapplet::dsl::*;
+    use crate::database::schema::tapplet;
+
+    installed_tapplet
+      .inner_join(tapplet::table)
+      .select((installed_tapplet::all_columns(), tapplet::display_name))
+      .load::<(InstalledTapplet, String)>(self.get_connection().deref_mut())
+      .expect("Error loading installed tapplets with display name")
+      .into_iter()
+      .map(|(tapplet, display_name)| InstalledTappletWithName { installed_tapplet: tapplet, display_name }).collect()
+  }
 }
 
 impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
@@ -87,19 +103,6 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
       .set(new)
       .execute(self.get_connection().deref_mut())
       .expect("Error updating tapplet");
-  }
-}
-
-impl SqliteStore {
-  pub fn get_installed_tapplets_with_display_name(&mut self) -> Vec<(InstalledTapplet, String)> {
-    use crate::database::schema::installed_tapplet::dsl::*;
-    use crate::database::schema::tapplet;
-
-    installed_tapplet
-      .inner_join(tapplet::table)
-      .select((installed_tapplet::all_columns(), tapplet::display_name))
-      .load::<(InstalledTapplet, String)>(self.get_connection().deref_mut())
-      .expect("Error loading installed tapplets with display name")
   }
 }
 
