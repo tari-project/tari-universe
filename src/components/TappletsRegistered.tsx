@@ -59,6 +59,7 @@ export const TappletsRegistered: React.FC = () => {
       dev_mode_endpoint: "",
       path_to_dist: "",
       tapplet_id: tapplet.id ?? 0,
+      tapplet_version_id: tapplet.id,
     }
 
     invoke("insert_installed_tapp_db", { tapplet: tapp })

@@ -9,6 +9,7 @@ use serde::{ Deserialize, Serialize };
 pub struct InstalledTapplet {
   pub id: Option<i32>,
   pub tapplet_id: Option<i32>,
+  pub tapplet_version_id: Option<i32>,
   pub is_dev_mode: bool,
   pub dev_mode_endpoint: Option<String>,
   pub path_to_dist: Option<String>,
@@ -18,6 +19,7 @@ pub struct InstalledTapplet {
 #[diesel(table_name = installed_tapplet)]
 pub struct CreateInstalledTapplet<'a> {
   pub tapplet_id: Option<i32>,
+  pub tapplet_version_id: Option<i32>,
   pub is_dev_mode: bool,
   pub dev_mode_endpoint: &'a str,
   pub path_to_dist: &'a str,
@@ -27,6 +29,7 @@ impl<'a> From<&CreateInstalledTapplet<'a>> for UpdateInstalledTapplet {
   fn from(create_installed_tapplet: &CreateInstalledTapplet) -> Self {
     UpdateInstalledTapplet {
       tapplet_id: create_installed_tapplet.tapplet_id,
+      tapplet_version_id: create_installed_tapplet.tapplet_version_id,
       is_dev_mode: create_installed_tapplet.is_dev_mode,
       dev_mode_endpoint: Some(create_installed_tapplet.dev_mode_endpoint.to_string()),
       path_to_dist: Some(create_installed_tapplet.path_to_dist.to_string()),
@@ -38,6 +41,7 @@ impl<'a> From<&CreateInstalledTapplet<'a>> for UpdateInstalledTapplet {
 #[diesel(table_name = installed_tapplet)]
 pub struct UpdateInstalledTapplet {
   pub tapplet_id: Option<i32>,
+  pub tapplet_version_id: Option<i32>,
   pub is_dev_mode: bool,
   pub dev_mode_endpoint: Option<String>,
   pub path_to_dist: Option<String>,

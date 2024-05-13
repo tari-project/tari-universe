@@ -52,8 +52,9 @@ pub async fn launch_tapplet(
   let mut locked_tokens = shutdown_tokens.0.lock().await;
   let mut store = SqliteStore::new(db_connection.0.clone());
 
-  let installed_tapplet: InstalledTapplet = store.get_by_id(installed_tapplet_id).unwrap();
-  let tapplet_handle = tauri::async_runtime::spawn(async { start(&installed_tapplet.path_to_dist.unwrap()).await });
+  let installed_tapplet = store.get_installed_tapplet_full_by_id(installed_tapplet_id).unwrap();
+  let tapplet_path = format!("{}/{}/package/dist", installed_tapplet.1.registry_id, installed_tapplet.1.id.unwrap());
+  let tapplet_handle = tauri::async_runtime::spawn(async move { start(&tapplet_path).await });
 
   let (addr, cancel_token) = tapplet_handle.await.unwrap();
   match locked_tokens.insert(installed_tapplet_id.clone(), cancel_token) {
@@ -246,16 +247,16 @@ pub fn insert_installed_tapp_db(
 ) -> Result<(), ()> {
   println!("insert_installed_tapp_db new tapplet...");
   println!("{:?}", tapplet);
-  let new_tapplet = CreateInstalledTapplet {
-    tapplet_id: tapplet.tapplet_id,
-    is_dev_mode: tapplet.is_dev_mode,
-    dev_mode_endpoint: tapplet.dev_mode_endpoint,
-    path_to_dist: tapplet.path_to_dist,
-  };
-  println!("{:?}", new_tapplet);
+  // let new_tapplet = CreateInstalledTapplet {
+  //   tapplet_id: tapplet.tapplet_id,
+  //   is_dev_mode: tapplet.is_dev_mode,
+  //   dev_mode_endpoint: tapplet.dev_mode_endpoint,
+  //   path_to_dist: tapplet.path_to_dist,
+  // };
+  println!("{:?}", tapplet);
 
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  tapplet_store.create(&new_tapplet);
+  tapplet_store.create(&tapplet);
   println!("insert_installed_tapp_db success");
   Ok(())
 }
@@ -276,15 +277,15 @@ pub fn update_installed_tapp_db(
   db_connection: State<'_, DatabaseConnection>
 ) -> Result<(), ()> {
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  let new_tapplet = UpdateInstalledTapplet {
-    tapplet_id: tapplet.tapplet_id,
-    is_dev_mode: tapplet.is_dev_mode,
-    dev_mode_endpoint: tapplet.dev_mode_endpoint,
-    path_to_dist: tapplet.path_to_dist,
-  };
+  // let new_tapplet = UpdateInstalledTapplet {
+  //   tapplet_id: tapplet.tapplet_id,
+  //   is_dev_mode: tapplet.is_dev_mode,
+  //   dev_mode_endpoint: tapplet.dev_mode_endpoint,
+  //   path_to_dist: tapplet.path_to_dist,
+  // };
   let tapplets: Vec<InstalledTapplet> = tapplet_store.get_all();
   let first: InstalledTapplet = tapplets.into_iter().next().unwrap();
-  tapplet_store.update(first, &new_tapplet);
+  tapplet_store.update(first, &tapplet);
   Ok(())
 }
 

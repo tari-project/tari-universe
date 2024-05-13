@@ -11,7 +11,6 @@ export function Tapplet() {
   const [tappletAddress, setTappletAddress] = useState("")
   const { id } = useParams()
   const installedTappletId = Number(id)
-  console.log(installedTappletId)
 
   useEffect(() => {
     invoke("launch_tapplet", { installedTappletId })

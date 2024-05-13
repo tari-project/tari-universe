@@ -11,6 +11,7 @@ diesel::table! {
     installed_tapplet (id) {
         id -> Nullable<Integer>,
         tapplet_id -> Nullable<Integer>,
+        tapplet_version_id -> Nullable<Integer>,
         is_dev_mode -> Bool,
         dev_mode_endpoint -> Nullable<Text>,
         path_to_dist -> Nullable<Text>,
@@ -43,6 +44,7 @@ diesel::table! {
 }
 
 diesel::joinable!(installed_tapplet -> tapplet (tapplet_id));
+diesel::joinable!(installed_tapplet -> tapplet_version (tapplet_version_id));
 diesel::joinable!(tapplet -> asset (image_id));
 diesel::joinable!(tapplet_version -> tapplet (tapplet_id));
 

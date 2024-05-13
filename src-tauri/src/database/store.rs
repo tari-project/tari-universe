@@ -59,6 +59,24 @@ impl SqliteStore {
       .map(|(tapplet, display_name)| InstalledTappletWithName { installed_tapplet: tapplet, display_name })
       .collect()
   }
+
+  pub fn get_installed_tapplet_full_by_id(
+    &mut self,
+    installed_tapplet_id: i32
+  ) -> Option<(InstalledTapplet, Tapplet, TappletVersion)> {
+    use crate::database::schema::installed_tapplet::dsl::id;
+    use crate::database::schema::installed_tapplet::dsl::*;
+    use crate::database::schema::tapplet::dsl::*;
+    use crate::database::schema::tapplet_version::dsl::*;
+
+    installed_tapplet
+      .filter(id.eq(installed_tapplet_id))
+      .inner_join(tapplet)
+      .inner_join(tapplet_version)
+      .select((installed_tapplet::all_columns(), tapplet::all_columns(), tapplet_version::all_columns()))
+      .first::<(InstalledTapplet, Tapplet, TappletVersion)>(self.get_connection().deref_mut())
+      .ok()
+  }
 }
 
 impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
