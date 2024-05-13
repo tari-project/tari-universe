@@ -58,22 +58,13 @@ function App() {
               {" "}
               Installed Tapplets{" "}
             </Link>
-            <Link to={TabKey.ACTIVE_TAPPLET} className="nav-item">
-              {" "}
-              Active Tapplet{" "}
-            </Link>
           </div>
 
           <Routes>
             <Route path={TabKey.WALLET} element={<Wallet key={TabKey.WALLET}></Wallet>} />
             <Route path={TabKey.TAPPLET_REGISTRY} element={<TappletsRegistered key={TabKey.TAPPLET_REGISTRY} />} />
             <Route path={TabKey.INSTALLED_TAPPLETS} element={<TappletsInstalled key={TabKey.INSTALLED_TAPPLETS} />} />
-
             <Route path={`${TabKey.ACTIVE_TAPPLET}/:id`} element={<Tapplet key={TabKey.ACTIVE_TAPPLET} />} />
-            <Route
-              path={`${TabKey.INSTALLED_TAPPLETS}/active-tapplet`}
-              element={<Tapplet key={TabKey.ACTIVE_TAPPLET} />}
-            />
           </Routes>
         </BrowserRouter>
       </div>
