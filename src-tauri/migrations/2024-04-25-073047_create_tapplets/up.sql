@@ -32,6 +32,7 @@ CREATE TABLE installed_tapplet (
   is_dev_mode BOOLEAN DEFAULT FALSE NOT NULL,
   dev_mode_endpoint TEXT,
   path_to_dist TEXT,
+  UNIQUE(tapplet_id, tapplet_version_id),
   FOREIGN KEY (tapplet_id) REFERENCES tapplet(id)
   FOREIGN KEY (tapplet_version_id) REFERENCES tapplet_version(id)
 );

@@ -44,8 +44,8 @@ export const TappletsInstalled: React.FC = () => {
                   <Launch color="primary" />
                 </NavLink>
               </IconButton>
-              <IconButton aria-label="delete" style={{ marginRight: 10 }}>
-                <Delete onClick={() => handleDelete(item)} color="primary" />
+              <IconButton aria-label="delete" style={{ marginRight: 10 }} onClick={() => handleDelete(item)}>
+                <Delete color="primary" />
               </IconButton>
             </ListItem>
           ))}

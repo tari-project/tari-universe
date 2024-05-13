@@ -149,7 +149,9 @@ impl<'a> Store<InstalledTapplet, CreateInstalledTapplet<'a>, UpdateInstalledTapp
     diesel
       ::insert_into(installed_tapplet::table)
       .values(item)
-      .on_conflict_do_nothing() // TODO don't allow to install if already installed (use registry_id and version_id as unique key)
+      .on_conflict((installed_tapplet::tapplet_id, installed_tapplet::tapplet_version_id))
+      .do_update()
+      .set(UpdateInstalledTapplet::from(item))
       .get_results(self.get_connection().deref_mut())
       .expect("Error saving new installed tapplet")
   }

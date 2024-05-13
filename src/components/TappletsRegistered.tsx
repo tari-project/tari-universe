@@ -74,8 +74,8 @@ export const TappletsRegistered: React.FC = () => {
                 <Avatar src={tariLogo} />
               </ListItemAvatar>
               <ListItemText primary={item.package_name} />
-              <IconButton aria-label="install">
-                <InstallDesktop onClick={() => handleInstall(item)} color="primary" />
+              <IconButton aria-label="install" onClick={() => handleInstall(item)}>
+                <InstallDesktop color="primary" />
               </IconButton>
             </ListItem>
           ))}
