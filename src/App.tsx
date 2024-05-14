@@ -7,7 +7,7 @@ import {
   TariPermissionSubstatesRead,
   TariPermissionTransactionSend,
 } from "./provider/permissions"
-import { Tapplet } from "./components/Tapplet"
+import { ActiveTapplet } from "./components/Tapplet"
 import { TabKey } from "./views/Tabs"
 import { Wallet } from "./components/Wallet"
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
@@ -64,7 +64,7 @@ function App() {
             <Route path={TabKey.WALLET} element={<Wallet key={TabKey.WALLET}></Wallet>} />
             <Route path={TabKey.TAPPLET_REGISTRY} element={<TappletsRegistered key={TabKey.TAPPLET_REGISTRY} />} />
             <Route path={TabKey.INSTALLED_TAPPLETS} element={<TappletsInstalled key={TabKey.INSTALLED_TAPPLETS} />} />
-            <Route path={`${TabKey.ACTIVE_TAPPLET}/:id`} element={<Tapplet key={TabKey.ACTIVE_TAPPLET} />} />
+            <Route path={`${TabKey.ACTIVE_TAPPLET}/:id`} element={<ActiveTapplet key={TabKey.ACTIVE_TAPPLET} />} />
           </Routes>
         </BrowserRouter>
       </div>

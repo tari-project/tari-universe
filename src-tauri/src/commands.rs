@@ -272,8 +272,6 @@ pub fn delete_installed_tapp(tapplet_id: i32, db_connection: State<'_, DatabaseC
     installed_tapplet.1.id.unwrap()
   );
 
-  println!("Deleting tapplet with path: {:?}", tapplet_path);
-
   delete_tapplet(&tapplet_path).unwrap();
   return Ok(());
 }

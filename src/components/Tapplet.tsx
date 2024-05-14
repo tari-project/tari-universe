@@ -7,7 +7,7 @@ export type TappletProps = {
   id: number
 }
 
-export function Tapplet() {
+export function ActiveTapplet() {
   const [tappletAddress, setTappletAddress] = useState("")
   const { id } = useParams()
   const installedTappletId = Number(id)
