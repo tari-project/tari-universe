@@ -10,29 +10,20 @@ pub struct InstalledTapplet {
   pub id: Option<i32>,
   pub tapplet_id: Option<i32>,
   pub tapplet_version_id: Option<i32>,
-  pub is_dev_mode: bool,
-  pub dev_mode_endpoint: Option<String>,
-  pub path_to_dist: Option<String>,
 }
 
 #[derive(Insertable, Debug, Deserialize)]
 #[diesel(table_name = installed_tapplet)]
-pub struct CreateInstalledTapplet<'a> {
+pub struct CreateInstalledTapplet {
   pub tapplet_id: Option<i32>,
   pub tapplet_version_id: Option<i32>,
-  pub is_dev_mode: bool,
-  pub dev_mode_endpoint: &'a str,
-  pub path_to_dist: &'a str,
 }
 
-impl<'a> From<&CreateInstalledTapplet<'a>> for UpdateInstalledTapplet {
+impl From<&CreateInstalledTapplet> for UpdateInstalledTapplet {
   fn from(create_installed_tapplet: &CreateInstalledTapplet) -> Self {
     UpdateInstalledTapplet {
       tapplet_id: create_installed_tapplet.tapplet_id,
       tapplet_version_id: create_installed_tapplet.tapplet_version_id,
-      is_dev_mode: create_installed_tapplet.is_dev_mode,
-      dev_mode_endpoint: Some(create_installed_tapplet.dev_mode_endpoint.to_string()),
-      path_to_dist: Some(create_installed_tapplet.path_to_dist.to_string()),
     }
   }
 }
@@ -42,9 +33,6 @@ impl<'a> From<&CreateInstalledTapplet<'a>> for UpdateInstalledTapplet {
 pub struct UpdateInstalledTapplet {
   pub tapplet_id: Option<i32>,
   pub tapplet_version_id: Option<i32>,
-  pub is_dev_mode: bool,
-  pub dev_mode_endpoint: Option<String>,
-  pub path_to_dist: Option<String>,
 }
 
 #[derive(Queryable, Selectable, Debug, Serialize)]
@@ -190,4 +178,48 @@ pub struct UpdateTappletVersion {
   pub tapplet_id: Option<i32>,
   pub version: String,
   pub checksum: String,
+}
+
+#[derive(Queryable, Selectable, Debug)]
+#[diesel(table_name = dev_tapplet)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+pub struct DevTapplet {
+  pub id: Option<i32>,
+  pub endpoint: String,
+  pub tapplet_name: String,
+  pub display_name: String,
+  pub about_summary: String,
+  pub about_description: String,
+}
+
+#[derive(Insertable, Debug)]
+#[diesel(table_name = dev_tapplet)]
+pub struct CreateDevTapplet<'a> {
+  pub endpoint: &'a str,
+  pub tapplet_name: &'a str,
+  pub display_name: &'a str,
+  pub about_summary: &'a str,
+  pub about_description: &'a str,
+}
+
+impl<'a> From<&CreateDevTapplet<'a>> for UpdateDevTapplet {
+  fn from(create_dev_tapplet: &CreateDevTapplet) -> Self {
+    UpdateDevTapplet {
+      endpoint: create_dev_tapplet.endpoint.to_string(),
+      tapplet_name: create_dev_tapplet.tapplet_name.to_string(),
+      display_name: create_dev_tapplet.display_name.to_string(),
+      about_summary: create_dev_tapplet.about_summary.to_string(),
+      about_description: create_dev_tapplet.about_description.to_string(),
+    }
+  }
+}
+
+#[derive(Debug, AsChangeset)]
+#[diesel(table_name = dev_tapplet)]
+pub struct UpdateDevTapplet {
+  pub endpoint: String,
+  pub tapplet_name: String,
+  pub display_name: String,
+  pub about_summary: String,
+  pub about_description: String,
 }

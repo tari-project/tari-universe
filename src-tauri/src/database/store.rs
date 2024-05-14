@@ -125,7 +125,7 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
   }
 }
 
-impl<'a> Store<InstalledTapplet, CreateInstalledTapplet<'a>, UpdateInstalledTapplet> for SqliteStore {
+impl Store<InstalledTapplet, CreateInstalledTapplet, UpdateInstalledTapplet> for SqliteStore {
   fn get_all(&mut self) -> Vec<InstalledTapplet> {
     use crate::database::schema::installed_tapplet::dsl::*;
 

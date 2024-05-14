@@ -17,7 +17,4 @@ export type InstalledTapplet = {
   id?: number
   tapplet_id?: number
   tapplet_version_id?: number
-  is_dev_mode: boolean
-  dev_mode_endpoint?: string
-  path_to_dist?: string
 }

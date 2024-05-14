@@ -54,9 +54,6 @@ export const TappletsRegistered: React.FC = () => {
     await installTapplet(baseUrl, basePath)
 
     const tapp: InstalledTapplet = {
-      is_dev_mode: true, //TODO dev mode
-      dev_mode_endpoint: "",
-      path_to_dist: "",
       tapplet_id: tapplet.id ?? 0,
       tapplet_version_id: tapplet.id,
     }

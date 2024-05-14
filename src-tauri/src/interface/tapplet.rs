@@ -4,6 +4,6 @@ use crate::database::models::InstalledTapplet;
 
 #[derive(Serialize)]
 pub struct InstalledTappletWithName {
-    pub installed_tapplet: InstalledTapplet,
-    pub display_name: String,
+  pub installed_tapplet: InstalledTapplet,
+  pub display_name: String,
 }

@@ -15,7 +15,7 @@ use crate::{
     store::{ SqliteStore, Store },
   },
   hash_calculator::calculate_shasum,
-  interface::{ InstalledTappletWithName, VerifiedTapplets },
+  interface::{ DevTappletResponse, InstalledTappletWithName, VerifiedTapplets },
   rpc::{ balances, free_coins, make_request },
   tapplet_installer::{ check_extracted_files, delete_tapplet, download_file, extract_tar, validate_checksum },
   tapplet_server::start,
@@ -23,6 +23,7 @@ use crate::{
   ShutdownTokens,
   Tokens,
 };
+use tauri_plugin_http::reqwest::{ self };
 
 #[tauri::command]
 pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), ()> {
@@ -274,4 +275,18 @@ pub fn delete_installed_tapp(tapplet_id: i32, db_connection: State<'_, DatabaseC
 
   delete_tapplet(&tapplet_path).unwrap();
   return Ok(());
+}
+
+#[tauri::command]
+pub async fn add_dev_tapplet_mode(endpoint: String, db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+  let body = reqwest::get(&endpoint).await.unwrap().json::<DevTappletResponse>().await.unwrap();
+  println!("{:?}", body);
+  // let mut store = SqliteStore::new(db_connection.0.clone());
+  // let new_dev_tapplet = CreateDevTapplet {
+  //   endpoint,
+  //   tapplet_name: "tapplet_name",
+  // };
+
+  // store.create(&installed_tapplet);
+  Ok(())
 }

@@ -7,7 +7,7 @@ import {
   TariPermissionSubstatesRead,
   TariPermissionTransactionSend,
 } from "./provider/permissions"
-import { ActiveTapplet } from "./components/Tapplet"
+import { ActiveTapplet } from "./components/ActiveTapplet"
 import { TabKey } from "./views/Tabs"
 import { Wallet } from "./components/Wallet"
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
