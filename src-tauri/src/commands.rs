@@ -17,7 +17,7 @@ use crate::{
   hash_calculator::calculate_shasum,
   interface::{ InstalledTappletWithName, VerifiedTapplets },
   rpc::{ balances, free_coins, make_request },
-  tapplet_installer::{ check_extracted_files, download_file, extract_tar, validate_checksum },
+  tapplet_installer::{ check_extracted_files, delete_tapplet, download_file, extract_tar, validate_checksum },
   tapplet_server::start,
   DatabaseConnection,
   ShutdownTokens,
@@ -259,4 +259,21 @@ pub fn delete_installed_tapp_db(tapplet_id: i32, db_connection: State<'_, Databa
     }
     None => Err(()),
   }
+}
+
+#[tauri::command]
+pub fn delete_installed_tapp(tapplet_id: i32, db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
+
+  let installed_tapplet = tapplet_store.get_installed_tapplet_full_by_id(tapplet_id).unwrap();
+  let tapplet_path = format!(
+    "../tapplets_installed/{}/{}",
+    installed_tapplet.1.registry_id,
+    installed_tapplet.1.id.unwrap()
+  );
+
+  println!("Deleting tapplet with path: {:?}", tapplet_path);
+
+  delete_tapplet(&tapplet_path).unwrap();
+  return Ok(());
 }

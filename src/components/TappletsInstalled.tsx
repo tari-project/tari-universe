@@ -25,6 +25,7 @@ export const TappletsInstalled: React.FC = () => {
 
   const handleDelete = async (item: InstalledTappletWithName) => {
     const _id = item.installed_tapplet.id
+    await invoke("delete_installed_tapp", { tappletId: _id })
     await invoke("delete_installed_tapp_db", { tappletId: _id })
     setInstalledTappletsList(await invoke("read_installed_tapp_db"))
   }
