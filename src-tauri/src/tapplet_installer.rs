@@ -4,6 +4,12 @@ use flate2::read::GzDecoder;
 use serde_json::Value;
 use tar::Archive;
 
+pub fn delete_tapplet(tapplet_path: &str) -> Result<(), ()> {
+  let tapp_dir = PathBuf::from(tapplet_path);
+  fs::remove_dir_all(tapp_dir).unwrap();
+  Ok(())
+}
+
 pub async fn download_file(url: String, tapplet_path: String) -> Result<(), anyhow::Error> {
   // Download the file
   let client = reqwest::Client::new();

@@ -28,10 +28,13 @@ CREATE TABLE tapplet_version (
 CREATE TABLE installed_tapplet (
   id INTEGER PRIMARY KEY,
   tapplet_id INTEGER,
+  tapplet_version_id INTEGER,
   is_dev_mode BOOLEAN DEFAULT FALSE NOT NULL,
   dev_mode_endpoint TEXT,
   path_to_dist TEXT,
+  UNIQUE(tapplet_id, tapplet_version_id),
   FOREIGN KEY (tapplet_id) REFERENCES tapplet(id)
+  FOREIGN KEY (tapplet_version_id) REFERENCES tapplet_version(id)
 );
 
 CREATE TABLE asset (
