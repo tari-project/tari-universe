@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { InstalledTapplet, RegisteredTapplet } from "../types/tapplet/Tapplet"
+import { InstalledTapplet, RegisteredTapplet } from "@type/tapplet"
 import { invoke } from "@tauri-apps/api/core"
 import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText } from "@mui/material"
 import { InstallDesktop } from "@mui/icons-material"

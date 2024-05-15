@@ -1,6 +1,6 @@
 import { Box } from "@mui/material"
 import { useLocation } from "react-router-dom"
-import { DevTapplet } from "./TappletsInstalled"
+import { DevTapplet } from "@type/tapplet"
 
 export function ActiveDevTapplet() {
   let { state }: { state: DevTapplet } = useLocation()

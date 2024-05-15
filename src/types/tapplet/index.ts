@@ -18,3 +18,18 @@ export type InstalledTapplet = {
   tapplet_id?: number
   tapplet_version_id?: number
 }
+
+export interface InstalledTappletWithName {
+  installed_tapplet: InstalledTapplet
+  display_name: string
+}
+
+export interface DevTapplet {
+  id?: number
+  package_name: string
+  endpoint: string
+  tapplet_name: string
+  display_name: string
+  about_summary: string
+  about_description: string
+}

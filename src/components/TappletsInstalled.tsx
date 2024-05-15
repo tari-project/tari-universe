@@ -1,36 +1,23 @@
 import { useEffect, useState } from "react"
-import { InstalledTapplet } from "../types/tapplet/Tapplet"
+import { DevTapplet, InstalledTappletWithName } from "@type/tapplet"
 import { invoke } from "@tauri-apps/api/core"
 import {
   Avatar,
-  Button,
+  FormControl,
   IconButton,
+  InputAdornment,
+  InputLabel,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  TextField,
+  OutlinedInput,
   Typography,
 } from "@mui/material"
 import { Launch, Delete, Add } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
 import { NavLink } from "react-router-dom"
 import { TabKey } from "../views/Tabs"
-
-interface InstalledTappletWithName {
-  installed_tapplet: InstalledTapplet
-  display_name: string
-}
-
-export interface DevTapplet {
-  id?: number
-  package_name: string
-  endpoint: string
-  tapplet_name: string
-  display_name: string
-  about_summary: string
-  about_description: string
-}
 
 export const TappletsInstalled: React.FC = () => {
   const [installedTappletsList, setInstalledTappletsList] = useState<InstalledTappletWithName[]>([])
@@ -109,14 +96,26 @@ export const TappletsInstalled: React.FC = () => {
             </ListItem>
           ))}
       </List>
-      <TextField
-        label="Tapplet dev mode endpoint"
-        value={tappletDevModeEndpoint}
-        onChange={(e) => setTappletDevModeEndpoint(e.target.value)}
-      />
-      <Button onClick={() => handleAddTappletDevMode(tappletDevModeEndpoint)} variant="contained" startIcon={<Add />}>
-        Add tapplet in the dev mode
-      </Button>
+      <FormControl sx={{ m: 1 }} variant="outlined">
+        <InputLabel htmlFor="outlined-adornment-password">Dev tapplet endpoint</InputLabel>
+        <OutlinedInput
+          id="outlined-adornment-password"
+          type="url"
+          onChange={(e) => setTappletDevModeEndpoint(e.target.value)}
+          endAdornment={
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle password visibility"
+                onClick={() => handleAddTappletDevMode(tappletDevModeEndpoint)}
+                edge="end"
+              >
+                <Add />
+              </IconButton>
+            </InputAdornment>
+          }
+          label="text"
+        />
+      </FormControl>
     </div>
   )
 }
