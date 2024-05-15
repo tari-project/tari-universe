@@ -195,15 +195,6 @@ pub fn update_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> 
 }
 
 #[tauri::command]
-pub fn delete_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
-  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  let tapplets: Vec<Tapplet> = tapplet_store.get_all();
-  let first: Tapplet = tapplets.into_iter().next().unwrap();
-  tapplet_store.delete(first);
-  Ok(())
-}
-
-#[tauri::command]
 pub fn get_by_id_tapp_registry_db(
   tapplet_id: i32,
   db_connection: State<'_, DatabaseConnection>
@@ -302,4 +293,17 @@ pub fn read_dev_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result
   let mut store = SqliteStore::new(db_connection.0.clone());
   let dev_tapplets: Vec<DevTapplet> = store.get_all();
   Ok(dev_tapplets)
+}
+
+#[tauri::command]
+pub fn delete_dev_tapplet(dev_tapplet_id: i32, db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+  let mut store = SqliteStore::new(db_connection.0.clone());
+  let dev_tapplet: Option<DevTapplet> = store.get_by_id(dev_tapplet_id);
+  match dev_tapplet {
+    Some(tapp) => {
+      store.delete(tapp);
+      return Ok(());
+    }
+    None => Err(()),
+  }
 }

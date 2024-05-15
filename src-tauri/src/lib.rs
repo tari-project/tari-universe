@@ -30,12 +30,12 @@ use commands::{
   insert_tapp_registry_db,
   read_tapp_registry_db,
   update_tapp_registry_db,
-  delete_tapp_registry_db,
   fetch_tapplets,
   get_by_id_tapp_registry_db,
   delete_installed_tapp,
   add_dev_tapplet,
   read_dev_tapplets,
+  delete_dev_tapplet,
 };
 
 use crate::{ rpc::permission_token, wallet_daemon::start_wallet_daemon };
@@ -74,7 +74,6 @@ pub fn run() {
         insert_tapp_registry_db,
         read_tapp_registry_db,
         update_tapp_registry_db,
-        delete_tapp_registry_db,
         download_tapp,
         calculate_tapp_checksum,
         validate_tapp_checksum,
@@ -84,7 +83,8 @@ pub fn run() {
         get_by_id_tapp_registry_db,
         delete_installed_tapp,
         add_dev_tapplet,
-        read_dev_tapplets
+        read_dev_tapplets,
+        delete_dev_tapplet
       ]
     )
     .setup(|app| {

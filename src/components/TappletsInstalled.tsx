@@ -46,7 +46,7 @@ export const TappletsInstalled: React.FC = () => {
     fetchTapplets()
   }, [])
 
-  const handleDelete = async (item: InstalledTappletWithName) => {
+  const handleDeleteInstalledTapplet = async (item: InstalledTappletWithName) => {
     const _id = item.installed_tapplet.id
     await invoke("delete_installed_tapp", { tappletId: _id })
     await invoke("delete_installed_tapp_db", { tappletId: _id })
@@ -55,6 +55,12 @@ export const TappletsInstalled: React.FC = () => {
 
   const handleAddTappletDevMode = async (endpoint: string) => {
     await invoke("add_dev_tapplet", { endpoint })
+    setDevTappletsList(await invoke("read_dev_tapplets"))
+  }
+
+  const handleDeleteDevTapplet = async (item: DevTapplet) => {
+    await invoke("delete_dev_tapplet", { devTappletId: item.id })
+    setDevTappletsList(await invoke("read_dev_tapplets"))
   }
 
   return (
@@ -73,7 +79,11 @@ export const TappletsInstalled: React.FC = () => {
                   <Launch color="primary" />
                 </NavLink>
               </IconButton>
-              <IconButton aria-label="delete" style={{ marginRight: 10 }} onClick={() => handleDelete(item)}>
+              <IconButton
+                aria-label="delete"
+                style={{ marginRight: 10 }}
+                onClick={() => handleDeleteInstalledTapplet(item)}
+              >
                 <Delete color="primary" />
               </IconButton>
             </ListItem>
@@ -93,11 +103,7 @@ export const TappletsInstalled: React.FC = () => {
                   <Launch color="primary" />
                 </NavLink>
               </IconButton>
-              <IconButton
-                aria-label="delete"
-                style={{ marginRight: 10 }}
-                onClick={() => console.log("TODO implement delete dev tapplet")}
-              >
+              <IconButton aria-label="delete" style={{ marginRight: 10 }} onClick={() => handleDeleteDevTapplet(item)}>
                 <Delete color="primary" />
               </IconButton>
             </ListItem>
