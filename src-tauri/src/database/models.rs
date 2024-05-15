@@ -151,7 +151,7 @@ pub struct UpdateAsset {
   pub rel_path: String,
 }
 
-#[derive(Queryable, Selectable, Debug)]
+#[derive(Queryable, Selectable, Debug, Serialize)]
 #[diesel(table_name = tapplet_version)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct TappletVersion {

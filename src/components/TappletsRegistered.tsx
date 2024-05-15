@@ -5,6 +5,21 @@ import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText } from
 import { InstallDesktop } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
 
+interface RegisteredTappletWithVersion {
+  registered_tapplet: RegisteredTapplet
+  version: string
+  integrity: string
+  registry_url: string
+}
+
+interface TappletVersion {
+  id?: number
+  tapplet_id?: number
+  version: string
+  integrity: string
+  registry_url: string
+}
+
 export const TappletsRegistered: React.FC = () => {
   const [registeredTappletsList, setRegisteredTappletsList] = useState<RegisteredTapplet[]>([])
 
@@ -48,9 +63,12 @@ export const TappletsRegistered: React.FC = () => {
   const handleInstall = async (tapplet: RegisteredTapplet) => {
     //TODO fetch path & url from registry
     //TODO add separate folder for different version
-    const basePath = `../tapplets_installed/${tapplet.registry_id}/${tapplet.id}`
     //TODO set url for different versions - registry json refactor needed
-    const baseUrl = `${tapplet.registry_url}`
+    const _tapplet: RegisteredTappletWithVersion = await invoke("get_registered_tapp_with_version", {
+      tappletId: tapplet.id,
+    })
+    const baseUrl = `${_tapplet.registry_url}`
+    const basePath = `../tapplets_installed/${_tapplet.registered_tapplet.registry_id}/${_tapplet.version}`
     await installTapplet(baseUrl, basePath)
 
     const tapp: InstalledTapplet = {
@@ -62,6 +80,8 @@ export const TappletsRegistered: React.FC = () => {
     }
 
     invoke("insert_installed_tapp_db", { tapplet: tapp })
+    console.log("dupa", _tapplet)
+    console.log("dupa", _tapplet.registered_tapplet, _tapplet.registry_url)
   }
 
   return (

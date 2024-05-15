@@ -15,7 +15,7 @@ use crate::{
     store::{ SqliteStore, Store },
   },
   hash_calculator::calculate_shasum,
-  interface::{ InstalledTappletWithName, RegisteredTapplets },
+  interface::{ InstalledTappletWithName, RegistedTappletWithVersion, RegisteredTapplets },
   rpc::{ balances, free_coins, make_request },
   tapplet_installer::{ check_extracted_files, delete_tapplet, download_file, extract_tar, validate_checksum },
   tapplet_server::start,
@@ -211,6 +211,22 @@ pub fn get_by_id_tapp_registry_db(
     Some(tapp) => Ok(tapp),
     None => Err(()),
   }
+}
+
+#[tauri::command]
+pub fn get_registered_tapp_with_version(
+  tapplet_id: i32,
+  db_connection: State<'_, DatabaseConnection>
+) -> Result<RegistedTappletWithVersion, ()> {
+  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
+  let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id).unwrap();
+  let registered_with_version = RegistedTappletWithVersion {
+    registered_tapplet: tapp,
+    integrity: version_data.integrity,
+    version: version_data.version,
+    registry_url: version_data.registry_url,
+  };
+  Ok(registered_with_version)
 }
 
 /**
