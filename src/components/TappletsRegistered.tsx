@@ -1,24 +1,9 @@
 import { useEffect, useState } from "react"
-import { InstalledTapplet, RegisteredTapplet } from "../types/tapplet/Tapplet"
+import { InstalledTapplet, RegisteredTapplet, RegisteredTappletWithVersion } from "../types/tapplet/Tapplet"
 import { invoke } from "@tauri-apps/api/core"
 import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText } from "@mui/material"
 import { InstallDesktop } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
-
-interface RegisteredTappletWithVersion {
-  registered_tapplet: RegisteredTapplet
-  version: string
-  integrity: string
-  registry_url: string
-}
-
-interface TappletVersion {
-  id?: number
-  tapplet_id?: number
-  version: string
-  integrity: string
-  registry_url: string
-}
 
 export const TappletsRegistered: React.FC = () => {
   const [registeredTappletsList, setRegisteredTappletsList] = useState<RegisteredTapplet[]>([])
@@ -61,27 +46,22 @@ export const TappletsRegistered: React.FC = () => {
   }
 
   const handleInstall = async (tapplet: RegisteredTapplet) => {
-    //TODO fetch path & url from registry
-    //TODO add separate folder for different version
-    //TODO set url for different versions - registry json refactor needed
     const _tapplet: RegisteredTappletWithVersion = await invoke("get_registered_tapp_with_version", {
       tappletId: tapplet.id,
     })
-    const baseUrl = `${_tapplet.registry_url}`
-    const basePath = `../tapplets_installed/${_tapplet.registered_tapplet.registry_id}/${_tapplet.version}`
-    await installTapplet(baseUrl, basePath)
+    const _url = `${_tapplet.tapp_version.registry_url}`
+    const _path = `../tapplets_installed/${_tapplet.registered_tapp.registry_id}/${_tapplet.tapp_version.version}`
+    await installTapplet(_url, _path)
 
     const tapp: InstalledTapplet = {
       is_dev_mode: true, //TODO dev mode
       dev_mode_endpoint: "",
-      path_to_dist: "",
-      tapplet_id: tapplet.id ?? 0,
-      tapplet_version_id: tapplet.id,
+      path_to_dist: _path,
+      tapplet_id: tapplet.id,
+      tapplet_version_id: _tapplet.tapp_version.id,
     }
 
     invoke("insert_installed_tapp_db", { tapplet: tapp })
-    console.log("dupa", _tapplet)
-    console.log("dupa", _tapplet.registered_tapplet, _tapplet.registry_url)
   }
 
   return (

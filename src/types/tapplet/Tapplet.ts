@@ -21,3 +21,21 @@ export type InstalledTapplet = {
   dev_mode_endpoint?: string
   path_to_dist?: string
 }
+
+export interface TappletVersion {
+  id?: number
+  tapplet_id?: number
+  version: string
+  integrity: string
+  registry_url: string
+}
+
+export interface RegisteredTappletWithVersion {
+  registered_tapp: RegisteredTapplet
+  tapp_version: TappletVersion
+}
+
+export interface InstalledTappletWithName {
+  installed_tapplet: InstalledTapplet
+  display_name: string
+}

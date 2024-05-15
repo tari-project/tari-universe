@@ -1,16 +1,11 @@
 import { useEffect, useState } from "react"
-import { InstalledTapplet } from "../types/tapplet/Tapplet"
+import { InstalledTappletWithName } from "../types/tapplet/Tapplet"
 import { invoke } from "@tauri-apps/api/core"
 import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText } from "@mui/material"
 import { Launch, Delete } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
 import { NavLink } from "react-router-dom"
 import { TabKey } from "../views/Tabs"
-
-interface InstalledTappletWithName {
-  installed_tapplet: InstalledTapplet
-  display_name: string
-}
 
 export const TappletsInstalled: React.FC = () => {
   const [installedTappletsList, setInstalledTappletsList] = useState<InstalledTappletWithName[]>([])

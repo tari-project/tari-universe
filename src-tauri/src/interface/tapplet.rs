@@ -10,8 +10,6 @@ pub struct InstalledTappletWithName {
 
 #[derive(Serialize)]
 pub struct RegistedTappletWithVersion {
-  pub registered_tapplet: Tapplet,
-  pub version: String,
-  pub integrity: String,
-  pub registry_url: String,
+  pub registered_tapp: Tapplet,
+  pub tapp_version: TappletVersion,
 }

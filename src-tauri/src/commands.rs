@@ -221,10 +221,8 @@ pub fn get_registered_tapp_with_version(
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id).unwrap();
   let registered_with_version = RegistedTappletWithVersion {
-    registered_tapplet: tapp,
-    integrity: version_data.integrity,
-    version: version_data.version,
-    registry_url: version_data.registry_url,
+    registered_tapp: tapp,
+    tapp_version: version_data,
   };
   Ok(registered_with_version)
 }
@@ -285,7 +283,7 @@ pub fn delete_installed_tapp(tapplet_id: i32, db_connection: State<'_, DatabaseC
   let tapplet_path = format!(
     "../tapplets_installed/{}/{}",
     installed_tapplet.1.registry_id,
-    installed_tapplet.1.id.unwrap()
+    installed_tapplet.2.version
   );
 
   delete_tapplet(&tapplet_path).unwrap();
