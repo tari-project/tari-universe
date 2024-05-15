@@ -22,9 +22,19 @@ interface InstalledTappletWithName {
   display_name: string
 }
 
+export interface DevTapplet {
+  id?: number
+  package_name: string
+  endpoint: string
+  tapplet_name: string
+  display_name: string
+  about_summary: string
+  about_description: string
+}
+
 export const TappletsInstalled: React.FC = () => {
   const [installedTappletsList, setInstalledTappletsList] = useState<InstalledTappletWithName[]>([])
-  const [devTappletsList, setDevTappletsList] = useState<InstalledTappletWithName[]>([])
+  const [devTappletsList, setDevTappletsList] = useState<DevTapplet[]>([])
   const [tappletDevModeEndpoint, setTappletDevModeEndpoint] = useState<string>("")
 
   useEffect(() => {
@@ -79,11 +89,15 @@ export const TappletsInstalled: React.FC = () => {
               </ListItemAvatar>
               <ListItemText primary={item.display_name} />
               <IconButton aria-label="launch" style={{ marginRight: 10 }}>
-                <NavLink to={`/${TabKey.ACTIVE_TAPPLET}/${item.installed_tapplet.id}`} style={{ display: "contents" }}>
+                <NavLink to={`/${TabKey.DEV_TAPPLETS}/${item.id}`} state={item} style={{ display: "contents" }}>
                   <Launch color="primary" />
                 </NavLink>
               </IconButton>
-              <IconButton aria-label="delete" style={{ marginRight: 10 }} onClick={() => handleDelete(item)}>
+              <IconButton
+                aria-label="delete"
+                style={{ marginRight: 10 }}
+                onClick={() => console.log("TODO implement delete dev tapplet")}
+              >
                 <Delete color="primary" />
               </IconButton>
             </ListItem>
