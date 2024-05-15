@@ -4,7 +4,7 @@
     "@karczuRF/tapp-example": {
       "id": "@karczuRF/tapp-example",
       "metadata": {
-        "name": "tapp-example",
+        "packageName": "tapp-example",
         "displayName": "Demo tapp by karczuRF",
         "author": {
           "name": "karczuRF",
@@ -21,23 +21,23 @@
           }
         ],
         "category": "tapplet category",
-        "logoUrl": "https://github.com/karczuRF/tapp-example/blob/main/dist/assets/logo.svg"
+        "logo": "https://github.com/karczuRF/tapp-example/blob/main/dist/assets/logo.svg"
       },
       "versions": {
         "1.0.1": {
           "integrity": "sha512-AC2x8xfG93T4QFeKWIb2h7gohc/HzNrqZUbCXOQ54apOPbeSRN/cMSj/iVmIhJ+1NrQJeppSsJjoVVzIYmuOKg==",
-          "registry": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.1.tgz"
+          "registryUrl": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.1.tgz"
         },
         "1.0.0": {
           "integrity": "sha512-Teya54P3ObC68rLu8E0IvPfjju0hlIgrej9llyIcNMF5CXoO5eCIBbvNnMaDt6z5nRqrWi6tHFZwlCK1yYpMaw==",
-          "registry": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz"
+          "registryUrl": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz"
         }
       }
     },
     "@MCozhusheck/tapplet-example": {
       "id": "@MCozhusheck/tapplet-example",
       "metadata": {
-        "name": "tapplet-example",
+        "packageName": "tapplet-example",
         "displayName": "Demo tapp by MCozhusheck",
         "author": {
           "name": "MCozhusheck",
@@ -54,16 +54,16 @@
           }
         ],
         "category": "tapplet category",
-        "logoUrl": "https://github.com/MCozhusheck/tapplet-example/blob/master/dist/vite.svg"
+        "logo": "https://github.com/MCozhusheck/tapplet-example/blob/master/dist/vite.svg"
       },
       "versions": {
         "0.0.2": {
           "integrity": "sha512-ivQM1oWaCaZrHARDCD2rib/RFmNDdSDuCQofOsEc3HLo/zgGjLXiySwm/uu3s/5lt9S+/oPC6wFE3m5agzdizA==",
-          "registry": "https://registry.npmjs.org/tapplet-example/-/tapplet-example-0.0.2.tgz"
+          "registryUrl": "https://registry.npmjs.org/tapplet-example/-/tapplet-example-0.0.2.tgz"
         },
         "0.0.1": {
           "integrity": "sha512-O56CWu0UvRPMieWp6HBPsQ+8OzDiWMmLUap7tarHLAKdx7vlYXo036OvQjHfpcAD79CRiJzrn4/GGvFlx5yU9w==",
-          "registry": "https://registry.npmjs.org/tapplet-example/-/tapplet-example-0.0.1.tgz"
+          "registryUrl": "https://registry.npmjs.org/tapplet-example/-/tapplet-example-0.0.1.tgz"
         }
       }
     }

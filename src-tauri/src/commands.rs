@@ -15,7 +15,7 @@ use crate::{
     store::{ SqliteStore, Store },
   },
   hash_calculator::calculate_shasum,
-  interface::{ InstalledTappletWithName, VerifiedTapplets },
+  interface::{ InstalledTappletWithName, RegisteredTapplets },
   rpc::{ balances, free_coins, make_request },
   tapplet_installer::{ check_extracted_files, delete_tapplet, download_file, extract_tar, validate_checksum },
   tapplet_server::start,
@@ -151,18 +151,19 @@ pub fn read_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Re
 #[tauri::command]
 pub fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
   let registry = include_str!("../../tapplets-registry.manifest.json");
-  let tapplets: VerifiedTapplets = serde_json::from_str(registry).unwrap();
+  let tapplets: RegisteredTapplets = serde_json::from_str(registry).unwrap();
   let mut store = SqliteStore::new(db_connection.0.clone());
-  tapplets.verified_tapplets.iter().for_each(|(_, tapplet_manifest)| {
+  tapplets.registered_tapplets.iter().for_each(|(_, tapplet_manifest)| {
     let inserted_tapplet = store.create(&CreateTapplet::from(tapplet_manifest));
     let tapplet_db_id = inserted_tapplet.iter().next().unwrap().id.unwrap();
 
-    tapplet_manifest.versions.iter().for_each(|(version, checksum)| {
+    tapplet_manifest.versions.iter().for_each(|(version, version_data)| {
       store.create(
         &(CreateTappletVersion {
           tapplet_id: Some(tapplet_db_id),
           version: &version,
-          checksum: &checksum.checksum,
+          integrity: &version_data.integrity,
+          registry_url: &version_data.registry_url,
         })
       );
     });
@@ -183,7 +184,6 @@ pub fn update_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> 
     author_website: "updated_value".to_string(),
     category: "updated_value".to_string(),
     registry_id: "updated_value".to_string(),
-    registry_url: "updated_value".to_string(),
   };
   let tapplets: Vec<Tapplet> = tapplet_store.get_all();
   let first: Tapplet = tapplets.into_iter().next().unwrap();

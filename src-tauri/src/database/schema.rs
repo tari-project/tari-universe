@@ -21,6 +21,7 @@ diesel::table! {
 diesel::table! {
     tapplet (id) {
         id -> Nullable<Integer>,
+        package_name -> Text,
         registry_id -> Text,
         display_name -> Text,
         author_name -> Text,
@@ -28,8 +29,6 @@ diesel::table! {
         about_summary -> Text,
         about_description -> Text,
         category -> Text,
-        package_name -> Text,
-        registry_url -> Text,
         image_id -> Nullable<Integer>,
     }
 }
@@ -39,7 +38,8 @@ diesel::table! {
         id -> Nullable<Integer>,
         tapplet_id -> Nullable<Integer>,
         version -> Text,
-        checksum -> Text,
+        integrity -> Text,
+        registry_url -> Text,
     }
 }
 
