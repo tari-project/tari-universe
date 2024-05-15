@@ -10,6 +10,7 @@ diesel::table! {
 diesel::table! {
     dev_tapplet (id) {
         id -> Nullable<Integer>,
+        package_name -> Text,
         endpoint -> Text,
         tapplet_name -> Text,
         display_name -> Text,

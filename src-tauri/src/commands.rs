@@ -4,9 +4,11 @@ use tauri::{ self, State };
 use crate::{
   database::{
     models::{
+      CreateDevTapplet,
       CreateInstalledTapplet,
       CreateTapplet,
       CreateTappletVersion,
+      DevTapplet,
       InstalledTapplet,
       Tapplet,
       UpdateInstalledTapplet,
@@ -278,15 +280,26 @@ pub fn delete_installed_tapp(tapplet_id: i32, db_connection: State<'_, DatabaseC
 }
 
 #[tauri::command]
-pub async fn add_dev_tapplet_mode(endpoint: String, db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
-  let body = reqwest::get(&endpoint).await.unwrap().json::<DevTappletResponse>().await.unwrap();
-  println!("{:?}", body);
-  // let mut store = SqliteStore::new(db_connection.0.clone());
-  // let new_dev_tapplet = CreateDevTapplet {
-  //   endpoint,
-  //   tapplet_name: "tapplet_name",
-  // };
+pub async fn add_dev_tapplet(endpoint: String, db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+  let manifest_endpoint = format!("{}/tapplet.manifest.json", endpoint);
+  let manifest_res = reqwest::get(&manifest_endpoint).await.unwrap().json::<DevTappletResponse>().await.unwrap();
+  let mut store = SqliteStore::new(db_connection.0.clone());
+  let new_dev_tapplet = CreateDevTapplet {
+    endpoint: &endpoint,
+    package_name: &manifest_res.id,
+    tapplet_name: &manifest_res.name,
+    display_name: &manifest_res.display_name,
+    about_summary: &manifest_res.about.summary,
+    about_description: &manifest_res.about.description,
+  };
 
-  // store.create(&installed_tapplet);
+  store.create(&new_dev_tapplet);
   Ok(())
+}
+
+#[tauri::command]
+pub fn read_dev_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<Vec<DevTapplet>, ()> {
+  let mut store = SqliteStore::new(db_connection.0.clone());
+  let dev_tapplets: Vec<DevTapplet> = store.get_all();
+  Ok(dev_tapplets)
 }

@@ -1,7 +1,17 @@
 import { useEffect, useState } from "react"
 import { InstalledTapplet } from "../types/tapplet/Tapplet"
 import { invoke } from "@tauri-apps/api/core"
-import { Avatar, Button, IconButton, List, ListItem, ListItemAvatar, ListItemText, TextField } from "@mui/material"
+import {
+  Avatar,
+  Button,
+  IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  TextField,
+  Typography,
+} from "@mui/material"
 import { Launch, Delete, Add } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
 import { NavLink } from "react-router-dom"
@@ -14,11 +24,13 @@ interface InstalledTappletWithName {
 
 export const TappletsInstalled: React.FC = () => {
   const [installedTappletsList, setInstalledTappletsList] = useState<InstalledTappletWithName[]>([])
+  const [devTappletsList, setDevTappletsList] = useState<InstalledTappletWithName[]>([])
   const [tappletDevModeEndpoint, setTappletDevModeEndpoint] = useState<string>("")
 
   useEffect(() => {
     const fetchTapplets = async () => {
       setInstalledTappletsList(await invoke("read_installed_tapp_db"))
+      setDevTappletsList(await invoke("read_dev_tapplets"))
     }
 
     fetchTapplets()
@@ -32,14 +44,35 @@ export const TappletsInstalled: React.FC = () => {
   }
 
   const handleAddTappletDevMode = async (endpoint: string) => {
-    await invoke("add_dev_tapplet_mode", { endpoint })
+    await invoke("add_dev_tapplet", { endpoint })
   }
 
   return (
     <div>
+      <Typography variant="h4">Installed Tapplets</Typography>
       <List>
         {installedTappletsList &&
           installedTappletsList.map((item, index) => (
+            <ListItem key={index}>
+              <ListItemAvatar>
+                <Avatar src={tariLogo} />
+              </ListItemAvatar>
+              <ListItemText primary={item.display_name} />
+              <IconButton aria-label="launch" style={{ marginRight: 10 }}>
+                <NavLink to={`/${TabKey.ACTIVE_TAPPLET}/${item.installed_tapplet.id}`} style={{ display: "contents" }}>
+                  <Launch color="primary" />
+                </NavLink>
+              </IconButton>
+              <IconButton aria-label="delete" style={{ marginRight: 10 }} onClick={() => handleDelete(item)}>
+                <Delete color="primary" />
+              </IconButton>
+            </ListItem>
+          ))}
+      </List>
+      <Typography variant="h4">Dev Tapplets</Typography>
+      <List>
+        {devTappletsList &&
+          devTappletsList.map((item, index) => (
             <ListItem key={index}>
               <ListItemAvatar>
                 <Avatar src={tariLogo} />

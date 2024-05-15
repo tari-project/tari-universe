@@ -116,7 +116,7 @@ pub struct UpdateTapplet {
   pub image_id: Option<i32>,
 }
 
-#[derive(Queryable, Selectable, Debug)]
+#[derive(Queryable, Selectable, Debug, Serialize)]
 #[diesel(table_name = asset)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Asset {
@@ -144,7 +144,7 @@ pub struct UpdateAsset {
   pub rel_path: String,
 }
 
-#[derive(Queryable, Selectable, Debug)]
+#[derive(Queryable, Selectable, Debug, Serialize)]
 #[diesel(table_name = tapplet_version)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct TappletVersion {
@@ -180,11 +180,12 @@ pub struct UpdateTappletVersion {
   pub checksum: String,
 }
 
-#[derive(Queryable, Selectable, Debug)]
+#[derive(Queryable, Selectable, Debug, Serialize)]
 #[diesel(table_name = dev_tapplet)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct DevTapplet {
   pub id: Option<i32>,
+  pub package_name: String,
   pub endpoint: String,
   pub tapplet_name: String,
   pub display_name: String,
@@ -196,6 +197,7 @@ pub struct DevTapplet {
 #[diesel(table_name = dev_tapplet)]
 pub struct CreateDevTapplet<'a> {
   pub endpoint: &'a str,
+  pub package_name: &'a str,
   pub tapplet_name: &'a str,
   pub display_name: &'a str,
   pub about_summary: &'a str,
@@ -206,6 +208,7 @@ impl<'a> From<&CreateDevTapplet<'a>> for UpdateDevTapplet {
   fn from(create_dev_tapplet: &CreateDevTapplet) -> Self {
     UpdateDevTapplet {
       endpoint: create_dev_tapplet.endpoint.to_string(),
+      package_name: create_dev_tapplet.package_name.to_string(),
       tapplet_name: create_dev_tapplet.tapplet_name.to_string(),
       display_name: create_dev_tapplet.display_name.to_string(),
       about_summary: create_dev_tapplet.about_summary.to_string(),
@@ -218,6 +221,7 @@ impl<'a> From<&CreateDevTapplet<'a>> for UpdateDevTapplet {
 #[diesel(table_name = dev_tapplet)]
 pub struct UpdateDevTapplet {
   pub endpoint: String,
+  pub package_name: String,
   pub tapplet_name: String,
   pub display_name: String,
   pub about_summary: String,

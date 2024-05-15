@@ -34,6 +34,8 @@ use commands::{
   fetch_tapplets,
   get_by_id_tapp_registry_db,
   delete_installed_tapp,
+  add_dev_tapplet,
+  read_dev_tapplets,
 };
 
 use crate::{ rpc::permission_token, wallet_daemon::start_wallet_daemon };
@@ -80,7 +82,9 @@ pub fn run() {
         extract_tapp_tarball,
         fetch_tapplets,
         get_by_id_tapp_registry_db,
-        delete_installed_tapp
+        delete_installed_tapp,
+        add_dev_tapplet,
+        read_dev_tapplets
       ]
     )
     .setup(|app| {

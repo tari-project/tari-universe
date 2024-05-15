@@ -41,9 +41,11 @@ CREATE TABLE asset (
 
 CREATE TABLE dev_tapplet (
   id INTEGER PRIMARY KEY,
+  package_name TEXT NOT NULL,
   endpoint TEXT NOT NULL,
   tapplet_name TEXT NOT NULL,
   display_name TEXT NOT NULL,
   about_summary TEXT NOT NULL,
-  about_description TEXT NOT NULL
+  about_description TEXT NOT NULL,
+  UNIQUE(package_name)
 );
