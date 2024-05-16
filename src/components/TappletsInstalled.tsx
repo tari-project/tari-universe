@@ -97,18 +97,13 @@ export const TappletsInstalled: React.FC = () => {
           ))}
       </List>
       <FormControl sx={{ m: 1 }} variant="outlined">
-        <InputLabel htmlFor="outlined-adornment-password">Dev tapplet endpoint</InputLabel>
+        <InputLabel>Dev tapplet endpoint</InputLabel>
         <OutlinedInput
-          id="outlined-adornment-password"
           type="url"
           onChange={(e) => setTappletDevModeEndpoint(e.target.value)}
           endAdornment={
             <InputAdornment position="end">
-              <IconButton
-                aria-label="toggle password visibility"
-                onClick={() => handleAddTappletDevMode(tappletDevModeEndpoint)}
-                edge="end"
-              >
+              <IconButton onClick={() => handleAddTappletDevMode(tappletDevModeEndpoint)} edge="end">
                 <Add />
               </IconButton>
             </InputAdornment>

@@ -12,7 +12,6 @@ export function ActiveDevTapplet() {
       try {
         const response = await fetch(`${state?.endpoint}/tapplet.manifest.json`)
         const manifest = await response.json()
-        console.log("Tapplet manifest:", manifest)
         if (manifest?.id === state?.package_name) {
           setIsVerified(true)
         } else {
