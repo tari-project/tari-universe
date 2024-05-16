@@ -1,5 +1,6 @@
 use tari_wallet_daemon_client::types::AccountsGetBalancesResponse;
-use tauri::{ self, State };
+use tauri::{ self, Manager, State };
+use std::path::PathBuf;
 
 use crate::{
   database::{
@@ -102,27 +103,31 @@ pub async fn call_wallet(method: String, params: String, tokens: State<'_, Token
 #[tauri::command]
 pub async fn download_and_extract_tapp(
   tapplet_id: i32,
-  db_connection: State<'_, DatabaseConnection>
+  db_connection: State<'_, DatabaseConnection>,
+  app_handle: tauri::AppHandle
 ) -> Result<(), ()> {
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id).unwrap();
 
   let url = version_data.registry_url;
-  let tapplet_path = format!("../tapplets_installed/{}/{}", tapp.registry_id, version_data.version);
-  let extract_path = tapplet_path.clone();
+  let app_path = app_handle.path().app_data_dir().unwrap().to_path_buf();
+  let tapp_dir_path = PathBuf::from(format!("/tapplets_installed/{}/{}", tapp.registry_id, version_data.version));
+  let tapplet_path = app_path.join(tapp_dir_path);
 
   // download tarball
-  let handle = tauri::async_runtime::spawn(async move { download_file(&url, &tapplet_path).await });
+  let download_path = tapplet_path.clone();
+  let handle = tauri::async_runtime::spawn(async move { download_file(&url, download_path).await });
   let _ = handle.await.unwrap();
 
   //extract tarball
-  let _ = extract_tapp_tarball(&extract_path);
-  let _ = check_tapp_files(&extract_path);
+  let extract_path = tapplet_path.clone();
+  let _ = extract_tapp_tarball(extract_path);
+  let _ = check_tapp_files(tapplet_path);
   Ok(())
 }
 
 #[tauri::command]
-pub fn extract_tapp_tarball(tapplet_path: &str) -> Result<(), ()> {
+pub fn extract_tapp_tarball(tapplet_path: PathBuf) -> Result<(), ()> {
   extract_tar(tapplet_path).unwrap();
   Ok(())
 }
@@ -145,7 +150,7 @@ pub fn calculate_and_validate_tapp_checksum(
 }
 
 #[tauri::command]
-pub fn check_tapp_files(tapplet_path: &str) -> Result<(), ()> {
+pub fn check_tapp_files(tapplet_path: PathBuf) -> Result<(), ()> {
   let _ = check_extracted_files(tapplet_path);
   Ok(())
 }
