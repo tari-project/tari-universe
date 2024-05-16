@@ -2,14 +2,13 @@
 export type RegisteredTapplet = {
   id?: number
   registry_id: string
+  package_name: string
   display_name: string
   author_name: string
   author_website: string
   about_summary: string
   about_description: string
   category: string
-  package_name: string
-  registry_url: string
   image_id?: number
 }
 

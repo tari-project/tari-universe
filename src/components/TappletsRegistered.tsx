@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { InstalledTapplet, RegisteredTapplet, RegisteredTappletWithVersion } from "../types/tapplet/Tapplet"
+import { RegisteredTapplet } from "../types/tapplet/Tapplet"
 import { invoke } from "@tauri-apps/api/core"
 import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText } from "@mui/material"
 import { InstallDesktop } from "@mui/icons-material"
@@ -40,20 +40,11 @@ export const TappletsRegistered: React.FC = () => {
     await validateChecksum(tappletId)
   }
 
-  const handleInstall = async (tapplet: RegisteredTapplet) => {
-    if (!tapplet.id) return
-    await installTapplet(tapplet.id)
+  const handleInstall = async (tappletId?: number) => {
+    if (!tappletId) return
+    await installTapplet(tappletId)
 
-    // TODO insert to db
-    const tapp: InstalledTapplet = {
-      is_dev_mode: true, //TODO dev mode
-      dev_mode_endpoint: "",
-      path_to_dist: "path_to_dist",
-      tapplet_id: tapplet.id,
-      tapplet_version_id: 1,
-    }
-
-    invoke("insert_installed_tapp_db", { tapplet: tapp })
+    invoke("insert_installed_tapp_db", { tappletId: tappletId })
   }
 
   return (
@@ -66,7 +57,7 @@ export const TappletsRegistered: React.FC = () => {
                 <Avatar src={tariLogo} />
               </ListItemAvatar>
               <ListItemText primary={item.package_name} />
-              <IconButton aria-label="install" onClick={() => handleInstall(item)}>
+              <IconButton aria-label="install" onClick={() => handleInstall(item.id)}>
                 <InstallDesktop color="primary" />
               </IconButton>
             </ListItem>

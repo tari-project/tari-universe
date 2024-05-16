@@ -252,12 +252,18 @@ pub fn get_registered_tapp_with_version(
  */
 
 #[tauri::command]
-pub fn insert_installed_tapp_db(
-  tapplet: CreateInstalledTapplet,
-  db_connection: State<'_, DatabaseConnection>
-) -> Result<(), ()> {
+pub fn insert_installed_tapp_db(tapplet_id: i32, db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  tapplet_store.create(&tapplet);
+  let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id).unwrap();
+
+  let installed_tapplet = CreateInstalledTapplet {
+    tapplet_id: tapp.id,
+    tapplet_version_id: version_data.id,
+    dev_mode_endpoint: "",
+    path_to_dist: "",
+    is_dev_mode: false,
+  };
+  tapplet_store.create(&installed_tapplet);
   Ok(())
 }
 
