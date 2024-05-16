@@ -16,7 +16,9 @@ use crate::database::models::{
   Tapplet,
   UpdateTapplet,
 };
+use crate::database::schema::tapplet_version;
 use crate::interface::InstalledTappletWithName;
+use crate::interface::RegistedTappletWithVersion;
 
 use super::models::CreateTappletVersion;
 use super::models::UpdateAsset;
@@ -75,6 +77,23 @@ impl SqliteStore {
       .inner_join(tapplet_version)
       .select((installed_tapplet::all_columns(), tapplet::all_columns(), tapplet_version::all_columns()))
       .first::<(InstalledTapplet, Tapplet, TappletVersion)>(self.get_connection().deref_mut())
+      .ok()
+  }
+
+  pub fn get_registered_tapplet_with_version(
+    &mut self,
+    registered_tapplet_id: i32
+  ) -> Option<(Tapplet, TappletVersion)> {
+    // use crate::database::schema::installed_tapplet::dsl::*;
+    use crate::database::schema::tapplet::dsl::id;
+    use crate::database::schema::tapplet::dsl::*;
+    use crate::database::schema::tapplet_version::dsl::*;
+
+    tapplet
+      .filter(id.eq(registered_tapplet_id))
+      .inner_join(tapplet_version)
+      .select((tapplet::all_columns(), tapplet_version::all_columns()))
+      .first::<(Tapplet, TappletVersion)>(self.get_connection().deref_mut())
       .ok()
   }
 }

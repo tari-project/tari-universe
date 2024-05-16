@@ -1,8 +1,10 @@
 {
-  "verifiedTapplets": {
+  "manifestVersion": "0.1.0",
+  "registeredTapplets": {
     "@karczuRF/tapp-example": {
       "id": "@karczuRF/tapp-example",
       "metadata": {
+        "packageName": "tapp-example",
         "displayName": "Demo tapp by karczuRF",
         "author": {
           "name": "karczuRF",
@@ -19,24 +21,23 @@
           }
         ],
         "category": "tapplet category",
-        "source": {
-          "location": {
-            "npm": {
-              "packageName": "@karczuRF/tapp-example",
-              "registry": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz"
-            }
-          }
-        }
+        "logo": "https://github.com/karczuRF/tapp-example/blob/main/dist/assets/logo.svg"
       },
       "versions": {
+        "1.0.1": {
+          "integrity": "sha512-AC2x8xfG93T4QFeKWIb2h7gohc/HzNrqZUbCXOQ54apOPbeSRN/cMSj/iVmIhJ+1NrQJeppSsJjoVVzIYmuOKg==",
+          "registryUrl": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.1.tgz"
+        },
         "1.0.0": {
-          "checksum": "Teya54P3ObC68rLu8E0IvPfjju0hlIgrej9llyIcNMF5CXoO5eCIBbvNnMaDt6z5nRqrWi6tHFZwlCK1yYpMaw=="
+          "integrity": "sha512-Teya54P3ObC68rLu8E0IvPfjju0hlIgrej9llyIcNMF5CXoO5eCIBbvNnMaDt6z5nRqrWi6tHFZwlCK1yYpMaw==",
+          "registryUrl": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz"
         }
       }
     },
     "@MCozhusheck/tapplet-example": {
       "id": "@MCozhusheck/tapplet-example",
       "metadata": {
+        "packageName": "tapplet-example",
         "displayName": "Demo tapp by MCozhusheck",
         "author": {
           "name": "MCozhusheck",
@@ -53,21 +54,16 @@
           }
         ],
         "category": "tapplet category",
-        "source": {
-          "location": {
-            "npm": {
-              "packageName": "@MCozhusheck/tapplet-example",
-              "registry": "https://registry.npmjs.org/tapplet-example/-/tapplet-example-0.0.2.tgz"
-            }
-          }
-        }
+        "logo": "https://github.com/MCozhusheck/tapplet-example/blob/master/dist/vite.svg"
       },
       "versions": {
         "0.0.2": {
-          "checksum": "ivQM1oWaCaZrHARDCD2rib/RFmNDdSDuCQofOsEc3HLo/zgGjLXiySwm/uu3s/5lt9S+/oPC6wFE3m5agzdizA=="
+          "integrity": "sha512-ivQM1oWaCaZrHARDCD2rib/RFmNDdSDuCQofOsEc3HLo/zgGjLXiySwm/uu3s/5lt9S+/oPC6wFE3m5agzdizA==",
+          "registryUrl": "https://registry.npmjs.org/tapplet-example/-/tapplet-example-0.0.2.tgz"
         },
         "0.0.1": {
-          "checksum": "O56CWu0UvRPMieWp6HBPsQ+8OzDiWMmLUap7tarHLAKdx7vlYXo036OvQjHfpcAD79CRiJzrn4/GGvFlx5yU9w=="
+          "integrity": "sha512-O56CWu0UvRPMieWp6HBPsQ+8OzDiWMmLUap7tarHLAKdx7vlYXo036OvQjHfpcAD79CRiJzrn4/GGvFlx5yU9w==",
+          "registryUrl": "https://registry.npmjs.org/tapplet-example/-/tapplet-example-0.0.1.tgz"
         }
       }
     }

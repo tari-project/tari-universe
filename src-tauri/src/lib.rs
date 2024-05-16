@@ -13,13 +13,12 @@ mod wallet_daemon;
 mod interface;
 
 use commands::{
-  calculate_tapp_checksum,
   call_wallet,
   check_tapp_files,
-  validate_tapp_checksum,
+  calculate_and_validate_tapp_checksum,
   launch_tapplet,
   close_tapplet,
-  download_tapp,
+  download_and_extract_tapp,
   extract_tapp_tarball,
   get_balances,
   get_free_coins,
@@ -34,6 +33,7 @@ use commands::{
   fetch_tapplets,
   get_by_id_tapp_registry_db,
   delete_installed_tapp,
+  get_registered_tapp_with_version,
 };
 
 use crate::{ rpc::permission_token, wallet_daemon::start_wallet_daemon };
@@ -73,14 +73,14 @@ pub fn run() {
         read_tapp_registry_db,
         update_tapp_registry_db,
         delete_tapp_registry_db,
-        download_tapp,
-        calculate_tapp_checksum,
-        validate_tapp_checksum,
+        download_and_extract_tapp,
+        calculate_and_validate_tapp_checksum,
         check_tapp_files,
         extract_tapp_tarball,
         fetch_tapplets,
         get_by_id_tapp_registry_db,
-        delete_installed_tapp
+        delete_installed_tapp,
+        get_registered_tapp_with_version
       ]
     )
     .setup(|app| {
