@@ -20,8 +20,11 @@ use crate::database::schema::tapplet_version;
 use crate::interface::InstalledTappletWithName;
 use crate::interface::RegistedTappletWithVersion;
 
+use super::models::CreateDevTapplet;
 use super::models::CreateTappletVersion;
+use super::models::DevTapplet;
 use super::models::UpdateAsset;
+use super::models::UpdateDevTapplet;
 use super::models::UpdateInstalledTapplet;
 use super::models::UpdateTappletVersion;
 
@@ -144,7 +147,7 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
   }
 }
 
-impl<'a> Store<InstalledTapplet, CreateInstalledTapplet<'a>, UpdateInstalledTapplet> for SqliteStore {
+impl Store<InstalledTapplet, CreateInstalledTapplet, UpdateInstalledTapplet> for SqliteStore {
   fn get_all(&mut self) -> Vec<InstalledTapplet> {
     use crate::database::schema::installed_tapplet::dsl::*;
 
@@ -280,6 +283,49 @@ impl<'a> Store<TappletVersion, CreateTappletVersion<'a>, UpdateTappletVersion> f
 
     diesel
       ::delete(tapplet_version.filter(id.eq(entity.id)))
+      .execute(self.get_connection().deref_mut())
+      .expect("Error deleting tapplet version");
+  }
+}
+
+impl<'a> Store<DevTapplet, CreateDevTapplet<'a>, UpdateDevTapplet> for SqliteStore {
+  fn get_all(&mut self) -> Vec<DevTapplet> {
+    use crate::database::schema::dev_tapplet::dsl::*;
+
+    dev_tapplet.load::<DevTapplet>(self.get_connection().deref_mut()).expect("Error loading tapplet versions")
+  }
+
+  fn get_by_id(&mut self, dev_tapplet_id: i32) -> Option<DevTapplet> {
+    use crate::database::schema::dev_tapplet::dsl::*;
+
+    dev_tapplet.filter(id.eq(dev_tapplet_id)).first::<DevTapplet>(self.get_connection().deref_mut()).ok()
+  }
+
+  fn create(&mut self, item: &CreateDevTapplet) -> Vec<DevTapplet> {
+    use crate::database::schema::dev_tapplet;
+
+    diesel
+      ::insert_into(dev_tapplet::table)
+      .values(item)
+      .get_results(self.get_connection().deref_mut())
+      .expect("Error saving new tapplet version")
+  }
+
+  fn update(&mut self, old: DevTapplet, new: &UpdateDevTapplet) {
+    use crate::database::schema::dev_tapplet::dsl::*;
+
+    diesel
+      ::update(dev_tapplet.filter(id.eq(old.id)))
+      .set(new)
+      .execute(self.get_connection().deref_mut())
+      .expect("Error updating tapplet version");
+  }
+
+  fn delete(&mut self, entity: DevTapplet) {
+    use crate::database::schema::dev_tapplet::dsl::*;
+
+    diesel
+      ::delete(dev_tapplet.filter(id.eq(entity.id)))
       .execute(self.get_connection().deref_mut())
       .expect("Error deleting tapplet version");
   }

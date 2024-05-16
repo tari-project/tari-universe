@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
-import { RegisteredTapplet } from "../types/tapplet/Tapplet"
 import { invoke } from "@tauri-apps/api/core"
-import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText } from "@mui/material"
+import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material"
 import { InstallDesktop } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
+import AddDevTappletDialog from "./AddDevTappletDialog"
+import { RegisteredTapplet } from "@type/tapplet"
 
 export const TappletsRegistered: React.FC = () => {
   const [registeredTappletsList, setRegisteredTappletsList] = useState<RegisteredTapplet[]>([])
@@ -49,6 +50,7 @@ export const TappletsRegistered: React.FC = () => {
 
   return (
     <div>
+      <Typography variant="h4">Registered Tapplets</Typography>
       {registeredTappletsList.length > 0 ? (
         <List>
           {registeredTappletsList.map((item) => (
@@ -66,6 +68,7 @@ export const TappletsRegistered: React.FC = () => {
       ) : (
         <div>Registered tapplets list is empty</div>
       )}
+      <AddDevTappletDialog />
     </div>
   )
 }

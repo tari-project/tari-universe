@@ -8,13 +8,20 @@ diesel::table! {
 }
 
 diesel::table! {
+    dev_tapplet (id) {
+        id -> Nullable<Integer>,
+        package_name -> Text,
+        endpoint -> Text,
+        tapplet_name -> Text,
+        display_name -> Text,
+    }
+}
+
+diesel::table! {
     installed_tapplet (id) {
         id -> Nullable<Integer>,
         tapplet_id -> Nullable<Integer>,
         tapplet_version_id -> Nullable<Integer>,
-        is_dev_mode -> Bool,
-        dev_mode_endpoint -> Nullable<Text>,
-        path_to_dist -> Nullable<Text>,
     }
 }
 
@@ -50,6 +57,7 @@ diesel::joinable!(tapplet_version -> tapplet (tapplet_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     asset,
+    dev_tapplet,
     installed_tapplet,
     tapplet,
     tapplet_version,

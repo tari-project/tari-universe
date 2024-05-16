@@ -4,9 +4,11 @@ use tauri::{ self, State };
 use crate::{
   database::{
     models::{
+      CreateDevTapplet,
       CreateInstalledTapplet,
       CreateTapplet,
       CreateTappletVersion,
+      DevTapplet,
       InstalledTapplet,
       Tapplet,
       UpdateInstalledTapplet,
@@ -15,7 +17,7 @@ use crate::{
     store::{ SqliteStore, Store },
   },
   hash_calculator::calculate_checksum,
-  interface::{ InstalledTappletWithName, RegistedTappletWithVersion, RegisteredTapplets },
+  interface::{ DevTappletResponse, InstalledTappletWithName, RegistedTappletWithVersion, RegisteredTapplets },
   rpc::{ balances, free_coins, make_request },
   tapplet_installer::{ check_extracted_files, delete_tapplet, download_file, extract_tar },
   tapplet_server::start,
@@ -23,6 +25,7 @@ use crate::{
   ShutdownTokens,
   Tokens,
 };
+use tauri_plugin_http::reqwest::{ self };
 
 #[tauri::command]
 pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), ()> {
@@ -212,15 +215,6 @@ pub fn update_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> 
 }
 
 #[tauri::command]
-pub fn delete_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
-  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  let tapplets: Vec<Tapplet> = tapplet_store.get_all();
-  let first: Tapplet = tapplets.into_iter().next().unwrap();
-  tapplet_store.delete(first);
-  Ok(())
-}
-
-#[tauri::command]
 pub fn get_by_id_tapp_registry_db(
   tapplet_id: i32,
   db_connection: State<'_, DatabaseConnection>
@@ -259,9 +253,6 @@ pub fn insert_installed_tapp_db(tapplet_id: i32, db_connection: State<'_, Databa
   let installed_tapplet = CreateInstalledTapplet {
     tapplet_id: tapp.id,
     tapplet_version_id: version_data.id,
-    dev_mode_endpoint: "",
-    path_to_dist: "",
-    is_dev_mode: false,
   };
   tapplet_store.create(&installed_tapplet);
   Ok(())
@@ -314,4 +305,40 @@ pub fn delete_installed_tapp(tapplet_id: i32, db_connection: State<'_, DatabaseC
 
   delete_tapplet(&tapplet_path).unwrap();
   return Ok(());
+}
+
+#[tauri::command]
+pub async fn add_dev_tapplet(endpoint: String, db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+  let manifest_endpoint = format!("{}/tapplet.manifest.json", endpoint);
+  let manifest_res = reqwest::get(&manifest_endpoint).await.unwrap().json::<DevTappletResponse>().await.unwrap();
+  let mut store = SqliteStore::new(db_connection.0.clone());
+  let new_dev_tapplet = CreateDevTapplet {
+    endpoint: &endpoint,
+    package_name: &manifest_res.id,
+    tapplet_name: &manifest_res.name,
+    display_name: &manifest_res.display_name,
+  };
+
+  store.create(&new_dev_tapplet);
+  Ok(())
+}
+
+#[tauri::command]
+pub fn read_dev_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<Vec<DevTapplet>, ()> {
+  let mut store = SqliteStore::new(db_connection.0.clone());
+  let dev_tapplets: Vec<DevTapplet> = store.get_all();
+  Ok(dev_tapplets)
+}
+
+#[tauri::command]
+pub fn delete_dev_tapplet(dev_tapplet_id: i32, db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+  let mut store = SqliteStore::new(db_connection.0.clone());
+  let dev_tapplet: Option<DevTapplet> = store.get_by_id(dev_tapplet_id);
+  match dev_tapplet {
+    Some(tapp) => {
+      store.delete(tapp);
+      return Ok(());
+    }
+    None => Err(()),
+  }
 }

@@ -16,9 +16,21 @@ export type InstalledTapplet = {
   id?: number
   tapplet_id?: number
   tapplet_version_id?: number
-  is_dev_mode: boolean
-  dev_mode_endpoint?: string
-  path_to_dist?: string
+}
+
+export interface InstalledTappletWithName {
+  installed_tapplet: InstalledTapplet
+  display_name: string
+}
+
+export interface DevTapplet {
+  id?: number
+  package_name: string
+  endpoint: string
+  tapplet_name: string
+  display_name: string
+  about_summary: string
+  about_description: string
 }
 
 export interface TappletVersion {

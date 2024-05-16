@@ -3,10 +3,6 @@ import { invoke } from "@tauri-apps/api/core"
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 
-export type TappletProps = {
-  id: number
-}
-
 export function ActiveTapplet() {
   const [tappletAddress, setTappletAddress] = useState("")
   const { id } = useParams()

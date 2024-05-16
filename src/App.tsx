@@ -1,18 +1,21 @@
 import "./App.css"
 import { useEffect } from "react"
-import { TariPermissions, WalletDaemonParameters, WalletDaemonTariProvider } from "./provider"
 import {
   TariPermissionAccountInfo,
   TariPermissionKeyList,
   TariPermissionSubstatesRead,
   TariPermissionTransactionSend,
-} from "./provider/permissions"
-import { ActiveTapplet } from "./components/Tapplet"
+  TariPermissions,
+} from "@provider/permissions"
+import { ActiveTapplet } from "./components/ActiveTapplet"
 import { TabKey } from "./views/Tabs"
 import { Wallet } from "./components/Wallet"
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
 import { TappletsRegistered } from "./components/TappletsRegistered"
 import { TappletsInstalled } from "./components/TappletsInstalled"
+import { ActiveDevTapplet } from "./components/DevTapplet"
+import { WalletDaemonParameters, WalletDaemonTariProvider } from "@provider/wallet_daemon"
+import { Box } from "@mui/material"
 
 let permissions = new TariPermissions()
 permissions.addPermission(new TariPermissionKeyList())
@@ -45,7 +48,7 @@ function App() {
     <div className="container">
       <div style={{ marginTop: "1px" }}>
         <BrowserRouter>
-          <div>
+          <Box pb={4}>
             <Link to={TabKey.WALLET} className="nav-item">
               {" "}
               Wallet{" "}
@@ -58,13 +61,14 @@ function App() {
               {" "}
               Installed Tapplets{" "}
             </Link>
-          </div>
+          </Box>
 
           <Routes>
             <Route path={TabKey.WALLET} element={<Wallet key={TabKey.WALLET}></Wallet>} />
             <Route path={TabKey.TAPPLET_REGISTRY} element={<TappletsRegistered key={TabKey.TAPPLET_REGISTRY} />} />
             <Route path={TabKey.INSTALLED_TAPPLETS} element={<TappletsInstalled key={TabKey.INSTALLED_TAPPLETS} />} />
             <Route path={`${TabKey.ACTIVE_TAPPLET}/:id`} element={<ActiveTapplet key={TabKey.ACTIVE_TAPPLET} />} />
+            <Route path={`${TabKey.DEV_TAPPLETS}/:id`} element={<ActiveDevTapplet key={TabKey.DEV_TAPPLETS} />} />
           </Routes>
         </BrowserRouter>
       </div>
