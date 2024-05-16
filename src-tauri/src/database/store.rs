@@ -288,9 +288,6 @@ impl<'a> Store<DevTapplet, CreateDevTapplet<'a>, UpdateDevTapplet> for SqliteSto
     diesel
       ::insert_into(dev_tapplet::table)
       .values(item)
-      .on_conflict(dev_tapplet::package_name)
-      .do_update()
-      .set(UpdateDevTapplet::from(item))
       .get_results(self.get_connection().deref_mut())
       .expect("Error saving new tapplet version")
   }

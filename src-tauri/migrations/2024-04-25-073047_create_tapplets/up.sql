@@ -47,5 +47,5 @@ CREATE TABLE dev_tapplet (
   display_name TEXT NOT NULL,
   about_summary TEXT NOT NULL,
   about_description TEXT NOT NULL,
-  UNIQUE(package_name)
+  UNIQUE(endpoint)
 );
