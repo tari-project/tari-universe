@@ -10,7 +10,7 @@ pub fn delete_tapplet(tapplet_path: &str) -> Result<(), ()> {
   Ok(())
 }
 
-pub async fn download_file(url: String, tapplet_path: String) -> Result<(), anyhow::Error> {
+pub async fn download_file(url: &str, tapplet_path: &str) -> Result<(), anyhow::Error> {
   // Download the file
   let client = reqwest::Client::new();
   let mut response = client
@@ -59,32 +59,32 @@ pub fn extract_tar(tapplet_path: &str) -> Result<(), ()> {
   Ok(())
 }
 
-pub fn validate_checksum(checksum: &str, tapplet_path: &str) -> bool {
-  // Extract the file to the specified directory
-  let manifest_file = PathBuf::from(tapplet_path).join("package").join("tapplet.manifest.json");
+// pub fn validate_checksum(checksum: &str, tapplet_path: &str) -> bool {
+//   // Extract the file to the specified directory
+//   let manifest_file = PathBuf::from(tapplet_path).join("package").join("tapplet.manifest.json");
 
-  // Open the JSON file
-  let mut file = fs::File::open(manifest_file).expect("Failed to open manifest.json");
+//   // Open the JSON file
+//   let mut file = fs::File::open(manifest_file).expect("Failed to open manifest.json");
 
-  // Read the JSON data from the file
-  let mut data = String::new();
-  file.read_to_string(&mut data).expect("Failed to read manifest.json");
+//   // Read the JSON data from the file
+//   let mut data = String::new();
+//   file.read_to_string(&mut data).expect("Failed to read manifest.json");
 
-  // Parse the JSON data as a Value object
-  let json: Value = serde_json::from_str(&data).expect("Failed to parse manifest.json");
+//   // Parse the JSON data as a Value object
+//   let json: Value = serde_json::from_str(&data).expect("Failed to parse manifest.json");
 
-  // Extract the integrity field from the Value object
+//   // Extract the integrity field from the Value object
 
-  // TODO don't panic if integrity field not found
-  // let pkg_integrity_checksum = json["integrity"]
-  //   .as_str()
-  //   .expect("Failed to extract integrity field from manifest.json ");
-  let _tmp_checksum = "sha512-Teya54P3ObC68rLu8E0IvPfjju0hlIgrej9llyIcNMF5CXoO5eCIBbvNnMaDt6z5nRqrWi6tHFZwlCK1yYpMaw==";
+//   // TODO don't panic if integrity field not found
+//   // let pkg_integrity_checksum = json["integrity"]
+//   //   .as_str()
+//   //   .expect("Failed to extract integrity field from manifest.json ");
+//   let _tmp_checksum = "sha512-Teya54P3ObC68rLu8E0IvPfjju0hlIgrej9llyIcNMF5CXoO5eCIBbvNnMaDt6z5nRqrWi6tHFZwlCK1yYpMaw==";
 
-  // Print the integrity value to the console
-  println!("Is checksum valid: {}", checksum == _tmp_checksum);
-  checksum == _tmp_checksum
-}
+//   // Print the integrity value to the console
+//   println!("Is checksum valid: {}", checksum == _tmp_checksum);
+//   checksum == _tmp_checksum
+// }
 
 pub fn check_extracted_files(tapplet_path: &str) -> Result<bool, String> {
   //TODO do we need to check sth more?

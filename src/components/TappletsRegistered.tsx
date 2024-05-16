@@ -23,42 +23,34 @@ export const TappletsRegistered: React.FC = () => {
     fetchTapplets()
   }, [])
 
-  async function downloadAndExtract(url: string, path: string) {
-    await invoke("download_tapp", { url, tappletPath: path })
-    await invoke("extract_tapp_tarball", { tappletPath: path })
-    await invoke("check_tapp_files", { tappletPath: path })
+  async function downloadAndExtract(tappletId: number) {
+    await invoke("download_and_extract_tapp", { tappletId: tappletId })
   }
 
-  async function validateChecksum(path: string) {
-    const calculatedChecksum: string = await invoke("calculate_tapp_checksum", {
-      tappletPath: path,
+  async function validateChecksum(tappletId: number) {
+    //TODO use it to display the verification process status
+    const isCheckumValid: boolean = await invoke("calculate_and_validate_tapp_checksum", {
+      tappletId: tappletId,
     })
-    //  TODO handle case if checksum is incorrect
-    const isCheckumValid: boolean = await invoke("validate_tapp_checksum", {
-      checksum: calculatedChecksum,
-      tappletPath: path,
-    })
+    console.log("is checksum valid?", isCheckumValid)
   }
 
-  async function installTapplet(url: string, path: string) {
-    await downloadAndExtract(url, path)
-    await validateChecksum(path)
+  async function installTapplet(tappletId: number) {
+    await downloadAndExtract(tappletId)
+    await validateChecksum(tappletId)
   }
 
   const handleInstall = async (tapplet: RegisteredTapplet) => {
-    const _tapplet: RegisteredTappletWithVersion = await invoke("get_registered_tapp_with_version", {
-      tappletId: tapplet.id,
-    })
-    const _url = `${_tapplet.tapp_version.registry_url}`
-    const _path = `../tapplets_installed/${_tapplet.registered_tapp.registry_id}/${_tapplet.tapp_version.version}`
-    await installTapplet(_url, _path)
+    if (!tapplet.id) return
+    await installTapplet(tapplet.id)
 
+    // TODO insert to db
     const tapp: InstalledTapplet = {
       is_dev_mode: true, //TODO dev mode
       dev_mode_endpoint: "",
-      path_to_dist: _path,
+      path_to_dist: "path_to_dist",
       tapplet_id: tapplet.id,
-      tapplet_version_id: _tapplet.tapp_version.id,
+      tapplet_version_id: 1,
     }
 
     invoke("insert_installed_tapp_db", { tapplet: tapp })

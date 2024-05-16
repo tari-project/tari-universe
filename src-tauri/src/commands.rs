@@ -14,10 +14,10 @@ use crate::{
     },
     store::{ SqliteStore, Store },
   },
-  hash_calculator::calculate_shasum,
+  hash_calculator::calculate_checksum,
   interface::{ InstalledTappletWithName, RegistedTappletWithVersion, RegisteredTapplets },
   rpc::{ balances, free_coins, make_request },
-  tapplet_installer::{ check_extracted_files, delete_tapplet, download_file, extract_tar, validate_checksum },
+  tapplet_installer::{ check_extracted_files, delete_tapplet, download_file, extract_tar },
   tapplet_server::start,
   DatabaseConnection,
   ShutdownTokens,
@@ -97,9 +97,24 @@ pub async fn call_wallet(method: String, params: String, tokens: State<'_, Token
 }
 
 #[tauri::command]
-pub async fn download_tapp(url: String, tapplet_path: String) -> Result<(), ()> {
-  let handle = tauri::async_runtime::spawn(async move { download_file(url.clone(), tapplet_path.clone()).await });
+pub async fn download_and_extract_tapp(
+  tapplet_id: i32,
+  db_connection: State<'_, DatabaseConnection>
+) -> Result<(), ()> {
+  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
+  let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id).unwrap();
+
+  let url = version_data.registry_url;
+  let tapplet_path = format!("../tapplets_installed/{}/{}", tapp.registry_id, version_data.version);
+  let extract_path = tapplet_path.clone();
+
+  // download tarball
+  let handle = tauri::async_runtime::spawn(async move { download_file(&url, &tapplet_path).await });
   let _ = handle.await.unwrap();
+
+  //extract tarball
+  let _ = extract_tapp_tarball(&extract_path);
+  let _ = check_tapp_files(&extract_path);
   Ok(())
 }
 
@@ -110,15 +125,20 @@ pub fn extract_tapp_tarball(tapplet_path: &str) -> Result<(), ()> {
 }
 
 #[tauri::command]
-pub fn calculate_tapp_checksum(tapplet_path: &str) -> Result<String, String> {
-  let response = calculate_shasum(tapplet_path).unwrap();
-  Ok(response)
-}
+pub fn calculate_and_validate_tapp_checksum(
+  tapplet_id: i32,
+  db_connection: State<'_, DatabaseConnection>
+) -> Result<bool, bool> {
+  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
+  let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id).unwrap();
+  let tapplet_path = format!("../tapplets_installed/{}/{}", tapp.registry_id, version_data.version);
 
-#[tauri::command]
-pub fn validate_tapp_checksum(checksum: &str, tapplet_path: &str) -> Result<bool, bool> {
-  let response = validate_checksum(checksum, tapplet_path);
-  Ok(response)
+  // calculate `integrity` from downloaded tarball file
+  let integrity = calculate_checksum(&tapplet_path).unwrap();
+  // check if the calculated chechsum is equal to the value stored in the registry
+  let validity: bool = integrity == version_data.integrity;
+
+  Ok(validity)
 }
 
 #[tauri::command]
