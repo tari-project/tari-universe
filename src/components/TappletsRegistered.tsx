@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react"
-import { InstalledTapplet, RegisteredTapplet } from "@type/tapplet"
 import { invoke } from "@tauri-apps/api/core"
 import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material"
 import { InstallDesktop } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
 import AddDevTappletDialog from "./AddDevTappletDialog"
+import { RegisteredTapplet } from "@type/tapplet"
 
 export const TappletsRegistered: React.FC = () => {
   const [registeredTappletsList, setRegisteredTappletsList] = useState<RegisteredTapplet[]>([])
@@ -24,42 +24,28 @@ export const TappletsRegistered: React.FC = () => {
     fetchTapplets()
   }, [])
 
-  async function downloadAndExtract(url: string, path: string) {
-    await invoke("download_tapp", { url, tappletPath: path })
-    await invoke("extract_tapp_tarball", { tappletPath: path })
-    await invoke("check_tapp_files", { tappletPath: path })
+  async function downloadAndExtract(tappletId: number) {
+    await invoke("download_and_extract_tapp", { tappletId: tappletId })
   }
 
-  async function validateChecksum(path: string) {
-    const calculatedChecksum: string = await invoke("calculate_tapp_checksum", {
-      tappletPath: path,
+  async function validateChecksum(tappletId: number) {
+    //TODO use it to display the verification process status
+    const isCheckumValid: boolean = await invoke("calculate_and_validate_tapp_checksum", {
+      tappletId: tappletId,
     })
-    //  TODO handle case if checksum is incorrect
-    const isCheckumValid: boolean = await invoke("validate_tapp_checksum", {
-      checksum: calculatedChecksum,
-      tappletPath: path,
-    })
+    console.log("is checksum valid?", isCheckumValid)
   }
 
-  async function installTapplet(url: string, path: string) {
-    await downloadAndExtract(url, path)
-    await validateChecksum(path)
+  async function installTapplet(tappletId: number) {
+    await downloadAndExtract(tappletId)
+    await validateChecksum(tappletId)
   }
 
-  const handleInstall = async (tapplet: RegisteredTapplet) => {
-    //TODO fetch path & url from registry
-    //TODO add separate folder for different version
-    const basePath = `../tapplets_installed/${tapplet.registry_id}/${tapplet.id}`
-    //TODO set url for different versions - registry json refactor needed
-    const baseUrl = `${tapplet.registry_url}`
-    await installTapplet(baseUrl, basePath)
+  const handleInstall = async (tappletId?: number) => {
+    if (!tappletId) return
+    await installTapplet(tappletId)
 
-    const tapp: InstalledTapplet = {
-      tapplet_id: tapplet.id ?? 0,
-      tapplet_version_id: tapplet.id,
-    }
-
-    invoke("insert_installed_tapp_db", { tapplet: tapp })
+    invoke("insert_installed_tapp_db", { tappletId: tappletId })
   }
 
   return (
@@ -73,7 +59,7 @@ export const TappletsRegistered: React.FC = () => {
                 <Avatar src={tariLogo} />
               </ListItemAvatar>
               <ListItemText primary={item.package_name} />
-              <IconButton aria-label="install" onClick={() => handleInstall(item)}>
+              <IconButton aria-label="install" onClick={() => handleInstall(item.id)}>
                 <InstallDesktop color="primary" />
               </IconButton>
             </ListItem>

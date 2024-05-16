@@ -16,10 +16,10 @@ use crate::{
     },
     store::{ SqliteStore, Store },
   },
-  hash_calculator::calculate_shasum,
-  interface::{ DevTappletResponse, InstalledTappletWithName, VerifiedTapplets },
+  hash_calculator::calculate_checksum,
+  interface::{ DevTappletResponse, InstalledTappletWithName, RegistedTappletWithVersion, RegisteredTapplets },
   rpc::{ balances, free_coins, make_request },
-  tapplet_installer::{ check_extracted_files, delete_tapplet, download_file, extract_tar, validate_checksum },
+  tapplet_installer::{ check_extracted_files, delete_tapplet, download_file, extract_tar },
   tapplet_server::start,
   DatabaseConnection,
   ShutdownTokens,
@@ -100,9 +100,24 @@ pub async fn call_wallet(method: String, params: String, tokens: State<'_, Token
 }
 
 #[tauri::command]
-pub async fn download_tapp(url: String, tapplet_path: String) -> Result<(), ()> {
-  let handle = tauri::async_runtime::spawn(async move { download_file(url.clone(), tapplet_path.clone()).await });
+pub async fn download_and_extract_tapp(
+  tapplet_id: i32,
+  db_connection: State<'_, DatabaseConnection>
+) -> Result<(), ()> {
+  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
+  let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id).unwrap();
+
+  let url = version_data.registry_url;
+  let tapplet_path = format!("../tapplets_installed/{}/{}", tapp.registry_id, version_data.version);
+  let extract_path = tapplet_path.clone();
+
+  // download tarball
+  let handle = tauri::async_runtime::spawn(async move { download_file(&url, &tapplet_path).await });
   let _ = handle.await.unwrap();
+
+  //extract tarball
+  let _ = extract_tapp_tarball(&extract_path);
+  let _ = check_tapp_files(&extract_path);
   Ok(())
 }
 
@@ -113,15 +128,20 @@ pub fn extract_tapp_tarball(tapplet_path: &str) -> Result<(), ()> {
 }
 
 #[tauri::command]
-pub fn calculate_tapp_checksum(tapplet_path: &str) -> Result<String, String> {
-  let response = calculate_shasum(tapplet_path).unwrap();
-  Ok(response)
-}
+pub fn calculate_and_validate_tapp_checksum(
+  tapplet_id: i32,
+  db_connection: State<'_, DatabaseConnection>
+) -> Result<bool, bool> {
+  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
+  let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id).unwrap();
+  let tapplet_path = format!("../tapplets_installed/{}/{}", tapp.registry_id, version_data.version);
 
-#[tauri::command]
-pub fn validate_tapp_checksum(checksum: &str, tapplet_path: &str) -> Result<bool, bool> {
-  let response = validate_checksum(checksum, tapplet_path);
-  Ok(response)
+  // calculate `integrity` from downloaded tarball file
+  let integrity = calculate_checksum(&tapplet_path).unwrap();
+  // check if the calculated chechsum is equal to the value stored in the registry
+  let validity: bool = integrity == version_data.integrity;
+
+  Ok(validity)
 }
 
 #[tauri::command]
@@ -154,18 +174,19 @@ pub fn read_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Re
 #[tauri::command]
 pub fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
   let registry = include_str!("../../tapplets-registry.manifest.json");
-  let tapplets: VerifiedTapplets = serde_json::from_str(registry).unwrap();
+  let tapplets: RegisteredTapplets = serde_json::from_str(registry).unwrap();
   let mut store = SqliteStore::new(db_connection.0.clone());
-  tapplets.verified_tapplets.iter().for_each(|(_, tapplet_manifest)| {
+  tapplets.registered_tapplets.iter().for_each(|(_, tapplet_manifest)| {
     let inserted_tapplet = store.create(&CreateTapplet::from(tapplet_manifest));
     let tapplet_db_id = inserted_tapplet.iter().next().unwrap().id.unwrap();
 
-    tapplet_manifest.versions.iter().for_each(|(version, checksum)| {
+    tapplet_manifest.versions.iter().for_each(|(version, version_data)| {
       store.create(
         &(CreateTappletVersion {
           tapplet_id: Some(tapplet_db_id),
           version: &version,
-          checksum: &checksum.checksum,
+          integrity: &version_data.integrity,
+          registry_url: &version_data.registry_url,
         })
       );
     });
@@ -186,7 +207,6 @@ pub fn update_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> 
     author_website: "updated_value".to_string(),
     category: "updated_value".to_string(),
     registry_id: "updated_value".to_string(),
-    registry_url: "updated_value".to_string(),
   };
   let tapplets: Vec<Tapplet> = tapplet_store.get_all();
   let first: Tapplet = tapplets.into_iter().next().unwrap();
@@ -207,17 +227,34 @@ pub fn get_by_id_tapp_registry_db(
   }
 }
 
+#[tauri::command]
+pub fn get_registered_tapp_with_version(
+  tapplet_id: i32,
+  db_connection: State<'_, DatabaseConnection>
+) -> Result<RegistedTappletWithVersion, ()> {
+  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
+  let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id).unwrap();
+  let registered_with_version = RegistedTappletWithVersion {
+    registered_tapp: tapp,
+    tapp_version: version_data,
+  };
+  Ok(registered_with_version)
+}
+
 /**
  * INSTALLED TAPPLETS - STORES ALL THE USER'S INSTALLED TAPPLETS
  */
 
 #[tauri::command]
-pub fn insert_installed_tapp_db(
-  tapplet: CreateInstalledTapplet,
-  db_connection: State<'_, DatabaseConnection>
-) -> Result<(), ()> {
+pub fn insert_installed_tapp_db(tapplet_id: i32, db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  tapplet_store.create(&tapplet);
+  let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id).unwrap();
+
+  let installed_tapplet = CreateInstalledTapplet {
+    tapplet_id: tapp.id,
+    tapplet_version_id: version_data.id,
+  };
+  tapplet_store.create(&installed_tapplet);
   Ok(())
 }
 
@@ -263,7 +300,7 @@ pub fn delete_installed_tapp(tapplet_id: i32, db_connection: State<'_, DatabaseC
   let tapplet_path = format!(
     "../tapplets_installed/{}/{}",
     installed_tapplet.1.registry_id,
-    installed_tapplet.1.id.unwrap()
+    installed_tapplet.2.version
   );
 
   delete_tapplet(&tapplet_path).unwrap();

@@ -41,14 +41,13 @@ pub struct UpdateInstalledTapplet {
 pub struct Tapplet {
   pub id: Option<i32>,
   pub registry_id: String,
+  pub package_name: String,
   pub display_name: String,
   pub author_name: String,
   pub author_website: String,
   pub about_summary: String,
   pub about_description: String,
   pub category: String,
-  pub package_name: String,
-  pub registry_url: String,
   pub image_id: Option<i32>,
 }
 
@@ -56,14 +55,13 @@ pub struct Tapplet {
 #[diesel(table_name = tapplet)]
 pub struct CreateTapplet<'a> {
   pub registry_id: &'a str,
+  pub package_name: &'a str,
   pub display_name: &'a str,
   pub author_name: &'a str,
   pub author_website: &'a str,
   pub about_summary: &'a str,
   pub about_description: &'a str,
   pub category: &'a str,
-  pub package_name: &'a str,
-  pub registry_url: &'a str,
   pub image_id: Option<i32>,
 }
 
@@ -71,14 +69,13 @@ impl<'a> From<&'a TappletManifest> for CreateTapplet<'a> {
   fn from(tapplet_manifest: &'a TappletManifest) -> Self {
     CreateTapplet {
       registry_id: &tapplet_manifest.id,
+      package_name: &tapplet_manifest.metadata.package_name,
       display_name: &tapplet_manifest.metadata.display_name,
       author_name: &tapplet_manifest.metadata.author.name,
       author_website: &tapplet_manifest.metadata.author.website,
       about_summary: &tapplet_manifest.metadata.about.summary,
       about_description: &tapplet_manifest.metadata.about.description,
       category: &tapplet_manifest.metadata.category,
-      package_name: &tapplet_manifest.metadata.source.location.npm.package_name,
-      registry_url: &tapplet_manifest.metadata.source.location.npm.registry,
       image_id: None,
     }
   }
@@ -88,14 +85,13 @@ impl<'a> From<&CreateTapplet<'a>> for UpdateTapplet {
   fn from(create_tapplet: &CreateTapplet) -> Self {
     UpdateTapplet {
       registry_id: create_tapplet.registry_id.to_string(),
+      package_name: create_tapplet.package_name.to_string(),
       display_name: create_tapplet.display_name.to_string(),
       author_name: create_tapplet.author_name.to_string(),
       author_website: create_tapplet.author_website.to_string(),
       about_summary: create_tapplet.about_summary.to_string(),
       about_description: create_tapplet.about_description.to_string(),
       category: create_tapplet.category.to_string(),
-      package_name: create_tapplet.package_name.to_string(),
-      registry_url: create_tapplet.registry_url.to_string(),
       image_id: create_tapplet.image_id,
     }
   }
@@ -105,14 +101,13 @@ impl<'a> From<&CreateTapplet<'a>> for UpdateTapplet {
 #[diesel(table_name = tapplet)]
 pub struct UpdateTapplet {
   pub registry_id: String,
+  pub package_name: String,
   pub display_name: String,
   pub author_name: String,
   pub author_website: String,
   pub about_summary: String,
   pub about_description: String,
   pub category: String,
-  pub package_name: String,
-  pub registry_url: String,
   pub image_id: Option<i32>,
 }
 
@@ -151,7 +146,8 @@ pub struct TappletVersion {
   pub id: Option<i32>,
   pub tapplet_id: Option<i32>,
   pub version: String,
-  pub checksum: String,
+  pub integrity: String,
+  pub registry_url: String,
 }
 
 #[derive(Insertable, Debug)]
@@ -159,7 +155,8 @@ pub struct TappletVersion {
 pub struct CreateTappletVersion<'a> {
   pub tapplet_id: Option<i32>,
   pub version: &'a str,
-  pub checksum: &'a str,
+  pub integrity: &'a str,
+  pub registry_url: &'a str,
 }
 
 impl<'a> From<&CreateTappletVersion<'a>> for UpdateTappletVersion {
@@ -167,7 +164,8 @@ impl<'a> From<&CreateTappletVersion<'a>> for UpdateTappletVersion {
     UpdateTappletVersion {
       tapplet_id: create_tapplet_version.tapplet_id,
       version: create_tapplet_version.version.to_string(),
-      checksum: create_tapplet_version.checksum.to_string(),
+      integrity: create_tapplet_version.integrity.to_string(),
+      registry_url: create_tapplet_version.registry_url.to_string(),
     }
   }
 }
@@ -177,7 +175,8 @@ impl<'a> From<&CreateTappletVersion<'a>> for UpdateTappletVersion {
 pub struct UpdateTappletVersion {
   pub tapplet_id: Option<i32>,
   pub version: String,
-  pub checksum: String,
+  pub integrity: String,
+  pub registry_url: String,
 }
 
 #[derive(Queryable, Selectable, Debug, Serialize)]

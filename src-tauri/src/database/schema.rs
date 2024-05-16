@@ -36,7 +36,6 @@ diesel::table! {
         about_description -> Text,
         category -> Text,
         package_name -> Text,
-        registry_url -> Text,
         image_id -> Nullable<Integer>,
     }
 }
@@ -46,7 +45,8 @@ diesel::table! {
         id -> Nullable<Integer>,
         tapplet_id -> Nullable<Integer>,
         version -> Text,
-        checksum -> Text,
+        integrity -> Text,
+        registry_url -> Text,
     }
 }
 

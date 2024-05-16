@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 
 #[derive(Debug, serde::Deserialize)]
-pub struct VerifiedTapplets {
-  #[serde(rename = "verifiedTapplets")]
-  pub verified_tapplets: HashMap<String, TappletManifest>,
+pub struct RegisteredTapplets {
+  #[serde(rename = "manifestVersion")]
+  pub manifest_version: String,
+  #[serde(rename = "registeredTapplets")]
+  pub registered_tapplets: HashMap<String, TappletManifest>,
 }
 
 #[derive(Debug, serde::Deserialize)]
@@ -15,18 +17,22 @@ pub struct TappletManifest {
 
 #[derive(Debug, serde::Deserialize, Clone)]
 pub struct Metadata {
+  #[serde(rename = "packageName")]
+  pub package_name: String,
   #[serde(rename = "displayName")]
   pub display_name: String,
   pub author: Author,
   pub about: About,
   pub audits: Vec<Audit>,
   pub category: String,
-  pub source: Source,
+  pub logo: String,
 }
 
 #[derive(Debug, serde::Deserialize, Clone)]
 pub struct Version {
-  pub checksum: String,
+  pub integrity: String,
+  #[serde(rename = "registryUrl")]
+  pub registry_url: String,
 }
 
 #[derive(Debug, serde::Deserialize, Clone)]
@@ -45,21 +51,4 @@ pub struct About {
 pub struct Audit {
   pub auditor: String,
   pub report: String,
-}
-
-#[derive(Debug, serde::Deserialize, Clone)]
-pub struct Source {
-  pub location: Location,
-}
-
-#[derive(Debug, serde::Deserialize, Clone)]
-pub struct Location {
-  pub npm: Npm,
-}
-
-#[derive(Debug, serde::Deserialize, Clone)]
-pub struct Npm {
-  #[serde(rename = "packageName")]
-  pub package_name: String,
-  pub registry: String,
 }
