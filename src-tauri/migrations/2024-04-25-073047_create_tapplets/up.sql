@@ -45,7 +45,5 @@ CREATE TABLE dev_tapplet (
   endpoint TEXT NOT NULL,
   tapplet_name TEXT NOT NULL,
   display_name TEXT NOT NULL,
-  about_summary TEXT NOT NULL,
-  about_description TEXT NOT NULL,
   UNIQUE(endpoint)
 );

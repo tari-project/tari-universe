@@ -189,8 +189,6 @@ pub struct DevTapplet {
   pub endpoint: String,
   pub tapplet_name: String,
   pub display_name: String,
-  pub about_summary: String,
-  pub about_description: String,
 }
 
 #[derive(Insertable, Debug)]
@@ -200,8 +198,6 @@ pub struct CreateDevTapplet<'a> {
   pub package_name: &'a str,
   pub tapplet_name: &'a str,
   pub display_name: &'a str,
-  pub about_summary: &'a str,
-  pub about_description: &'a str,
 }
 
 impl<'a> From<&CreateDevTapplet<'a>> for UpdateDevTapplet {
@@ -211,8 +207,6 @@ impl<'a> From<&CreateDevTapplet<'a>> for UpdateDevTapplet {
       package_name: create_dev_tapplet.package_name.to_string(),
       tapplet_name: create_dev_tapplet.tapplet_name.to_string(),
       display_name: create_dev_tapplet.display_name.to_string(),
-      about_summary: create_dev_tapplet.about_summary.to_string(),
-      about_description: create_dev_tapplet.about_description.to_string(),
     }
   }
 }
@@ -224,6 +218,4 @@ pub struct UpdateDevTapplet {
   pub package_name: String,
   pub tapplet_name: String,
   pub display_name: String,
-  pub about_summary: String,
-  pub about_description: String,
 }

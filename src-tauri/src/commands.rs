@@ -280,8 +280,6 @@ pub async fn add_dev_tapplet(endpoint: String, db_connection: State<'_, Database
     package_name: &manifest_res.id,
     tapplet_name: &manifest_res.name,
     display_name: &manifest_res.display_name,
-    about_summary: &manifest_res.about.summary,
-    about_description: &manifest_res.about.description,
   };
 
   store.create(&new_dev_tapplet);

@@ -14,8 +14,6 @@ diesel::table! {
         endpoint -> Text,
         tapplet_name -> Text,
         display_name -> Text,
-        about_summary -> Text,
-        about_description -> Text,
     }
 }
 
