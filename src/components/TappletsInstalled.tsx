@@ -1,20 +1,8 @@
 import { useEffect, useState } from "react"
 import { DevTapplet, InstalledTappletWithName } from "@type/tapplet"
 import { invoke } from "@tauri-apps/api/core"
-import {
-  Avatar,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  OutlinedInput,
-  Typography,
-} from "@mui/material"
-import { Launch, Delete, Add } from "@mui/icons-material"
+import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material"
+import { Launch, Delete } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
 import { NavLink } from "react-router-dom"
 import { TabKey } from "../views/Tabs"
@@ -22,7 +10,6 @@ import { TabKey } from "../views/Tabs"
 export const TappletsInstalled: React.FC = () => {
   const [installedTappletsList, setInstalledTappletsList] = useState<InstalledTappletWithName[]>([])
   const [devTappletsList, setDevTappletsList] = useState<DevTapplet[]>([])
-  const [tappletDevModeEndpoint, setTappletDevModeEndpoint] = useState<string>("")
 
   useEffect(() => {
     const fetchTapplets = async () => {
@@ -38,11 +25,6 @@ export const TappletsInstalled: React.FC = () => {
     await invoke("delete_installed_tapp", { tappletId: _id })
     await invoke("delete_installed_tapp_db", { tappletId: _id })
     setInstalledTappletsList(await invoke("read_installed_tapp_db"))
-  }
-
-  const handleAddTappletDevMode = async (endpoint: string) => {
-    await invoke("add_dev_tapplet", { endpoint })
-    setDevTappletsList(await invoke("read_dev_tapplets"))
   }
 
   const handleDeleteDevTapplet = async (item: DevTapplet) => {
@@ -96,21 +78,6 @@ export const TappletsInstalled: React.FC = () => {
             </ListItem>
           ))}
       </List>
-      <FormControl sx={{ m: 1 }} variant="outlined">
-        <InputLabel>Dev tapplet endpoint</InputLabel>
-        <OutlinedInput
-          type="url"
-          onChange={(e) => setTappletDevModeEndpoint(e.target.value)}
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton onClick={() => handleAddTappletDevMode(tappletDevModeEndpoint)} edge="end">
-                <Add />
-              </IconButton>
-            </InputAdornment>
-          }
-          label="text"
-        />
-      </FormControl>
     </div>
   )
 }
