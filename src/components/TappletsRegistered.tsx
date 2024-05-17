@@ -5,15 +5,19 @@ import { InstallDesktop } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
 import AddDevTappletDialog from "./AddDevTappletDialog"
 import { RegisteredTapplet } from "@type/tapplet"
+import { useSnackBar } from "../ErrorContext"
 
 export const TappletsRegistered: React.FC = () => {
   const [registeredTappletsList, setRegisteredTappletsList] = useState<RegisteredTapplet[]>([])
+  const { showSnackBar } = useSnackBar()
 
   useEffect(() => {
     const fetchTapplets = async () => {
       try {
         // fetch data from json to db
         await invoke("fetch_tapplets")
+          .then((message) => console.log(message))
+          .catch((error) => showSnackBar(error, "error"))
         // read from db
         const _tapplets: RegisteredTapplet[] = await invoke("read_tapp_registry_db")
         if (_tapplets) setRegisteredTappletsList(_tapplets)

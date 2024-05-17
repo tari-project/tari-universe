@@ -16,6 +16,7 @@ use crate::{
     },
     store::{ SqliteStore, Store },
   },
+  error::Error,
   hash_calculator::calculate_checksum,
   interface::{ DevTappletResponse, InstalledTappletWithName, RegistedTappletWithVersion, RegisteredTapplets },
   rpc::{ balances, free_coins, make_request },
@@ -172,25 +173,26 @@ pub fn read_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Re
  *  REGISTERED TAPPLETS - FETCH DATA FROM MANIFEST JSON
  */
 #[tauri::command]
-pub fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+pub fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<(), Error> {
   let registry = include_str!("../../tapplets-registry.manifest.json");
-  let tapplets: RegisteredTapplets = serde_json::from_str(registry).unwrap();
+  let tapplets: RegisteredTapplets = serde_json::from_str(registry).map_err(|e| Error::JsonParsingError(e))?;
   let mut store = SqliteStore::new(db_connection.0.clone());
-  tapplets.registered_tapplets.iter().for_each(|(_, tapplet_manifest)| {
-    let inserted_tapplet = store.create(&CreateTapplet::from(tapplet_manifest));
-    let tapplet_db_id = inserted_tapplet.iter().next().unwrap().id.unwrap();
 
-    tapplet_manifest.versions.iter().for_each(|(version, version_data)| {
+  for tapplet_manifest in tapplets.registered_tapplets.values() {
+    let inserted_tapplet = store.create(&CreateTapplet::from(tapplet_manifest))?;
+    let tapplet_db_id = inserted_tapplet.id;
+
+    for (version, version_data) in tapplet_manifest.versions.iter() {
       store.create(
         &(CreateTappletVersion {
-          tapplet_id: Some(tapplet_db_id),
+          tapplet_id: tapplet_db_id,
           version: &version,
           integrity: &version_data.integrity,
           registry_url: &version_data.registry_url,
         })
-      );
-    });
-  });
+      )?;
+    }
+  }
   Ok(())
 }
 
@@ -308,7 +310,10 @@ pub fn delete_installed_tapp(tapplet_id: i32, db_connection: State<'_, DatabaseC
 }
 
 #[tauri::command]
-pub async fn add_dev_tapplet(endpoint: String, db_connection: State<'_, DatabaseConnection>) -> Result<(), ()> {
+pub async fn add_dev_tapplet(
+  endpoint: String,
+  db_connection: State<'_, DatabaseConnection>
+) -> Result<DevTapplet, Error> {
   let manifest_endpoint = format!("{}/tapplet.manifest.json", endpoint);
   let manifest_res = reqwest::get(&manifest_endpoint).await.unwrap().json::<DevTappletResponse>().await.unwrap();
   let mut store = SqliteStore::new(db_connection.0.clone());
@@ -319,8 +324,7 @@ pub async fn add_dev_tapplet(endpoint: String, db_connection: State<'_, Database
     display_name: &manifest_res.display_name,
   };
 
-  store.create(&new_dev_tapplet);
-  Ok(())
+  store.create(&new_dev_tapplet)
 }
 
 #[tauri::command]

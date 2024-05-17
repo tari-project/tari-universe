@@ -2,7 +2,6 @@ use std::ops::DerefMut;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::MutexGuard;
-
 use diesel::prelude::*;
 use diesel::SqliteConnection;
 
@@ -16,9 +15,8 @@ use crate::database::models::{
   Tapplet,
   UpdateTapplet,
 };
-use crate::database::schema::tapplet_version;
 use crate::interface::InstalledTappletWithName;
-use crate::interface::RegistedTappletWithVersion;
+use crate::error::Error;
 
 use super::models::CreateDevTapplet;
 use super::models::CreateTappletVersion;
@@ -45,7 +43,7 @@ impl SqliteStore {
 pub trait Store<T, U, G> {
   fn get_all(&mut self) -> Vec<T>;
   fn get_by_id(&mut self, id: i32) -> Option<T>;
-  fn create(&mut self, item: &U) -> Vec<T>;
+  fn create(&mut self, item: &U) -> Result<T, Error>;
   fn delete(&mut self, entity: T);
   fn update(&mut self, old: T, new: &G);
 }
@@ -114,7 +112,7 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
     tapplet.filter(id.eq(tapplet_id)).first::<Tapplet>(self.get_connection().deref_mut()).ok()
   }
 
-  fn create(&mut self, item: &CreateTapplet) -> Vec<Tapplet> {
+  fn create(&mut self, item: &CreateTapplet) -> Result<Tapplet, Error> {
     use crate::database::schema::tapplet;
 
     diesel
@@ -123,8 +121,8 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
       .on_conflict(tapplet::package_name)
       .do_update()
       .set(UpdateTapplet::from(item))
-      .get_results(self.get_connection().deref_mut())
-      .expect("Error saving new tapplet")
+      .get_result(self.get_connection().deref_mut())
+      .map_err(|e| Error::DatabaseError(e))
   }
 
   fn delete(&mut self, entity: Tapplet) {
@@ -165,7 +163,7 @@ impl Store<InstalledTapplet, CreateInstalledTapplet, UpdateInstalledTapplet> for
       .ok()
   }
 
-  fn create(&mut self, item: &CreateInstalledTapplet) -> Vec<InstalledTapplet> {
+  fn create(&mut self, item: &CreateInstalledTapplet) -> Result<InstalledTapplet, Error> {
     use crate::database::schema::installed_tapplet;
 
     diesel
@@ -174,8 +172,8 @@ impl Store<InstalledTapplet, CreateInstalledTapplet, UpdateInstalledTapplet> for
       .on_conflict((installed_tapplet::tapplet_id, installed_tapplet::tapplet_version_id))
       .do_update()
       .set(UpdateInstalledTapplet::from(item))
-      .get_results(self.get_connection().deref_mut())
-      .expect("Error saving new installed tapplet")
+      .get_result(self.get_connection().deref_mut())
+      .map_err(|e| Error::DatabaseError(e))
   }
 
   fn update(&mut self, old: InstalledTapplet, new: &UpdateInstalledTapplet) {
@@ -211,15 +209,15 @@ impl<'a> Store<Asset, CreateAsset<'a>, UpdateAsset> for SqliteStore {
     asset.filter(id.eq(asset_id)).first::<Asset>(self.get_connection().deref_mut()).ok()
   }
 
-  fn create(&mut self, item: &CreateAsset) -> Vec<Asset> {
+  fn create(&mut self, item: &CreateAsset) -> Result<Asset, Error> {
     use crate::database::schema::asset;
 
     diesel
       ::insert_into(asset::table)
       .values(item)
       .on_conflict_do_nothing()
-      .get_results(self.get_connection().deref_mut())
-      .expect("Error saving new asset")
+      .get_result(self.get_connection().deref_mut())
+      .map_err(|e| Error::DatabaseError(e))
   }
 
   fn update(&mut self, old: Asset, new: &UpdateAsset) {
@@ -255,7 +253,7 @@ impl<'a> Store<TappletVersion, CreateTappletVersion<'a>, UpdateTappletVersion> f
     tapplet_version.filter(id.eq(tapplet_version_id)).first::<TappletVersion>(self.get_connection().deref_mut()).ok()
   }
 
-  fn create(&mut self, item: &CreateTappletVersion) -> Vec<TappletVersion> {
+  fn create(&mut self, item: &CreateTappletVersion) -> Result<TappletVersion, Error> {
     use crate::database::schema::tapplet_version;
 
     diesel
@@ -264,8 +262,8 @@ impl<'a> Store<TappletVersion, CreateTappletVersion<'a>, UpdateTappletVersion> f
       .on_conflict((tapplet_version::version, tapplet_version::tapplet_id))
       .do_update()
       .set(UpdateTappletVersion::from(item))
-      .get_results(self.get_connection().deref_mut())
-      .expect("Error saving new tapplet version")
+      .get_result(self.get_connection().deref_mut())
+      .map_err(|e| Error::DatabaseError(e))
   }
 
   fn update(&mut self, old: TappletVersion, new: &UpdateTappletVersion) {
@@ -301,14 +299,14 @@ impl<'a> Store<DevTapplet, CreateDevTapplet<'a>, UpdateDevTapplet> for SqliteSto
     dev_tapplet.filter(id.eq(dev_tapplet_id)).first::<DevTapplet>(self.get_connection().deref_mut()).ok()
   }
 
-  fn create(&mut self, item: &CreateDevTapplet) -> Vec<DevTapplet> {
+  fn create(&mut self, item: &CreateDevTapplet) -> Result<DevTapplet, Error> {
     use crate::database::schema::dev_tapplet;
 
     diesel
       ::insert_into(dev_tapplet::table)
       .values(item)
-      .get_results(self.get_connection().deref_mut())
-      .expect("Error saving new tapplet version")
+      .get_result(self.get_connection().deref_mut())
+      .map_err(|e| Error::DatabaseError(e))
   }
 
   fn update(&mut self, old: DevTapplet, new: &UpdateDevTapplet) {
