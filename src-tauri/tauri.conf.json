@@ -1,7 +1,7 @@
 {
   "productName": "wallet-daemon-test",
   "version": "0.0.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "universe.tari",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
