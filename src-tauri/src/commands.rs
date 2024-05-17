@@ -127,14 +127,8 @@ pub async fn download_and_extract_tapp(
 
   //extract tarball
   let extract_path: PathBuf = tapplet_path.clone();
-  let _ = extract_tapp_tarball(extract_path);
-  let _ = check_tapp_files(tapplet_path);
-  Ok(())
-}
-
-#[tauri::command]
-pub fn extract_tapp_tarball(tapplet_path: PathBuf) -> Result<(), ()> {
-  extract_tar(tapplet_path).unwrap();
+  let _ = extract_tar(extract_path).unwrap();
+  let _ = check_extracted_files(tapplet_path);
   Ok(())
 }
 
@@ -156,12 +150,6 @@ pub fn calculate_and_validate_tapp_checksum(
   let validity: bool = integrity == version_data.integrity;
 
   Ok(validity)
-}
-
-#[tauri::command]
-pub fn check_tapp_files(tapplet_path: PathBuf) -> Result<(), ()> {
-  let _ = check_extracted_files(tapplet_path);
-  Ok(())
 }
 
 /**

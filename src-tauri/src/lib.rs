@@ -15,12 +15,10 @@ mod constants;
 
 use commands::{
   call_wallet,
-  check_tapp_files,
   calculate_and_validate_tapp_checksum,
   launch_tapplet,
   close_tapplet,
   download_and_extract_tapp,
-  extract_tapp_tarball,
   get_balances,
   get_free_coins,
   insert_installed_tapp_db,
@@ -77,8 +75,6 @@ pub fn run() {
         update_tapp_registry_db,
         download_and_extract_tapp,
         calculate_and_validate_tapp_checksum,
-        check_tapp_files,
-        extract_tapp_tarball,
         fetch_tapplets,
         get_by_id_tapp_registry_db,
         delete_installed_tapp,
