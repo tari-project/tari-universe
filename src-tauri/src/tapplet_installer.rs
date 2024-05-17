@@ -1,11 +1,13 @@
+use tauri::Manager;
 use tauri_plugin_http::reqwest::{ self };
 use std::{ fs, io::Write, path::PathBuf };
 use flate2::read::GzDecoder;
 use tar::Archive;
 
-pub fn delete_tapplet(tapplet_path: &str) -> Result<(), ()> {
-  let tapp_dir = PathBuf::from(tapplet_path);
-  fs::remove_dir_all(tapp_dir).unwrap();
+use crate::constants::TAPPLETS_INSTALLED_DIR;
+
+pub fn delete_tapplet(tapplet_path: PathBuf) -> Result<(), ()> {
+  fs::remove_dir_all(tapplet_path).unwrap();
   Ok(())
 }
 
@@ -63,5 +65,22 @@ pub fn check_extracted_files(tapplet_path: PathBuf) -> Result<bool, String> {
     Ok(true)
   } else {
     Err(format!("Extracted tapplet files missing"))
+  }
+}
+
+pub fn get_tapp_download_path(
+  registry_id: String,
+  version: String,
+  app_handle: tauri::AppHandle
+) -> Result<PathBuf, String> {
+  // app_path = /home/user/.local/share/universe.tari
+  let app_path = app_handle.path().app_data_dir().unwrap().to_path_buf();
+  let tapp_dir_path = format!("{}/{}/{}", TAPPLETS_INSTALLED_DIR, registry_id, version);
+  let tapplet_path = app_path.join(tapp_dir_path);
+
+  if tapplet_path.exists() {
+    Ok(tapplet_path)
+  } else {
+    Err(format!("Tapplet download path undefined"))
   }
 }

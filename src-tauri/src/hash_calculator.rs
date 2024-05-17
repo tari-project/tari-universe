@@ -4,7 +4,7 @@ use std::fs;
 use std::fs::read_dir;
 use std::io::Read;
 use std::num::ParseIntError;
-use std::path::Path;
+use std::path::{ Path, PathBuf };
 
 fn calculate_hash(data: &[u8], sha: usize) -> String {
   let strout: String = match sha {
@@ -51,10 +51,10 @@ fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
     .collect()
 }
 
-pub fn calculate_checksum(path: &str) -> Result<String, String> {
+pub fn calculate_checksum(tapplet_path: PathBuf) -> Result<String, String> {
   // sha-512
   let sha: usize = 512;
-  let tarball_file = Path::new(path).join("tapplet.tar.gz");
+  let tarball_file = tapplet_path.join("tapplet.tar.gz");
 
   // calculate sha and convert
   let shasum_output = read_data(&tarball_file, sha);
