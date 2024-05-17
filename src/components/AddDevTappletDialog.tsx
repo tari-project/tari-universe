@@ -7,18 +7,23 @@ import DialogContent from "@mui/material/DialogContent"
 import DialogContentText from "@mui/material/DialogContentText"
 import DialogTitle from "@mui/material/DialogTitle"
 import { invoke } from "@tauri-apps/api/core"
+import { useSnackBar } from "../ErrorContext"
 
 export default function AddDevTappletDialog() {
   const [open, setOpen] = React.useState(false)
+  const { showSnackBar } = useSnackBar()
 
   const onSubmitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const formJson = Object.fromEntries((formData as any).entries())
-    console.log(formJson)
     const endpoint = formJson.endpoint
-    await invoke("add_dev_tapplet", { endpoint })
-    handleClose()
+    try {
+      await invoke("add_dev_tapplet", { endpoint })
+      handleClose()
+    } catch (error) {
+      showSnackBar(error, "error")
+    }
   }
 
   const handleClickOpen = () => {

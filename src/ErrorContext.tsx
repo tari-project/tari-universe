@@ -2,7 +2,7 @@ import { Alert, AlertColor, Snackbar } from "@mui/material"
 import { ReactNode, createContext, useContext, useState } from "react"
 
 type SnackBarContextActions = {
-  showSnackBar: (text: string, typeColor: AlertColor) => void
+  showSnackBar: (text: any, typeColor: AlertColor) => void
 }
 
 const SnackBarContext = createContext({} as SnackBarContextActions)
@@ -16,7 +16,10 @@ const SnackBarProvider: React.FC<SnackBarContextProviderProps> = ({ children }) 
   const [message, setMessage] = useState<string>("")
   const [typeColor, setTypeColor] = useState<AlertColor>("info")
 
-  const showSnackBar = (text: string, color: AlertColor) => {
+  const showSnackBar = (text: any, color: AlertColor) => {
+    if (typeof text !== "string") {
+      throw new Error("Error message must be a string")
+    }
     setMessage(text)
     setTypeColor(color)
     setOpen(true)
