@@ -1,5 +1,5 @@
 use tari_wallet_daemon_client::types::AccountsGetBalancesResponse;
-use tauri::{ self, Manager, State };
+use tauri::{ self, State };
 use std::path::PathBuf;
 
 use crate::{
@@ -15,7 +15,6 @@ use crate::{
       UpdateInstalledTapplet,
       UpdateTapplet,
     },
-    schema::{ tapplet::registry_id, tapplet_version },
     store::{ SqliteStore, Store },
   },
   hash_calculator::calculate_checksum,
