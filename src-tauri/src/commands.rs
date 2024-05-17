@@ -115,14 +115,13 @@ pub async fn download_and_extract_tapp(
   app_handle: tauri::AppHandle
 ) -> Result<(), ()> {
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id).unwrap();
-
-  let url = version_data.registry_url;
+  let (tapp, tapp_version) = tapplet_store.get_registered_tapplet_with_version(tapplet_id).unwrap();
 
   // get download path
-  let tapplet_path = get_tapp_download_path(tapp.registry_id, version_data.version, app_handle).unwrap();
+  let tapplet_path = get_tapp_download_path(tapp.registry_id, tapp_version.version, app_handle).unwrap();
 
   // download tarball
+  let url = tapp_version.registry_url;
   let download_path = tapplet_path.clone();
   let handle = tauri::async_runtime::spawn(async move { download_file(&url, download_path).await });
   let _ = handle.await.unwrap();

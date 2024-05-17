@@ -72,15 +72,11 @@ pub fn get_tapp_download_path(
   registry_id: String,
   version: String,
   app_handle: tauri::AppHandle
-) -> Result<PathBuf, String> {
+) -> Result<PathBuf, ()> {
   // app_path = /home/user/.local/share/universe.tari
   let app_path = app_handle.path().app_data_dir().unwrap().to_path_buf();
   let tapp_dir_path = format!("{}/{}/{}", TAPPLETS_INSTALLED_DIR, registry_id, version);
   let tapplet_path = app_path.join(tapp_dir_path);
 
-  if tapplet_path.exists() {
-    Ok(tapplet_path)
-  } else {
-    Err(format!("Tapplet download path undefined"))
-  }
+  Ok(tapplet_path)
 }
