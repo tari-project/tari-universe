@@ -1,4 +1,4 @@
-import * as React from "react"
+import { FormEvent, Fragment, useState } from "react"
 import Button from "@mui/material/Button"
 import TextField from "@mui/material/TextField"
 import Dialog from "@mui/material/Dialog"
@@ -7,13 +7,13 @@ import DialogContent from "@mui/material/DialogContent"
 import DialogContentText from "@mui/material/DialogContentText"
 import DialogTitle from "@mui/material/DialogTitle"
 import { invoke } from "@tauri-apps/api/core"
-import { useSnackBar } from "../ErrorContext"
 
 export default function AddDevTappletDialog() {
-  const [open, setOpen] = React.useState(false)
-  const { showSnackBar } = useSnackBar()
+  const [open, setOpen] = useState(false)
+  const [hasError, setHasError] = useState(false)
+  const [errorMsg, setErrorMsg] = useState("")
 
-  const onSubmitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
+  const onSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const formJson = Object.fromEntries((formData as any).entries())
@@ -22,7 +22,8 @@ export default function AddDevTappletDialog() {
       await invoke("add_dev_tapplet", { endpoint })
       handleClose()
     } catch (error) {
-      showSnackBar(error, "error")
+      setHasError(true)
+      setErrorMsg(error as string)
     }
   }
 
@@ -35,7 +36,7 @@ export default function AddDevTappletDialog() {
   }
 
   return (
-    <React.Fragment>
+    <Fragment>
       <Button variant="contained" onClick={handleClickOpen}>
         Add dev tapplet
       </Button>
@@ -53,6 +54,12 @@ export default function AddDevTappletDialog() {
             To add tapplet in developer mode please enter the endpoint of the tapplet.
           </DialogContentText>
           <TextField
+            error={hasError}
+            helperText={errorMsg}
+            onChange={() => {
+              setHasError(false)
+              setErrorMsg("")
+            }}
             autoFocus
             required
             margin="dense"
@@ -69,6 +76,6 @@ export default function AddDevTappletDialog() {
           <Button type="submit">Add</Button>
         </DialogActions>
       </Dialog>
-    </React.Fragment>
+    </Fragment>
   )
 }

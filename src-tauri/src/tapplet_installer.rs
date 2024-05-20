@@ -2,11 +2,11 @@ use tauri_plugin_http::reqwest::{ self };
 use std::{ fs, io::Write, path::PathBuf };
 use flate2::read::GzDecoder;
 use tar::Archive;
+use crate::error::Error;
 
-pub fn delete_tapplet(tapplet_path: &str) -> Result<(), ()> {
+pub fn delete_tapplet(tapplet_path: &str) -> Result<(), Error> {
   let tapp_dir = PathBuf::from(tapplet_path);
-  fs::remove_dir_all(tapp_dir).unwrap();
-  Ok(())
+  fs::remove_dir_all(tapp_dir).map_err(|_| Error::CantDeleteTapplet())
 }
 
 pub async fn download_file(url: &str, tapplet_path: &str) -> Result<(), anyhow::Error> {

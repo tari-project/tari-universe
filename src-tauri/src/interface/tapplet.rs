@@ -9,7 +9,7 @@ pub struct InstalledTappletWithName {
 }
 
 #[derive(Serialize)]
-pub struct RegistedTappletWithVersion {
+pub struct RegisteredTappletWithVersion {
   pub registered_tapp: Tapplet,
   pub tapp_version: TappletVersion,
 }
