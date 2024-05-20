@@ -5,6 +5,14 @@ pub enum Error {
   #[error("Dev tapp with this endpoint already exists")] DevTappletAlreadyExists(),
   #[error("Failed to delete tapplet folder")] CantDeleteTapplet(),
   #[error(transparent)] DatabaseError(diesel::result::Error),
+  #[error("Failed to bind port: {port}")] BindPortError {
+    port: String,
+  },
+  #[error("Failed to obtain of local address")] LocalAddressError(),
+  #[error("Failed to start tapplet server")] TappletServerError(),
+  #[error("Tapplet server already running")] TappletServerAlreadyRunning(),
+  #[error("Token for tapplet server is invalid")] TappletServerTokenInvalid(),
+  #[error("Tauri error")] TauriError(),
   #[error(transparent)] JsonParsingError(#[from] serde_json::Error),
 }
 
@@ -23,6 +31,14 @@ impl From<diesel::result::Error> for Error {
           _ => Error::DatabaseError(e),
         }
       _ => Error::DatabaseError(e),
+    }
+  }
+}
+
+impl From<tauri::Error> for Error {
+  fn from(e: tauri::Error) -> Self {
+    match e {
+      _ => Error::TauriError(),
     }
   }
 }

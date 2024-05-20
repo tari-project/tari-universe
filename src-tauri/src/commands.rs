@@ -52,37 +52,34 @@ pub async fn launch_tapplet(
   installed_tapplet_id: i32,
   shutdown_tokens: State<'_, ShutdownTokens>,
   db_connection: State<'_, DatabaseConnection>
-) -> Result<String, ()> {
+) -> Result<String, Error> {
   let mut locked_tokens = shutdown_tokens.0.lock().await;
   let mut store = SqliteStore::new(db_connection.0.clone());
 
-  let installed_tapplet = store.get_installed_tapplet_full_by_id(installed_tapplet_id).unwrap();
+  let installed_tapplet = store.get_installed_tapplet_full_by_id(installed_tapplet_id)?;
   let tapplet_path = format!("{}/{}/package/dist", installed_tapplet.1.registry_id, installed_tapplet.1.id.unwrap());
   let tapplet_handle = tauri::async_runtime::spawn(async move { start(&tapplet_path).await });
 
-  let (addr, cancel_token) = tapplet_handle.await.unwrap();
+  let (addr, cancel_token) = tapplet_handle.await??;
   match locked_tokens.insert(installed_tapplet_id.clone(), cancel_token) {
     Some(_) => {
-      println!("Tapplet already running with id: {}", installed_tapplet_id.clone());
+      return Err(Error::TappletServerAlreadyRunning());
     }
-    None => {
-      println!("Tapplet started with id: {}", installed_tapplet_id.clone());
-    }
+    None => {}
   }
   Ok(format!("http://{}", addr))
 }
 
 #[tauri::command]
-pub async fn close_tapplet(installed_tapplet_id: i32, shutdown_tokens: State<'_, ShutdownTokens>) -> Result<(), ()> {
+pub async fn close_tapplet(installed_tapplet_id: i32, shutdown_tokens: State<'_, ShutdownTokens>) -> Result<(), Error> {
   let mut lock = shutdown_tokens.0.lock().await;
   match lock.get(&installed_tapplet_id) {
     Some(token) => {
       token.cancel();
       lock.remove(&installed_tapplet_id);
-      println!("Tapplet stopped with id: {}", installed_tapplet_id.clone());
     }
     None => {
-      println!("Tapplet not found with id: {}", installed_tapplet_id.clone());
+      return Err(Error::TappletServerTokenInvalid());
     }
   }
 
