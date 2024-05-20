@@ -66,7 +66,6 @@ export default function AddDevTappletDialog() {
             id="name"
             name="endpoint"
             label="Tapplet Endpoint"
-            type="url"
             fullWidth
             variant="standard"
           />

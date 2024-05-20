@@ -12,6 +12,8 @@ pub enum Error {
   #[error("Failed to start tapplet server")] TappletServerError(),
   #[error("Tapplet server already running")] TappletServerAlreadyRunning(),
   #[error("Token for tapplet server is invalid")] TappletServerTokenInvalid(),
+  #[error("Failed to fetch manifest")] FetchManifestError(),
+  #[error("Failed to receive manifest")] ManifestResponseError(),
   #[error("Tauri error")] TauriError(),
   #[error(transparent)] JsonParsingError(#[from] serde_json::Error),
 }

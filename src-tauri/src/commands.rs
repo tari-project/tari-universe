@@ -301,7 +301,11 @@ pub async fn add_dev_tapplet(
   db_connection: State<'_, DatabaseConnection>
 ) -> Result<DevTapplet, Error> {
   let manifest_endpoint = format!("{}/tapplet.manifest.json", endpoint);
-  let manifest_res = reqwest::get(&manifest_endpoint).await.unwrap().json::<DevTappletResponse>().await.unwrap();
+  let manifest_res = reqwest
+    ::get(&manifest_endpoint).await
+    .map_err(|_| Error::FetchManifestError())?
+    .json::<DevTappletResponse>().await
+    .map_err(|_| Error::ManifestResponseError())?;
   let mut store = SqliteStore::new(db_connection.0.clone());
   let new_dev_tapplet = CreateDevTapplet {
     endpoint: &endpoint,
