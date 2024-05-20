@@ -61,8 +61,7 @@ const useDevTapplets = () => {
   const deleteDevTapplet = useCallback(async (item: DevTapplet) => {
     try {
       const _id = item.id
-      await invoke("delete_dev_tapp", { tappletId: _id })
-      await invoke("delete_dev_tapp_db", { tappletId: _id })
+      await invoke("delete_dev_tapplet", { devTappletId: _id })
 
       const devTappletsList = await invoke("read_dev_tapplets")
       setDevTappletsList(devTappletsList as DevTapplet[] | undefined)
