@@ -66,7 +66,7 @@ pub async fn make_request<T: Serialize>(
   method: String,
   params: T
 ) -> Result<serde_json::Value, anyhow::Error> {
-  let address: SocketAddr = env::var("JSON_CONNECT_ADDRESS").unwrap().parse().unwrap();
+  let address: SocketAddr = env::var("JSON_CONNECT_ADDRESS")?.parse()?;
   let url = format!("http://{}", address);
   let client = reqwest::Client::new();
   let body = JsonRpcRequest {

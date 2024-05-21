@@ -2,23 +2,20 @@ use tauri_plugin_http::reqwest::{ self };
 use std::{ fs, io::Write, path::PathBuf };
 use flate2::read::GzDecoder;
 use tar::Archive;
-use crate::error::{ Error::{ self, IOError }, IOError::* };
+use crate::error::{ Error::{ self, IOError, RequestError }, IOError::*, RequestError::* };
 
 pub fn delete_tapplet(tapplet_path: &str) -> Result<(), Error> {
   let tapp_dir = PathBuf::from(tapplet_path);
   fs::remove_dir_all(tapp_dir).map_err(|_| IOError(FailedToDeleteTapplet { path: tapplet_path.to_string() }))
 }
 
-pub async fn download_file(url: &str, tapplet_path: &str) -> Result<(), anyhow::Error> {
+pub async fn download_file(url: &str, tapplet_path: &str) -> Result<(), Error> {
   // Download the file
   let client = reqwest::Client::new();
   let mut response = client
     .get(url)
     .send().await
-    .unwrap_or_else(|e| {
-      println!("Error making HTTP request: {}", e);
-      std::process::exit(1);
-    });
+    .map_err(|_| RequestError(FailedToDownload { url: url.to_string() }))?;
 
   // Ensure the request was successful
   if response.status().is_success() {
@@ -28,13 +25,16 @@ pub async fn download_file(url: &str, tapplet_path: &str) -> Result<(), anyhow::
 
     // Open a file to write the stream to
     let tapplet_tarball = tapp_dir.join("tapplet.tar.gz");
+    let tapplet_tarball_path = tapplet_tarball.to_str().unwrap_or_default();
     let mut file = fs::File
-      ::create(tapplet_tarball)
-      .map_err(|_| IOError(FailedToCreateFile { path: tapplet_path.to_string() }))?;
+      ::create(&tapplet_tarball)
+      .map_err(|_| IOError(FailedToCreateFile { path: tapplet_tarball_path.to_string() }))?;
 
     // Stream the response body and write it to the file chunk by chunk
-    while let Some(chunk) = response.chunk().await? {
-      file.write_all(&chunk)?;
+    while
+      let Some(chunk) = response.chunk().await.map_err(|_| RequestError(FailedToDownload { url: url.to_string() }))?
+    {
+      file.write_all(&chunk).map_err(|_| IOError(FailedToWriteFile { path: tapplet_tarball_path.to_string() }))?;
     }
   } else if response.status().is_server_error() {
     println!("Download server error! Status: {:?}", response.status());

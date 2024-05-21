@@ -86,7 +86,7 @@ pub fn run() {
     )
     .setup(|app| {
       tauri::async_runtime::spawn(async move {
-        start_wallet_daemon().await.unwrap();
+        start_wallet_daemon().await.unwrap(); // TODO handle error while starting wallet daemon https://github.com/orgs/tari-project/projects/18/views/1?pane=issue&itemId=63753279
       });
 
       let handle = tauri::async_runtime::spawn(async move { permission_token().await.unwrap() });

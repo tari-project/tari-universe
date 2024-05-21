@@ -8,12 +8,11 @@ pub enum Error {
   #[error("Failed to bind port: {port}")] BindPortError {
     port: String,
   },
+  #[error(transparent)] RequestError(#[from] RequestError),
   #[error("Failed to obtain of local address")] LocalAddressError(),
   #[error("Failed to start tapplet server")] TappletServerError(),
   #[error("Tapplet server already running")] TappletServerAlreadyRunning(),
   #[error("Token for tapplet server is invalid")] TappletServerTokenInvalid(),
-  #[error("Failed to fetch manifest")] FetchManifestError(),
-  #[error("Failed to receive manifest")] ManifestResponseError(),
   #[error("Tauri error")] TauriError(#[from] tauri::Error),
   #[error(transparent)] JsonParsingError(#[from] serde_json::Error),
 }
@@ -58,6 +57,9 @@ pub enum IOError {
   #[error("Failed to create file at path: {path}")] FailedToCreateFile {
     path: String,
   },
+  #[error("Failed to write file at path: {path}")] FailedToWriteFile {
+    path: String,
+  },
   #[error("Failed to parse int")] ParseIntError(#[from] ParseIntError),
   #[error("Failed to unpack file at path: {path}")] FailedToUnpackFile {
     path: String,
@@ -67,5 +69,18 @@ pub enum IOError {
   },
   #[error("Failed to delete tapplet folder at path: {path}")] FailedToDeleteTapplet {
     path: String,
+  },
+}
+
+#[derive(Debug, Error)]
+pub enum RequestError {
+  #[error("Failed to fetch manifest from {endpoint}")] FetchManifestError {
+    endpoint: String,
+  },
+  #[error("Failed to receive manifest {endpoint}")] ManifestResponseError {
+    endpoint: String,
+  },
+  #[error("Failed to download file from {url}")] FailedToDownload {
+    url: String,
   },
 }

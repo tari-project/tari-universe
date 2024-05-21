@@ -16,7 +16,7 @@ use crate::{
     },
     store::{ SqliteStore, Store },
   },
-  error::Error,
+  error::{ Error::{ self, RequestError }, RequestError::* },
   hash_calculator::calculate_checksum,
   interface::{ DevTappletResponse, InstalledTappletWithName, RegisteredTappletWithVersion, RegisteredTapplets },
   rpc::{ balances, free_coins, make_request },
@@ -291,9 +291,9 @@ pub async fn add_dev_tapplet(
   let manifest_endpoint = format!("{}/tapplet.manifest.json", endpoint);
   let manifest_res = reqwest
     ::get(&manifest_endpoint).await
-    .map_err(|_| Error::FetchManifestError())?
+    .map_err(|_| RequestError(FetchManifestError { endpoint: endpoint.clone() }))?
     .json::<DevTappletResponse>().await
-    .map_err(|_| Error::ManifestResponseError())?;
+    .map_err(|_| RequestError(ManifestResponseError { endpoint: endpoint.clone() }))?;
   let mut store = SqliteStore::new(db_connection.0.clone());
   let new_dev_tapplet = CreateDevTapplet {
     endpoint: &endpoint,

@@ -14,7 +14,7 @@ pub fn establish_connection() -> SqliteConnection {
   let mut db_connection = SqliteConnection::establish(&database_url).unwrap_or_else(|_|
     panic!("Error connecting to {}", database_url)
   );
-  run_migrations(&mut db_connection).unwrap();
+  run_migrations(&mut db_connection).unwrap(); // TODO handle migrations error while running setup https://github.com/orgs/tari-project/projects/18/views/1?pane=issue&itemId=63753279
   db_connection
 }
 fn run_migrations(connection: &mut impl MigrationHarness<Sqlite>) -> Result<(), ()> {
