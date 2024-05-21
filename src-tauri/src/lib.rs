@@ -94,11 +94,11 @@ pub fn run() {
       let tokens = app.state::<Tokens>();
       tokens.permission
         .lock()
-        .unwrap()
+        .map_err(|_| error::Error::FailedToObtainPermissionTokenLock())?
         .replace_range(.., &permission_token);
       tokens.auth
         .lock()
-        .unwrap()
+        .map_err(|_| error::Error::FailedToObtainAuthTokenLock())?
         .replace_range(.., &auth_token);
 
       Ok(())

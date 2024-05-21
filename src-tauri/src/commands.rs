@@ -16,7 +16,18 @@ use crate::{
     },
     store::{ SqliteStore, Store },
   },
-  error::{ Error::{ self, RequestError, TappletServerError }, RequestError::*, TappletServerError::* },
+  error::{
+    Error::{
+      self,
+      RequestError,
+      TappletServerError,
+      FailedToObtainAuthTokenLock,
+      FailedToObtainPermissionTokenLock,
+      JsonParsingError,
+    },
+    RequestError::*,
+    TappletServerError::*,
+  },
   hash_calculator::calculate_checksum,
   interface::{ DevTappletResponse, InstalledTappletWithName, RegisteredTappletWithVersion, RegisteredTapplets },
   rpc::{ balances, free_coins, make_request },
@@ -29,18 +40,30 @@ use crate::{
 use tauri_plugin_http::reqwest::{ self };
 
 #[tauri::command]
-pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), ()> {
-  let permission_token = tokens.permission.lock().unwrap().clone();
-  let auth_token = tokens.auth.lock().unwrap().clone();
+pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), Error> {
+  let permission_token = tokens.permission
+    .lock()
+    .map_err(|_| FailedToObtainPermissionTokenLock())?
+    .clone();
+  let auth_token = tokens.auth
+    .lock()
+    .map_err(|_| FailedToObtainAuthTokenLock())?
+    .clone();
   let handle = tauri::async_runtime::spawn(async move { free_coins(auth_token, permission_token).await.unwrap() });
   handle.await.unwrap();
   Ok(())
 }
 
 #[tauri::command]
-pub async fn get_balances(tokens: State<'_, Tokens>) -> Result<AccountsGetBalancesResponse, ()> {
-  let permission_token = tokens.permission.lock().unwrap().clone();
-  let auth_token = tokens.auth.lock().unwrap().clone();
+pub async fn get_balances(tokens: State<'_, Tokens>) -> Result<AccountsGetBalancesResponse, Error> {
+  let permission_token = tokens.permission
+    .lock()
+    .map_err(|_| FailedToObtainPermissionTokenLock())?
+    .clone();
+  let auth_token = tokens.auth
+    .lock()
+    .map_err(|_| FailedToObtainAuthTokenLock())?
+    .clone();
   let handle = tauri::async_runtime::spawn(async move { balances(auth_token, permission_token).await.unwrap() });
   let balances = handle.await.unwrap();
 
@@ -57,7 +80,7 @@ pub async fn launch_tapplet(
   let mut store = SqliteStore::new(db_connection.0.clone());
 
   let installed_tapplet = store.get_installed_tapplet_full_by_id(installed_tapplet_id)?;
-  let tapplet_path = format!("{}/{}/package/dist", installed_tapplet.1.registry_id, installed_tapplet.1.id.unwrap());
+  let tapplet_path = format!("{}/{}/package/dist", installed_tapplet.1.registry_id, installed_tapplet.2.version);
   let tapplet_handle = tauri::async_runtime::spawn(async move { start(&tapplet_path).await });
 
   let (addr, cancel_token) = tapplet_handle.await??;
@@ -87,9 +110,16 @@ pub async fn close_tapplet(installed_tapplet_id: i32, shutdown_tokens: State<'_,
 }
 
 #[tauri::command]
-pub async fn call_wallet(method: String, params: String, tokens: State<'_, Tokens>) -> Result<serde_json::Value, ()> {
-  let permission_token = tokens.permission.lock().unwrap().clone();
-  let req_params: serde_json::Value = serde_json::from_str(&params).unwrap();
+pub async fn call_wallet(
+  method: String,
+  params: String,
+  tokens: State<'_, Tokens>
+) -> Result<serde_json::Value, Error> {
+  let permission_token = tokens.permission
+    .lock()
+    .map_err(|_| FailedToObtainPermissionTokenLock())?
+    .clone();
+  let req_params: serde_json::Value = serde_json::from_str(&params).map_err(|e| JsonParsingError(e))?;
   let handle = tauri::async_runtime::spawn(async move {
     make_request(Some(permission_token), method, req_params).await.unwrap()
   });
@@ -161,7 +191,7 @@ pub fn read_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Re
 #[tauri::command]
 pub fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<(), Error> {
   let registry = include_str!("../../tapplets-registry.manifest.json");
-  let tapplets: RegisteredTapplets = serde_json::from_str(registry).map_err(|e| Error::JsonParsingError(e))?;
+  let tapplets: RegisteredTapplets = serde_json::from_str(registry).map_err(|e| JsonParsingError(e))?;
   let mut store = SqliteStore::new(db_connection.0.clone());
 
   for tapplet_manifest in tapplets.registered_tapplets.values() {
@@ -234,7 +264,7 @@ pub fn insert_installed_tapp_db(
   db_connection: State<'_, DatabaseConnection>
 ) -> Result<InstalledTapplet, Error> {
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id).unwrap();
+  let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id)?;
 
   let installed_tapplet = CreateInstalledTapplet {
     tapplet_id: tapp.id,

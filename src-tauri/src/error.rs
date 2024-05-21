@@ -9,6 +9,8 @@ pub enum Error {
   #[error(transparent)] TappletServerError(#[from] TappletServerError),
   #[error("Tauri error")] TauriError(#[from] tauri::Error),
   #[error(transparent)] JsonParsingError(#[from] serde_json::Error),
+  #[error("Failed to obtain permission token lock")] FailedToObtainPermissionTokenLock(),
+  #[error("Failed to obtain auth token lock")] FailedToObtainAuthTokenLock(),
 }
 
 impl serde::Serialize for Error {
