@@ -5,14 +5,8 @@ use thiserror::Error;
 pub enum Error {
   #[error(transparent)] DatabaseError(#[from] DatabaseError),
   #[error(transparent)] IOError(#[from] IOError),
-  #[error("Failed to bind port: {port}")] BindPortError {
-    port: String,
-  },
   #[error(transparent)] RequestError(#[from] RequestError),
-  #[error("Failed to obtain of local address")] LocalAddressError(),
-  #[error("Failed to start tapplet server")] TappletServerError(),
-  #[error("Tapplet server already running")] TappletServerAlreadyRunning(),
-  #[error("Token for tapplet server is invalid")] TappletServerTokenInvalid(),
+  #[error(transparent)] TappletServerError(#[from] TappletServerError),
   #[error("Tauri error")] TauriError(#[from] tauri::Error),
   #[error(transparent)] JsonParsingError(#[from] serde_json::Error),
 }
@@ -21,6 +15,17 @@ impl serde::Serialize for Error {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: serde::ser::Serializer {
     serializer.serialize_str(self.to_string().as_ref())
   }
+}
+
+#[derive(Debug, Error)]
+pub enum TappletServerError {
+  #[error("Failed to obtain of local address")] FailedToObtainLocalAddress(),
+  #[error("Failed to start tapplet server")] FailedToStart(),
+  #[error("Tapplet server already running")] AlreadyRunning(),
+  #[error("Token for tapplet server is invalid")] TokenInvalid(),
+  #[error("Failed to bind port: {port}")] BindPortError {
+    port: String,
+  },
 }
 
 #[derive(Debug, Error)]

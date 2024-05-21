@@ -3,7 +3,7 @@ use std::net::SocketAddr;
 use tokio::select;
 use tokio_util::sync::CancellationToken;
 use tower_http::services::ServeDir;
-use crate::error::Error;
+use crate::error::{ Error::{ self, TappletServerError }, TappletServerError::* };
 
 const TAPPLET_DIR: &str = "../tapplets_installed"; // TODO store in config
 
@@ -23,16 +23,16 @@ pub async fn serve(app: Router, port: u16) -> Result<(String, CancellationToken)
   let addr = SocketAddr::from(([127, 0, 0, 1], port));
   let listener = tokio::net::TcpListener
     ::bind(addr).await
-    .map_err(|_| Error::BindPortError { port: addr.to_string() })?;
+    .map_err(|_| TappletServerError(BindPortError { port: addr.to_string() }))?;
   let address = listener
     .local_addr()
-    .map_err(|_| Error::LocalAddressError())?
+    .map_err(|_| TappletServerError(FailedToObtainLocalAddress()))?
     .to_string();
 
   tauri::async_runtime::spawn(async move { axum
       ::serve(listener, app)
       .with_graceful_shutdown(shutdown_signal(cancel_token_clone)).await
-      .map_err(|_| Error::TappletServerError()) });
+      .map_err(|_| TappletServerError(FailedToStart())) });
   Ok((address, cancel_token))
 }
 

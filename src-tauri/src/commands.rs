@@ -16,7 +16,7 @@ use crate::{
     },
     store::{ SqliteStore, Store },
   },
-  error::{ Error::{ self, RequestError }, RequestError::* },
+  error::{ Error::{ self, RequestError, TappletServerError }, RequestError::*, TappletServerError::* },
   hash_calculator::calculate_checksum,
   interface::{ DevTappletResponse, InstalledTappletWithName, RegisteredTappletWithVersion, RegisteredTapplets },
   rpc::{ balances, free_coins, make_request },
@@ -63,7 +63,7 @@ pub async fn launch_tapplet(
   let (addr, cancel_token) = tapplet_handle.await??;
   match locked_tokens.insert(installed_tapplet_id.clone(), cancel_token) {
     Some(_) => {
-      return Err(Error::TappletServerAlreadyRunning());
+      return Err(TappletServerError(AlreadyRunning()));
     }
     None => {}
   }
@@ -79,7 +79,7 @@ pub async fn close_tapplet(installed_tapplet_id: i32, shutdown_tokens: State<'_,
       lock.remove(&installed_tapplet_id);
     }
     None => {
-      return Err(Error::TappletServerTokenInvalid());
+      return Err(TappletServerError(TokenInvalid()));
     }
   }
 
@@ -105,13 +105,13 @@ pub async fn download_and_extract_tapp(
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id)?;
 
-  let url = version_data.registry_url;
+  let url = version_data.registry_url.clone();
   let tapplet_path = format!("../tapplets_installed/{}/{}", tapp.registry_id, version_data.version);
   let extract_path = tapplet_path.clone();
 
   // download tarball
   let handle = tauri::async_runtime::spawn(async move { download_file(&url, &tapplet_path).await });
-  handle.await?;
+  handle.await?.map_err(|_| Error::RequestError(FailedToDownload { url: version_data.registry_url }))?;
 
   //extract tarball
   extract_tar(&extract_path)?;
