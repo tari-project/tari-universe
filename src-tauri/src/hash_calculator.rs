@@ -3,7 +3,7 @@ use sha2::Digest;
 use std::{ fs, path::Path };
 use std::fs::read_dir;
 use std::io::Read;
-use crate::error::{ Error, IOError::* };
+use crate::error::{ Error::{ self, IOError }, IOError::* };
 
 fn calculate_hash(data: &[u8], sha: usize) -> String {
   match sha {
@@ -19,7 +19,7 @@ fn read_data(path: &Path, sha: usize) -> Result<String, Error> {
   let mut results = Vec::new();
   if path.is_dir() {
     let paths = read_dir(path).map_err(|_|
-      Error::from(FailedToReadDir {
+      IOError(FailedToReadDir {
         path: path.to_str().unwrap_or_default().to_string(),
       })
     )?;
@@ -30,7 +30,7 @@ fn read_data(path: &Path, sha: usize) -> Result<String, Error> {
             let entry_path = entry.path();
             let path_to_file = entry_path.to_str().unwrap_or_default();
             let mut data = Vec::new();
-            file.read_to_end(&mut data).map_err(|_| Error::from(FailedToReadFile { path: path_to_file.to_string() }))?;
+            file.read_to_end(&mut data).map_err(|_| IOError(FailedToReadFile { path: path_to_file.to_string() }))?;
             let strout = calculate_hash(&data, sha);
             results.push(strout + "    " + path_to_file);
           }
@@ -42,7 +42,7 @@ fn read_data(path: &Path, sha: usize) -> Result<String, Error> {
       let mut data = Vec::new();
       file
         .read_to_end(&mut data)
-        .map_err(|_| Error::from(FailedToReadFile { path: path.to_str().unwrap_or_default().to_string() }))?;
+        .map_err(|_| IOError(FailedToReadFile { path: path.to_str().unwrap_or_default().to_string() }))?;
       let strout = calculate_hash(&data, sha);
       results.push(strout);
     }
