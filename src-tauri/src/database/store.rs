@@ -15,8 +15,8 @@ use crate::database::models::{
   Tapplet,
   UpdateTapplet,
 };
+use crate::error::{ Error, DatabaseError::* };
 use crate::interface::InstalledTappletWithName;
-use crate::error::Error;
 
 use super::models::CreateDevTapplet;
 use super::models::CreateTappletVersion;
@@ -57,7 +57,7 @@ impl SqliteStore {
       .inner_join(tapplet::table)
       .select((installed_tapplet::all_columns(), tapplet::display_name))
       .load::<(InstalledTapplet, String)>(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))?;
+      .map_err(|_| FailedToRetrieveData { entity_name: "installed tapplet".to_string() })?;
 
     let result = tapplets
       .into_iter()
@@ -84,7 +84,7 @@ impl SqliteStore {
       .inner_join(tapplet_version)
       .select((installed_tapplet::all_columns(), tapplet::all_columns(), tapplet_version::all_columns()))
       .first::<(InstalledTapplet, Tapplet, TappletVersion)>(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToRetrieveData { entity_name: "installed tapplet".to_string() }))
   }
 
   pub fn get_registered_tapplet_with_version(
@@ -100,7 +100,7 @@ impl SqliteStore {
       .inner_join(tapplet_version)
       .select((tapplet::all_columns(), tapplet_version::all_columns()))
       .first::<(Tapplet, TappletVersion)>(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToRetrieveData { entity_name: "tapplets with version".to_string() }))
   }
 }
 
@@ -108,7 +108,9 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
   fn get_all(&mut self) -> Result<Vec<Tapplet>, Error> {
     use crate::database::schema::tapplet::dsl::*;
 
-    tapplet.load::<Tapplet>(self.get_connection().deref_mut()).map_err(|e| Error::from(e))
+    tapplet
+      .load::<Tapplet>(self.get_connection().deref_mut())
+      .map_err(|_| Error::from(FailedToRetrieveData { entity_name: "Tapplet".to_string() }))
   }
 
   fn get_by_id(&mut self, tapplet_id: i32) -> Result<Tapplet, Error> {
@@ -117,7 +119,7 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
     tapplet
       .filter(id.eq(tapplet_id))
       .first::<Tapplet>(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToRetrieveData { entity_name: "Tapplet".to_string() }))
   }
 
   fn create(&mut self, item: &CreateTapplet) -> Result<Tapplet, Error> {
@@ -130,7 +132,7 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
       .do_update()
       .set(UpdateTapplet::from(item))
       .get_result(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToCreate { entity_name: "Tapplet".to_string() }))
   }
 
   fn delete(&mut self, entity: Tapplet) -> Result<usize, Error> {
@@ -139,7 +141,7 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
     diesel
       ::delete(tapplet.filter(id.eq(entity.id)))
       .execute(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToDelete { entity_name: "Tapplet".to_string() }))
   }
 
   fn update(&mut self, old: Tapplet, new: &UpdateTapplet) -> Result<usize, Error> {
@@ -149,7 +151,7 @@ impl<'a> Store<Tapplet, CreateTapplet<'a>, UpdateTapplet> for SqliteStore {
       ::update(tapplet.filter(id.eq(old.id)))
       .set(new)
       .execute(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToUpdate { entity_name: "Tapplet".to_string() }))
   }
 }
 
@@ -157,7 +159,9 @@ impl Store<InstalledTapplet, CreateInstalledTapplet, UpdateInstalledTapplet> for
   fn get_all(&mut self) -> Result<Vec<InstalledTapplet>, Error> {
     use crate::database::schema::installed_tapplet::dsl::*;
 
-    installed_tapplet.load::<InstalledTapplet>(self.get_connection().deref_mut()).map_err(|e| Error::from(e))
+    installed_tapplet
+      .load::<InstalledTapplet>(self.get_connection().deref_mut())
+      .map_err(|_| Error::from(FailedToRetrieveData { entity_name: "Installed Tapplet".to_string() }))
   }
 
   fn get_by_id(&mut self, installed_tapplet_id: i32) -> Result<InstalledTapplet, Error> {
@@ -166,7 +170,7 @@ impl Store<InstalledTapplet, CreateInstalledTapplet, UpdateInstalledTapplet> for
     installed_tapplet
       .filter(id.eq(installed_tapplet_id))
       .first::<InstalledTapplet>(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToRetrieveData { entity_name: "installed Tapplet".to_string() }))
   }
 
   fn create(&mut self, item: &CreateInstalledTapplet) -> Result<InstalledTapplet, Error> {
@@ -179,7 +183,11 @@ impl Store<InstalledTapplet, CreateInstalledTapplet, UpdateInstalledTapplet> for
       .do_update()
       .set(UpdateInstalledTapplet::from(item))
       .get_result(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_|
+        Error::from(FailedToCreate {
+          entity_name: "Installed Tapplet".to_string(),
+        })
+      )
   }
 
   fn update(&mut self, old: InstalledTapplet, new: &UpdateInstalledTapplet) -> Result<usize, Error> {
@@ -189,7 +197,7 @@ impl Store<InstalledTapplet, CreateInstalledTapplet, UpdateInstalledTapplet> for
       ::update(installed_tapplet.filter(id.eq(old.id)))
       .set(new)
       .execute(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToUpdate { entity_name: "installed Tapplet".to_string() }))
   }
 
   fn delete(&mut self, entity: InstalledTapplet) -> Result<usize, Error> {
@@ -198,7 +206,7 @@ impl Store<InstalledTapplet, CreateInstalledTapplet, UpdateInstalledTapplet> for
     diesel
       ::delete(installed_tapplet.filter(id.eq(entity.id)))
       .execute(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToDelete { entity_name: "installed Tapplet".to_string() }))
   }
 }
 
@@ -206,7 +214,9 @@ impl<'a> Store<Asset, CreateAsset<'a>, UpdateAsset> for SqliteStore {
   fn get_all(&mut self) -> Result<Vec<Asset>, Error> {
     use crate::database::schema::asset::dsl::*;
 
-    asset.load::<Asset>(self.get_connection().deref_mut()).map_err(|e| Error::from(e))
+    asset
+      .load::<Asset>(self.get_connection().deref_mut())
+      .map_err(|_| Error::from(FailedToRetrieveData { entity_name: "asset".to_string() }))
   }
 
   fn get_by_id(&mut self, asset_id: i32) -> Result<Asset, Error> {
@@ -215,7 +225,7 @@ impl<'a> Store<Asset, CreateAsset<'a>, UpdateAsset> for SqliteStore {
     asset
       .filter(id.eq(asset_id))
       .first::<Asset>(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToRetrieveData { entity_name: "asset".to_string() }))
   }
 
   fn create(&mut self, item: &CreateAsset) -> Result<Asset, Error> {
@@ -226,7 +236,7 @@ impl<'a> Store<Asset, CreateAsset<'a>, UpdateAsset> for SqliteStore {
       .values(item)
       .on_conflict_do_nothing()
       .get_result(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToCreate { entity_name: "asset".to_string() }))
   }
 
   fn update(&mut self, old: Asset, new: &UpdateAsset) -> Result<usize, Error> {
@@ -236,7 +246,7 @@ impl<'a> Store<Asset, CreateAsset<'a>, UpdateAsset> for SqliteStore {
       ::update(asset.filter(id.eq(old.id)))
       .set(new)
       .execute(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToUpdate { entity_name: "asset".to_string() }))
   }
 
   fn delete(&mut self, entity: Asset) -> Result<usize, Error> {
@@ -245,7 +255,7 @@ impl<'a> Store<Asset, CreateAsset<'a>, UpdateAsset> for SqliteStore {
     diesel
       ::delete(asset.filter(id.eq(entity.id)))
       .execute(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToDelete { entity_name: "asset".to_string() }))
   }
 }
 
@@ -253,7 +263,9 @@ impl<'a> Store<TappletVersion, CreateTappletVersion<'a>, UpdateTappletVersion> f
   fn get_all(&mut self) -> Result<Vec<TappletVersion>, Error> {
     use crate::database::schema::tapplet_version::dsl::*;
 
-    tapplet_version.load::<TappletVersion>(self.get_connection().deref_mut()).map_err(|e| Error::from(e))
+    tapplet_version
+      .load::<TappletVersion>(self.get_connection().deref_mut())
+      .map_err(|_| Error::from(FailedToRetrieveData { entity_name: "Tapplet version".to_string() }))
   }
 
   fn get_by_id(&mut self, tapplet_version_id: i32) -> Result<TappletVersion, Error> {
@@ -262,7 +274,7 @@ impl<'a> Store<TappletVersion, CreateTappletVersion<'a>, UpdateTappletVersion> f
     tapplet_version
       .filter(id.eq(tapplet_version_id))
       .first::<TappletVersion>(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToRetrieveData { entity_name: "Tapplet version".to_string() }))
   }
 
   fn create(&mut self, item: &CreateTappletVersion) -> Result<TappletVersion, Error> {
@@ -275,7 +287,11 @@ impl<'a> Store<TappletVersion, CreateTappletVersion<'a>, UpdateTappletVersion> f
       .do_update()
       .set(UpdateTappletVersion::from(item))
       .get_result(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_|
+        Error::from(FailedToCreate {
+          entity_name: "Tapplet version".to_string(),
+        })
+      )
   }
 
   fn update(&mut self, old: TappletVersion, new: &UpdateTappletVersion) -> Result<usize, Error> {
@@ -285,7 +301,7 @@ impl<'a> Store<TappletVersion, CreateTappletVersion<'a>, UpdateTappletVersion> f
       ::update(tapplet_version.filter(id.eq(old.id)))
       .set(new)
       .execute(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToUpdate { entity_name: "Tapplet version".to_string() }))
   }
 
   fn delete(&mut self, entity: TappletVersion) -> Result<usize, Error> {
@@ -294,7 +310,7 @@ impl<'a> Store<TappletVersion, CreateTappletVersion<'a>, UpdateTappletVersion> f
     diesel
       ::delete(tapplet_version.filter(id.eq(entity.id)))
       .execute(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToDelete { entity_name: "Tapplet version".to_string() }))
   }
 }
 
@@ -302,7 +318,9 @@ impl<'a> Store<DevTapplet, CreateDevTapplet<'a>, UpdateDevTapplet> for SqliteSto
   fn get_all(&mut self) -> Result<Vec<DevTapplet>, Error> {
     use crate::database::schema::dev_tapplet::dsl::*;
 
-    dev_tapplet.load::<DevTapplet>(self.get_connection().deref_mut()).map_err(|e| Error::from(e))
+    dev_tapplet
+      .load::<DevTapplet>(self.get_connection().deref_mut())
+      .map_err(|_| Error::from(FailedToRetrieveData { entity_name: "Dev Tapplet".to_string() }))
   }
 
   fn get_by_id(&mut self, dev_tapplet_id: i32) -> Result<DevTapplet, Error> {
@@ -311,7 +329,7 @@ impl<'a> Store<DevTapplet, CreateDevTapplet<'a>, UpdateDevTapplet> for SqliteSto
     dev_tapplet
       .filter(id.eq(dev_tapplet_id))
       .first::<DevTapplet>(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToRetrieveData { entity_name: "Dev Tapplet".to_string() }))
   }
 
   fn create(&mut self, item: &CreateDevTapplet) -> Result<DevTapplet, Error> {
@@ -321,7 +339,12 @@ impl<'a> Store<DevTapplet, CreateDevTapplet<'a>, UpdateDevTapplet> for SqliteSto
       ::insert_into(dev_tapplet::table)
       .values(item)
       .get_result(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_|
+        Error::from(AlreadyExists {
+          entity_name: "Dev Tapplet".to_string(),
+          field_name: "endpoint".to_string(),
+        })
+      )
   }
 
   fn update(&mut self, old: DevTapplet, new: &UpdateDevTapplet) -> Result<usize, Error> {
@@ -331,7 +354,7 @@ impl<'a> Store<DevTapplet, CreateDevTapplet<'a>, UpdateDevTapplet> for SqliteSto
       ::update(dev_tapplet.filter(id.eq(old.id)))
       .set(new)
       .execute(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToUpdate { entity_name: "Dev Tapplet".to_string() }))
   }
 
   fn delete(&mut self, entity: DevTapplet) -> Result<usize, Error> {
@@ -340,6 +363,6 @@ impl<'a> Store<DevTapplet, CreateDevTapplet<'a>, UpdateDevTapplet> for SqliteSto
     diesel
       ::delete(dev_tapplet.filter(id.eq(entity.id)))
       .execute(self.get_connection().deref_mut())
-      .map_err(|e| Error::from(e))
+      .map_err(|_| Error::from(FailedToDelete { entity_name: "Dev Tapplet".to_string() }))
   }
 }
