@@ -51,8 +51,8 @@ tari_dan_common_types = { path = "../../tari-dan/dan_layer/common_types" }
 tari_dan_app_utilities = { path = "../../tari-dan/applications/tari_dan_app_utilities" }
 tari_wallet_daemon_client = { path = "../../tari-dan/clients/wallet_daemon_client" }
 
-tari_shutdown = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-tari_common = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
+tari_shutdown = { git = "https://github.com/tari-project/tari.git", branch = "feature-dan2" }
+tari_common = { git = "https://github.com/tari-project/tari.git", branch = "feature-dan2" }
 base64 = "0.22.1"
 sha2 = "0.10.8"
 sha1 = "0.10.6"
