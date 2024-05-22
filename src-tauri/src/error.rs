@@ -11,6 +11,10 @@ pub enum Error {
   #[error(transparent)] JsonParsingError(#[from] serde_json::Error),
   #[error("Failed to obtain permission token lock")] FailedToObtainPermissionTokenLock(),
   #[error("Failed to obtain auth token lock")] FailedToObtainAuthTokenLock(),
+  #[error("Provider call failed for method: {method} with params: {params}")] ProviderError {
+    method: String,
+    params: String,
+  },
 }
 
 impl serde::Serialize for Error {

@@ -15,6 +15,8 @@ use tari_wallet_daemon_client::{
 };
 use tauri_plugin_http::reqwest::{ self, header::{ AUTHORIZATION, CONTENT_TYPE } };
 
+use crate::error::Error;
+
 pub async fn permission_token() -> Result<(String, String), anyhow::Error> {
   let req_params = AuthLoginRequest {
     permissions: vec!["Admin".to_string()],
@@ -47,15 +49,19 @@ pub async fn free_coins(auth_token: String, permissions_token: String) -> Result
   Ok(())
 }
 
-pub async fn balances(
-  auth_token: String,
-  permissions_token: String
-) -> Result<AccountsGetBalancesResponse, anyhow::Error> {
+pub async fn balances(auth_token: String, permissions_token: String) -> Result<AccountsGetBalancesResponse, Error> {
   let balance_req = AccountsGetBalancesRequest {
     account: Some(ComponentAddressOrName::Name(auth_token)),
     refresh: false,
   };
-  let balance_res = make_request(Some(permissions_token), "accounts.get_balances".to_string(), balance_req).await?;
+  let method = "accounts.get_balances".to_string();
+  let serialized_params = serde_json::to_string(&balance_req).map_err(|e| Error::JsonParsingError(e))?;
+  let balance_res = make_request(Some(permissions_token), method.clone(), balance_req).await.map_err(
+    |_| Error::ProviderError {
+      method,
+      params: serialized_params,
+    }
+  )?;
   let balance_res: AccountsGetBalancesResponse = serde_json::from_value(balance_res)?;
 
   Ok(balance_res)

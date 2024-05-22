@@ -64,10 +64,29 @@ pub async fn get_balances(tokens: State<'_, Tokens>) -> Result<AccountsGetBalanc
     .lock()
     .map_err(|_| FailedToObtainAuthTokenLock())?
     .clone();
-  let handle = tauri::async_runtime::spawn(async move { balances(auth_token, permission_token).await.unwrap() });
-  let balances = handle.await.unwrap();
+  let handle = tauri::async_runtime::spawn(async move { balances(auth_token, permission_token).await });
+  let balances = handle.await??;
 
   Ok(balances)
+}
+
+#[tauri::command]
+pub async fn call_wallet(
+  method: String,
+  params: String,
+  tokens: State<'_, Tokens>
+) -> Result<serde_json::Value, Error> {
+  let permission_token = tokens.permission
+    .lock()
+    .map_err(|_| FailedToObtainPermissionTokenLock())?
+    .clone();
+  let req_params: serde_json::Value = serde_json::from_str(&params).map_err(|e| JsonParsingError(e))?;
+  let method_clone = method.clone();
+  let handle = tauri::async_runtime::spawn(async move {
+    make_request(Some(permission_token), method, req_params).await
+  });
+  let response = handle.await?.map_err(|_| Error::ProviderError { method: method_clone, params })?;
+  Ok(response)
 }
 
 #[tauri::command]
@@ -107,24 +126,6 @@ pub async fn close_tapplet(installed_tapplet_id: i32, shutdown_tokens: State<'_,
   }
 
   Ok(())
-}
-
-#[tauri::command]
-pub async fn call_wallet(
-  method: String,
-  params: String,
-  tokens: State<'_, Tokens>
-) -> Result<serde_json::Value, Error> {
-  let permission_token = tokens.permission
-    .lock()
-    .map_err(|_| FailedToObtainPermissionTokenLock())?
-    .clone();
-  let req_params: serde_json::Value = serde_json::from_str(&params).map_err(|e| JsonParsingError(e))?;
-  let handle = tauri::async_runtime::spawn(async move {
-    make_request(Some(permission_token), method, req_params).await.unwrap()
-  });
-  let response = handle.await.unwrap();
-  Ok(response)
 }
 
 #[tauri::command]
