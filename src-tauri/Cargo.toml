@@ -56,3 +56,4 @@ tari_common = { git = "https://github.com/tari-project/tari.git", rev = "284cabf
 base64 = "0.22.1"
 sha2 = "0.10.8"
 sha1 = "0.10.6"
+thiserror = "1.0.60"

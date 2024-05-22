@@ -2,16 +2,26 @@ import { invoke } from "@tauri-apps/api/core"
 import { useState } from "react"
 
 import { Typography } from "@mui/material"
+import { useSnackBar } from "../ErrorContext"
 
 export const Wallet: React.FC = () => {
   const [balances, setBalances] = useState({})
+  const { showSnackBar } = useSnackBar()
 
   async function get_free_coins() {
-    await invoke("get_free_coins", {})
+    try {
+      await invoke("get_free_coins", {})
+    } catch (error) {
+      showSnackBar(error, "error")
+    }
   }
 
   async function get_balances() {
-    setBalances(await invoke("get_balances", {}))
+    try {
+      setBalances(await invoke("get_balances", {}))
+    } catch (error) {
+      showSnackBar(error, "error")
+    }
   }
 
   return (

@@ -11,6 +11,7 @@ mod tapplet_installer;
 mod tapplet_server;
 mod wallet_daemon;
 mod interface;
+mod error;
 mod constants;
 
 use commands::{
@@ -86,7 +87,7 @@ pub fn run() {
     )
     .setup(|app| {
       tauri::async_runtime::spawn(async move {
-        start_wallet_daemon().await.unwrap();
+        start_wallet_daemon().await.unwrap(); // TODO handle error while starting wallet daemon https://github.com/orgs/tari-project/projects/18/views/1?pane=issue&itemId=63753279
       });
 
       let handle = tauri::async_runtime::spawn(async move { permission_token().await.unwrap() });
@@ -94,11 +95,11 @@ pub fn run() {
       let tokens = app.state::<Tokens>();
       tokens.permission
         .lock()
-        .unwrap()
+        .map_err(|_| error::Error::FailedToObtainPermissionTokenLock())?
         .replace_range(.., &permission_token);
       tokens.auth
         .lock()
-        .unwrap()
+        .map_err(|_| error::Error::FailedToObtainAuthTokenLock())?
         .replace_range(.., &auth_token);
 
       Ok(())

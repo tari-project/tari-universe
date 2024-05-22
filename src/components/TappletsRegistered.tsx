@@ -5,35 +5,50 @@ import { InstallDesktop } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
 import AddDevTappletDialog from "./AddDevTappletDialog"
 import { RegisteredTapplet } from "@type/tapplet"
+import { useSnackBar } from "../ErrorContext"
 
-export const TappletsRegistered: React.FC = () => {
-  const [registeredTappletsList, setRegisteredTappletsList] = useState<RegisteredTapplet[]>([])
+const useRegisteredTapplets = () => {
+  const [registeredTappletsList, setRegisteredTappletsList] = useState<RegisteredTapplet[] | undefined>([])
+  const { showSnackBar } = useSnackBar()
 
   useEffect(() => {
     const fetchTapplets = async () => {
       try {
-        // fetch data from json to db
         await invoke("fetch_tapplets")
-        // read from db
-        const _tapplets: RegisteredTapplet[] = await invoke("read_tapp_registry_db")
-        if (_tapplets) setRegisteredTappletsList(_tapplets)
+        const registeredTappletsList = await invoke("read_tapp_registry_db")
+        setRegisteredTappletsList(registeredTappletsList as RegisteredTapplet[] | undefined)
       } catch (error) {
-        console.error("Error:", error)
+        showSnackBar(error, "error")
       }
     }
+
     fetchTapplets()
   }, [])
 
+  return registeredTappletsList
+}
+
+export const TappletsRegistered: React.FC = () => {
+  const registeredTappletsList = useRegisteredTapplets()
+  const { showSnackBar } = useSnackBar()
+
   async function downloadAndExtract(tappletId: number) {
-    await invoke("download_and_extract_tapp", { tappletId: tappletId })
+    try {
+      await invoke("download_and_extract_tapp", { tappletId: tappletId })
+    } catch (error) {
+      showSnackBar(error, "error")
+    }
   }
 
   async function validateChecksum(tappletId: number) {
     //TODO use it to display the verification process status
-    const isCheckumValid: boolean = await invoke("calculate_and_validate_tapp_checksum", {
-      tappletId: tappletId,
-    })
-    console.log("is checksum valid?", isCheckumValid)
+    try {
+      const isCheckumValid = await invoke("calculate_and_validate_tapp_checksum", {
+        tappletId: tappletId,
+      })
+    } catch (error) {
+      showSnackBar(error, "error")
+    }
   }
 
   async function installTapplet(tappletId: number) {
@@ -45,15 +60,19 @@ export const TappletsRegistered: React.FC = () => {
     if (!tappletId) return
     await installTapplet(tappletId)
 
-    invoke("insert_installed_tapp_db", { tappletId: tappletId })
+    try {
+      await invoke("insert_installed_tapp_db", { tappletId: tappletId })
+    } catch (error) {
+      showSnackBar(error, "error")
+    }
   }
 
   return (
     <div>
       <Typography variant="h4">Registered Tapplets</Typography>
-      {registeredTappletsList.length > 0 ? (
+      {registeredTappletsList?.length ?? 0 > 0 ? (
         <List>
-          {registeredTappletsList.map((item) => (
+          {registeredTappletsList?.map((item) => (
             <ListItem key={item.package_name}>
               <ListItemAvatar>
                 <Avatar src={tariLogo} />
