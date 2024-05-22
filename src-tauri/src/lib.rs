@@ -12,6 +12,7 @@ mod tapplet_server;
 mod wallet_daemon;
 mod interface;
 mod error;
+mod constants;
 
 use commands::{
   call_wallet,

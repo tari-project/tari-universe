@@ -1,5 +1,6 @@
 use tari_wallet_daemon_client::types::AccountsGetBalancesResponse;
 use tauri::{ self, State };
+use std::path::PathBuf;
 
 use crate::{
   database::{
@@ -31,7 +32,7 @@ use crate::{
   hash_calculator::calculate_checksum,
   interface::{ DevTappletResponse, InstalledTappletWithName, RegisteredTappletWithVersion, RegisteredTapplets },
   rpc::{ balances, free_coins, make_request },
-  tapplet_installer::{ check_extracted_files, delete_tapplet, download_file, extract_tar },
+  tapplet_installer::{ check_extracted_files, delete_tapplet, download_file, extract_tar, get_tapp_download_path },
   tapplet_server::start,
   DatabaseConnection,
   ShutdownTokens,
@@ -93,16 +94,23 @@ pub async fn call_wallet(
 pub async fn launch_tapplet(
   installed_tapplet_id: i32,
   shutdown_tokens: State<'_, ShutdownTokens>,
-  db_connection: State<'_, DatabaseConnection>
+  db_connection: State<'_, DatabaseConnection>,
+  app_handle: tauri::AppHandle
 ) -> Result<String, Error> {
   let mut locked_tokens = shutdown_tokens.0.lock().await;
   let mut store = SqliteStore::new(db_connection.0.clone());
 
-  let installed_tapplet = store.get_installed_tapplet_full_by_id(installed_tapplet_id)?;
-  let tapplet_path = format!("{}/{}/package/dist", installed_tapplet.1.registry_id, installed_tapplet.2.version);
-  let tapplet_handle = tauri::async_runtime::spawn(async move { start(&tapplet_path).await });
+  let (_installed_tapp, registered_tapp, tapp_version) = store
+    .get_installed_tapplet_full_by_id(installed_tapplet_id)
+    .unwrap();
 
-  let (addr, cancel_token) = tapplet_handle.await??;
+  // get download path
+  let tapplet_path = get_tapp_download_path(registered_tapp.registry_id, tapp_version.version, app_handle).unwrap();
+  let dist_path = tapplet_path.join("package/dist");
+
+  let handle_start = tauri::async_runtime::spawn(async move { start(dist_path).await });
+
+  let (addr, cancel_token) = handle_start.await??;
   match locked_tokens.insert(installed_tapplet_id.clone(), cancel_token) {
     Some(_) => {
       return Err(TappletServerError(AlreadyRunning()));
@@ -131,36 +139,42 @@ pub async fn close_tapplet(installed_tapplet_id: i32, shutdown_tokens: State<'_,
 #[tauri::command]
 pub async fn download_and_extract_tapp(
   tapplet_id: i32,
-  db_connection: State<'_, DatabaseConnection>
+  db_connection: State<'_, DatabaseConnection>,
+  app_handle: tauri::AppHandle
 ) -> Result<(), Error> {
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id)?;
+  let (tapp, tapp_version) = tapplet_store.get_registered_tapplet_with_version(tapplet_id)?;
 
-  let url = version_data.registry_url.clone();
-  let tapplet_path = format!("../tapplets_installed/{}/{}", tapp.registry_id, version_data.version);
-  let extract_path = tapplet_path.clone();
+  // get download path
+  let tapplet_path = get_tapp_download_path(tapp.registry_id, tapp_version.version, app_handle).unwrap();
 
   // download tarball
-  let handle = tauri::async_runtime::spawn(async move { download_file(&url, &tapplet_path).await });
-  handle.await?.map_err(|_| Error::RequestError(FailedToDownload { url: version_data.registry_url }))?;
+  let url = tapp_version.registry_url.clone();
+  let download_path = tapplet_path.clone();
+  let handle = tauri::async_runtime::spawn(async move { download_file(&url, download_path).await });
+  handle.await?.map_err(|_| Error::RequestError(FailedToDownload { url: tapp_version.registry_url }))?;
 
   //extract tarball
-  extract_tar(&extract_path)?;
-  check_extracted_files(&extract_path)?;
+  let extract_path: PathBuf = tapplet_path.clone();
+  extract_tar(extract_path)?;
+  check_extracted_files(tapplet_path)?;
   Ok(())
 }
 
 #[tauri::command]
 pub fn calculate_and_validate_tapp_checksum(
   tapplet_id: i32,
-  db_connection: State<'_, DatabaseConnection>
+  db_connection: State<'_, DatabaseConnection>,
+  app_handle: tauri::AppHandle
 ) -> Result<bool, Error> {
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id)?;
-  let tapplet_path = format!("../tapplets_installed/{}/{}", tapp.registry_id, version_data.version);
+
+  // get download path
+  let tapplet_path = get_tapp_download_path(tapp.registry_id, version_data.version, app_handle).unwrap();
 
   // calculate `integrity` from downloaded tarball file
-  let integrity = calculate_checksum(&tapplet_path)?;
+  let integrity = calculate_checksum(tapplet_path)?;
   // check if the calculated chechsum is equal to the value stored in the registry
   let validity: bool = integrity == version_data.integrity;
 
@@ -301,17 +315,19 @@ pub fn delete_installed_tapp_db(tapplet_id: i32, db_connection: State<'_, Databa
 }
 
 #[tauri::command]
-pub fn delete_installed_tapp(tapplet_id: i32, db_connection: State<'_, DatabaseConnection>) -> Result<(), Error> {
-  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
+pub fn delete_installed_tapp(
+  tapplet_id: i32,
+  db_connection: State<'_, DatabaseConnection>,
+  app_handle: tauri::AppHandle
+) -> Result<(), Error> {
+  let mut store = SqliteStore::new(db_connection.0.clone());
 
-  let installed_tapplet = tapplet_store.get_installed_tapplet_full_by_id(tapplet_id)?;
-  let tapplet_path = format!(
-    "../tapplets_installed/{}/{}",
-    installed_tapplet.1.registry_id,
-    installed_tapplet.2.version
-  );
+  let (_installed_tapp, registered_tapp, tapp_version) = store.get_installed_tapplet_full_by_id(tapplet_id)?;
 
-  delete_tapplet(&tapplet_path)
+  // get download path
+  let tapplet_path = get_tapp_download_path(registered_tapp.registry_id, tapp_version.version, app_handle).unwrap();
+
+  delete_tapplet(tapplet_path)
 }
 
 #[tauri::command]

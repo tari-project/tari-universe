@@ -81,6 +81,7 @@ pub enum IOError {
   #[error("Failed to delete tapplet folder at path: {path}")] FailedToDeleteTapplet {
     path: String,
   },
+  #[error("Failed to get file path")] FailedToGetFilePath,
 }
 
 #[derive(Debug, Error)]
