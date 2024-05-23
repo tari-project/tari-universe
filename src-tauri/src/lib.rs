@@ -1,5 +1,5 @@
 use diesel::SqliteConnection;
-use std::{ collections::HashMap, env, sync::{ Arc, Mutex } };
+use std::{ collections::HashMap, env, sync::{ Arc, Mutex }, thread::sleep, time::Duration };
 use tauri::{ self, Manager };
 use tokio_util::sync::CancellationToken;
 
@@ -48,6 +48,20 @@ pub struct Tokens {
 pub struct ShutdownTokens(Arc<tokio::sync::Mutex<HashMap<i32, CancellationToken>>>);
 pub struct DatabaseConnection(Arc<Mutex<SqliteConnection>>);
 
+async fn try_get_tokens() -> (String, String) {
+  loop {
+    match permission_token().await {
+      Ok(tokens) => {
+        return tokens;
+      }
+      Err(_) => {
+        sleep(Duration::from_millis(500));
+        continue;
+      }
+    }
+  }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder
@@ -90,7 +104,7 @@ pub fn run() {
         start_wallet_daemon().await.unwrap(); // TODO handle error while starting wallet daemon https://github.com/orgs/tari-project/projects/18/views/1?pane=issue&itemId=63753279
       });
 
-      let handle = tauri::async_runtime::spawn(async move { permission_token().await.unwrap() });
+      let handle = tauri::async_runtime::spawn(try_get_tokens());
       let (permission_token, auth_token) = tauri::async_runtime::block_on(handle).unwrap();
       let tokens = app.state::<Tokens>();
       tokens.permission
