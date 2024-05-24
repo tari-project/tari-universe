@@ -110,14 +110,14 @@ export class WalletDaemonTariProvider implements TariProvider {
       inputs: req.required_substates.map((s) => ({
         // TODO: Hmm The bindings want a SubstateId object, but the wallet only wants a string. Any is used to skip type checking here
         substate_id: s.substate_id as any,
-        version: s.version,
+        version: s.version || null,
       })),
       override_inputs: false,
       is_dry_run: req.is_dry_run,
       proof_ids: [],
       min_epoch: null,
       max_epoch: null,
-    } as TransactionSubmitRequest
+    } satisfies TransactionSubmitRequest
     const res = await this.client.submitTransaction(params)
 
     return { transaction_id: res.transaction_id }
