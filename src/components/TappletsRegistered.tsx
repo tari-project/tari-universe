@@ -46,6 +46,7 @@ export const TappletsRegistered: React.FC = () => {
       const isCheckumValid = await invoke("calculate_and_validate_tapp_checksum", {
         tappletId: tappletId,
       })
+      console.log("Checksum validation result: ", isCheckumValid) // unused variable causes build failure
     } catch (error) {
       showSnackBar(error, "error")
     }

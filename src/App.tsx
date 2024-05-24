@@ -1,5 +1,5 @@
 import "./App.css"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import {
   TariPermissionAccountInfo,
   TariPermissionKeyList,
@@ -16,6 +16,7 @@ import { TappletsInstalled } from "./components/TappletsInstalled"
 import { ActiveDevTapplet } from "./components/DevTapplet"
 import { WalletDaemonParameters, WalletDaemonTariProvider } from "@provider/wallet_daemon"
 import { Box } from "@mui/material"
+import { useSnackBar } from "./ErrorContext"
 
 let permissions = new TariPermissions()
 permissions.addPermission(new TariPermissionKeyList())
@@ -27,16 +28,29 @@ const params: WalletDaemonParameters = {
   permissions,
   optionalPermissions,
 }
-const provider = await WalletDaemonTariProvider.build(params)
 
 function App() {
+  const provider = useRef<WalletDaemonTariProvider | null>(null)
+  const { showSnackBar } = useSnackBar()
   useEffect(() => {
+    const initProvider = async () => {
+      const newProvider = await WalletDaemonTariProvider.build(params)
+      provider.current = newProvider
+    }
+    initProvider().catch((e) => {
+      showSnackBar(`Failed to initialize provider ${e.message}`, "error")
+    })
+
     const handleMessage = async (event: any) => {
+      if (!provider.current) {
+        showSnackBar("Provider is not initialized yet", "error")
+        return
+      }
+
       const { methodName, args } = event.data
-      const result = await provider.runOne(methodName, args)
+      const result = await provider.current.runOne(methodName, args)
       event.source.postMessage({ id: event.id, result }, event.origin)
     }
-
     window.addEventListener("message", handleMessage, false)
 
     return () => {
