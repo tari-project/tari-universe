@@ -1,39 +1,31 @@
-# Setup
+# Requirements
+Install `tauri-cli` with command `cargo install tauri-cli --version "^2.0.0-beta"`
+Install `npm` and `node` from [npm docs](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
+Minimal requirements are:
+ - node version >= 18
+ - npm version >= 8
 
-In a local `tari-dan` repo change swap these dependencies to a version that compiles wallet-daemon:
+Install [rust](https://www.rust-lang.org/tools/install) with minimal version 1.77
 
-```toml
-# external minotari/tari dependencies
-tari_hash_domains = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-minotari_app_grpc = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-minotari_app_utilities = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-minotari_console_wallet = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-minotari_node = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-minotari_node_grpc_client = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-minotari_wallet = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-minotari_wallet_grpc_client = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-tari_common = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-tari_common_types = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
+Add wasm32-unknown-unknown compilation target for rust with command `rustup target add wasm32-unknown-unknown`
 
-# avoid including default features so each crate can choose which ones to import
-tari_core = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06", default-features = false }
-tari_crypto = "0.20.0"
-tari_key_manager = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-tari_metrics = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-tari_mmr = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-tari_p2p = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-tari_shutdown = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-tari_storage = { git = "https://github.com/tari-project/tari.git", rev = "284cabfe92e31d1de963f701dd1c404a85cb7a06" }
-tari_utilities = "0.7.0"
-```
+tari-dan requires it's own dependencies to run on ubuntu:
 
-Start `tari-dan` docker image like: `docker run -p 18000-18100:18000-18100 quay.io/tarilabs/dan-testing`
+Run [install_ubuntu_dependencies.sh](https://github.com/tari-project/tari-dan/blob/development/scripts/install_ubuntu_dependencies.sh) from tari-dan repo
 
-run `cargo tauri dev`
+## windows
+Download Visual Studio Community 2019 from [microsoft webpage](https://learn.microsoft.com/en-us/visualstudio/releases/2019/redistribution#--download)
+On installation select `Dekstop development with C++` from `Desktop & Mobile` tab and click `Install`.
 
-Logs are available in `log/wallet-daemon` folder and sqlite db is in `localnet/data`
+## macOS
+WIP
 
-Change path for `"@tariproject/wallet_jrpc_client"` in `package.json` file
+# Running Tari Universe locally
 
-The example tapplet comes from [tapplet-example](https://github.com/MCozhusheck/tapplet-example)
-You can replace viewed by building project and copying the files inside `dist` folder.
+Run `cargo tauri dev` to launch application locally
+
+Logs are available in `log/wallet-daemon` folder and sqlite db logs are in `igor/data`
+
+# Testing tapplets locally
+
+Navigate to `Tapplet Registry` and click `Add dev tapplet` to add tapplet running on your machine
