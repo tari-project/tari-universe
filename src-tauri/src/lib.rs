@@ -74,7 +74,6 @@ pub fn run() {
       auth: Mutex::new("".to_string()),
     })
     .manage(ShutdownTokens::default())
-    .manage(DatabaseConnection(Arc::new(Mutex::new(database::establish_connection()))))
     .invoke_handler(
       tauri::generate_handler![
         get_free_coins,
@@ -104,10 +103,12 @@ pub fn run() {
       tauri::async_runtime::spawn(async move {
         start_wallet_daemon().await.unwrap(); // TODO handle error while starting wallet daemon https://github.com/orgs/tari-project/projects/18/views/1?pane=issue&itemId=63753279
       });
+      let tokens = app.state::<Tokens>();
+      let db_path = app.path().app_data_dir().unwrap().to_path_buf().join(constants::DB_FILE_NAME);
+      app.manage(DatabaseConnection(Arc::new(Mutex::new(database::establish_connection(db_path.to_str().unwrap())))));
 
       let handle = tauri::async_runtime::spawn(try_get_tokens());
       let (permission_token, auth_token) = tauri::async_runtime::block_on(handle).unwrap();
-      let tokens = app.state::<Tokens>();
       tokens.permission
         .lock()
         .map_err(|_| error::Error::FailedToObtainPermissionTokenLock())?
