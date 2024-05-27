@@ -1,6 +1,6 @@
 use std::{ env, fs, panic, path::PathBuf, process };
 
-use tari_common::initialize_logging;
+use tari_common::{ initialize_logging, configuration::Network };
 use tari_crypto::{ keys::PublicKey, ristretto::RistrettoPublicKey };
 use tari_dan_app_utilities::configuration::load_configuration;
 use tari_dan_wallet_daemon::{ cli::Cli, config::ApplicationConfig, initialize_wallet_sdk, run_tari_dan_wallet_daemon };
@@ -18,12 +18,12 @@ pub async fn start_wallet_daemon() -> Result<(), anyhow::Error> {
 
   let base_path = env::current_dir().unwrap().parent().unwrap().to_path_buf();
 
-  let cli = Cli::init();
+  let mut cli = Cli::init();
+  cli.common.network = Some(Network::Igor);
 
   let config_path = PathBuf::from(base_path.join("config.toml"));
   let cfg = load_configuration(config_path, true, &cli).unwrap();
-  let mut config = ApplicationConfig::load_from(&cfg).unwrap();
-  config.dan_wallet_daemon.indexer_node_json_rpc_url = env::var("INDEXER_NODE_JSON_RPC_URL").unwrap();
+  let config = ApplicationConfig::load_from(&cfg).unwrap();
   let derive_secret = env::var("DERIVE_SECRET").ok();
 
   if let Some(secret) = derive_secret {

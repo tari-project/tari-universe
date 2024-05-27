@@ -1,5 +1,5 @@
 use diesel::SqliteConnection;
-use std::{ collections::HashMap, env, sync::{ Arc, Mutex }, thread::sleep, time::Duration };
+use std::{ collections::HashMap, sync::{ Arc, Mutex }, thread::sleep, time::Duration };
 use tauri::{ self, Manager };
 use tokio_util::sync::CancellationToken;
 
@@ -54,7 +54,8 @@ async fn try_get_tokens() -> (String, String) {
       Ok(tokens) => {
         return tokens;
       }
-      Err(_) => {
+      Err(e) => {
+        println!("Failed to get tokens: {}", e);
         sleep(Duration::from_millis(500));
         continue;
       }
