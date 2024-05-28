@@ -1,5 +1,5 @@
 {
-  "productName": "wallet-daemon-test",
+  "productName": "tari-universe",
   "version": "0.0.0",
   "identifier": "universe.tari",
   "build": {
@@ -11,7 +11,7 @@
   "app": {
     "windows": [
       {
-        "title": "wallet-daemon-test",
+        "title": "Tari Universe",
         "width": 800,
         "height": 600
       }
