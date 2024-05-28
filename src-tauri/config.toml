@@ -184,21 +184,3 @@ peer_seeds = [
 
 [indexer.p2p]
 #transport = "tor"
-
-########################################################################################################################
-#                                                                                                                      #
-#                                     DAN Wallet Daemon Configuration Options ()                                       #
-#                                                                                                                      #
-########################################################################################################################
-
-[dan_wallet_daemon]
-# JSON-RPC listener address (default = "127.0.0.1:9000")
-json_rpc_address = "0.0.0.0:19000"
-ui_connect_address = "127.0.0.1:19000"
-indexer_node_json_rpc_url = "https://indexer-devnet.tari.com/json_rpc"
-
-# Signaling server address (default = "127.0.0.1:9100")
-# signaling_server_addr = "127.0.0.1:9100"
-
-# Validator node endpoint url (default = "http://127.0.0.1:18200/json_rpc")
-# validator_node_endpoint = "http://127.0.0.1:18200/json_rpc"
