@@ -1,5 +1,5 @@
 use diesel::SqliteConnection;
-use std::{ collections::HashMap, env, sync::{ Arc, Mutex }, thread::sleep, time::Duration };
+use std::{ collections::HashMap, sync::{ Arc, Mutex }, thread::sleep, time::Duration };
 use tauri::{ self, Manager };
 use tokio_util::sync::CancellationToken;
 
@@ -54,7 +54,8 @@ async fn try_get_tokens() -> (String, String) {
       Ok(tokens) => {
         return tokens;
       }
-      Err(_) => {
+      Err(e) => {
+        println!("Failed to get tokens: {}", e);
         sleep(Duration::from_millis(500));
         continue;
       }
@@ -73,7 +74,6 @@ pub fn run() {
       auth: Mutex::new("".to_string()),
     })
     .manage(ShutdownTokens::default())
-    .manage(DatabaseConnection(Arc::new(Mutex::new(database::establish_connection()))))
     .invoke_handler(
       tauri::generate_handler![
         get_free_coins,
@@ -100,13 +100,17 @@ pub fn run() {
       ]
     )
     .setup(|app| {
+      let data_dir_path = app.path().app_data_dir().unwrap().to_path_buf();
+      let log_path = app.path().app_log_dir().unwrap().to_path_buf();
       tauri::async_runtime::spawn(async move {
-        start_wallet_daemon().await.unwrap(); // TODO handle error while starting wallet daemon https://github.com/orgs/tari-project/projects/18/views/1?pane=issue&itemId=63753279
+        start_wallet_daemon(log_path, data_dir_path).await.unwrap(); // TODO handle error while starting wallet daemon https://github.com/orgs/tari-project/projects/18/views/1?pane=issue&itemId=63753279
       });
+      let db_path = app.path().app_data_dir().unwrap().to_path_buf().join(constants::DB_FILE_NAME);
+      app.manage(DatabaseConnection(Arc::new(Mutex::new(database::establish_connection(db_path.to_str().unwrap())))));
 
+      let tokens = app.state::<Tokens>();
       let handle = tauri::async_runtime::spawn(try_get_tokens());
       let (permission_token, auth_token) = tauri::async_runtime::block_on(handle).unwrap();
-      let tokens = app.state::<Tokens>();
       tokens.permission
         .lock()
         .map_err(|_| error::Error::FailedToObtainPermissionTokenLock())?

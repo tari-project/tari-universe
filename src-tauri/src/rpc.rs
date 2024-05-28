@@ -1,6 +1,6 @@
 use axum_jrpc::{ JsonRpcAnswer, JsonRpcRequest, JsonRpcResponse };
 use serde::Serialize;
-use std::{ env, net::SocketAddr };
+use std::{ net::SocketAddr, str::FromStr };
 use tari_wallet_daemon_client::{
   types::{
     AccountsCreateFreeTestCoinsRequest,
@@ -16,6 +16,8 @@ use tari_wallet_daemon_client::{
 use tauri_plugin_http::reqwest::{ self, header::{ AUTHORIZATION, CONTENT_TYPE } };
 
 use crate::error::Error;
+
+const JSON_CONNECT_ADDRESS: &str = "127.0.0.1:19000"; // TODO use db to get endpoint
 
 pub async fn permission_token() -> Result<(String, String), anyhow::Error> {
   let req_params = AuthLoginRequest {
@@ -72,7 +74,7 @@ pub async fn make_request<T: Serialize>(
   method: String,
   params: T
 ) -> Result<serde_json::Value, anyhow::Error> {
-  let address: SocketAddr = env::var("JSON_CONNECT_ADDRESS")?.parse()?;
+  let address = SocketAddr::from_str(JSON_CONNECT_ADDRESS).unwrap();
   let url = format!("http://{}", address);
   let client = reqwest::Client::new();
   let body = JsonRpcRequest {

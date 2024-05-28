@@ -193,7 +193,9 @@ peer_seeds = [
 
 [dan_wallet_daemon]
 # JSON-RPC listener address (default = "127.0.0.1:9000")
-json_rpc_address = "127.0.0.1:9001"
+json_rpc_address = "0.0.0.0:19000"
+ui_connect_address = "127.0.0.1:19000"
+indexer_node_json_rpc_url = "https://indexer-devnet.tari.com/json_rpc"
 
 # Signaling server address (default = "127.0.0.1:9100")
 # signaling_server_addr = "127.0.0.1:9100"
