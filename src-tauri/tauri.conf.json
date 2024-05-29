@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "identifier": "universe.tari",
   "build": {
-    "beforeDevCommand": "yarn dev",
+    "beforeDevCommand": "yarn run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "yarn build",
+    "beforeBuildCommand": "yarn run build",
     "frontendDist": "../dist"
   },
   "app": {
