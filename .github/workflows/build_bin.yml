@@ -1,9 +1,8 @@
 name: "publish"
 
 on:
-  push:
-    branches:
-      - feat/tauri-action
+  release:
+    types: [published]
 
 jobs:
   publish-tauri:
@@ -85,9 +84,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
-          releaseName: "App v__VERSION__"
-          releaseBody: "See the assets to download this version and install."
+          releaseBody: "Launcher for Tari DAN network."
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
