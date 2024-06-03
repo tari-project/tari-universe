@@ -39,6 +39,7 @@ use commands::{
 };
 
 use crate::{ rpc::permission_token, wallet_daemon::start_wallet_daemon };
+use crate::error::{ Error::IOError, IOError::* };
 
 pub struct Tokens {
   auth: Mutex<String>,
@@ -100,8 +101,22 @@ pub fn run() {
       ]
     )
     .setup(|app| {
-      let data_dir_path = app.path().app_data_dir().unwrap().to_path_buf();
-      let log_path = app.path().app_log_dir().unwrap().to_path_buf();
+      let data_dir_path = app.path().app_data_dir().unwrap();
+      if !data_dir_path.exists() {
+        std::fs
+          ::create_dir(&data_dir_path)
+          .map_err(|_| IOError(FailedToCreateDir { path: data_dir_path.to_str().unwrap().to_string() }))?;
+      }
+      let data_dir_path = data_dir_path.to_path_buf();
+
+      let log_path = app.path().app_log_dir().unwrap();
+      if !log_path.exists() {
+        std::fs
+          ::create_dir(&log_path)
+          .map_err(|_| IOError(FailedToCreateDir { path: log_path.to_str().unwrap().to_string() }))?;
+      }
+      let log_path = log_path.to_path_buf();
+
       tauri::async_runtime::spawn(async move {
         start_wallet_daemon(log_path, data_dir_path).await.unwrap(); // TODO handle error while starting wallet daemon https://github.com/orgs/tari-project/projects/18/views/1?pane=issue&itemId=63753279
       });
