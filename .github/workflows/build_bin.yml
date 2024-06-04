@@ -97,4 +97,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tari-universe-${{ matrix.platform }}
-          path: '/home/runner/work/tari-universe/tari-universe/src-tauri/target/release/bundle'
+          path: "${{ join(fromJSON(steps.build.outputs.artifacts), '\n') }}"
