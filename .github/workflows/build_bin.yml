@@ -5,7 +5,8 @@ on:
     types: [published]
 
 jobs:
-  publish-tauri:
+  builds:
+    name: Building ${{ matrix.platform }} 
     permissions:
       contents: write
     strategy:
@@ -80,7 +81,9 @@ jobs:
       - name: install frontend dependencies
         run: yarn install
 
-      - uses: tauri-apps/tauri-action@v0
+      - name: Build
+        uses: tauri-apps/tauri-action@v0
+        id: build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -88,3 +91,9 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: tari-universe-${{ matrix.platform }}
+          path: ${{ steps.build.outputs.artifactPaths }}
