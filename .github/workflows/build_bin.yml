@@ -97,4 +97,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tari-universe-${{ matrix.platform }}
-          path: "${{ join(fromJSON(steps.build.outputs.artifacts), '\n') }}"
+          path: "${{ join(fromJSON(steps.build.outputs.artifactPaths), '\n') }}"
