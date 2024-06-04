@@ -1,8 +1,9 @@
 name: "publish"
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - feat/tauri-action
 
 jobs:
   builds:
