@@ -1,0 +1,99 @@
+name: "publish"
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  builds:
+    name: Building ${{ matrix.platform }} 
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: "ubuntu-22.04"
+            args: ""
+          - platform: "windows-2019"
+            args: ""
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: 'wasm32-unknown-unknown'
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
+        run: >-
+          sudo apt-get update;
+          sudo apt-get install -y
+          libwebkit2gtk-4.1-dev
+          libappindicator3-dev
+          librsvg2-dev patchelf
+          apt-transport-https
+          ca-certificates
+          curl
+          gpg
+          openssl
+          libssl-dev
+          pkg-config
+          libsqlite3-dev
+          git
+          cmake
+          dh-autoreconf
+          libc++-dev
+          libc++abi-dev
+          libprotobuf-dev
+          protobuf-compiler
+          libncurses5-dev
+          libncursesw5-dev
+          build-essential
+          zip
+    
+      - name: Install Windows dependencies
+        if: startsWith(runner.os,'Windows')
+        run: |
+          vcpkg.exe install sqlite3:x64-windows zlib:x64-windows
+          # Bug in choco - need to install each package individually
+          choco upgrade llvm -y
+          # psutils is out of date
+          # choco upgrade psutils -y
+          choco upgrade openssl -y
+          # Should already be installed
+          # choco upgrade strawberryperl -y
+          choco upgrade protoc -y
+
+      - name: install frontend dependencies
+        run: yarn install
+
+      - name: Build
+        uses: tauri-apps/tauri-action@v0
+        id: build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          releaseBody: "Launcher for Tari DAN network."
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: tari-universe_${{ steps.build.outputs.appVersion }}_${{ matrix.platform }}
+          path: "${{ join(fromJSON(steps.build.outputs.artifactPaths), '\n') }}"
