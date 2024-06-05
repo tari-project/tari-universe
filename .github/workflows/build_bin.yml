@@ -30,8 +30,7 @@ jobs:
           - platform: "windows-2019"
             args: ""
           - platform: "macos-latest"
-            args: ""
-            #args: "--target universal-apple-darwin"
+            args: "--verbose --target universal-apple-darwin"
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -105,6 +104,8 @@ jobs:
         run: |
           # openssl, cmake, autoconf and zip already installed
           brew install coreutils automake protobuf
+          # Build universal targets - bug in yarn?
+          rm -f src-tauri/rust-toolchain.toml
 
       - name: install frontend dependencies
         run: yarn install
@@ -115,9 +116,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          includeDebug: true
+          includeRelease: true
           releaseBody: "Launcher for Tari DAN network."
           releaseDraft: true
-          prerelease: false
+          prerelease: true
           args: ${{ matrix.args }}
 
       - name: Upload
