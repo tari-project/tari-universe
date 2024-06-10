@@ -1,12 +1,3 @@
-import { TariPermissions } from "./permissions"
-import {
-  SubmitTransactionRequest,
-  TransactionResult,
-  TransactionStatus,
-  SubmitTransactionResponse,
-  Account,
-  TariProvider,
-} from "./types"
 import {
   WalletDaemonClient,
   stringToSubstateId,
@@ -14,8 +5,22 @@ import {
   TransactionSubmitRequest,
   SubstateType,
   SubstatesListRequest,
+  substateIdToString,
+  KeyBranch,
 } from "@tariproject/wallet_jrpc_client"
 import { IPCRpcTransport } from "./ipc_transport"
+import {
+  Account,
+  SubmitTransactionRequest,
+  SubmitTransactionResponse,
+  Substate,
+  TariPermissions,
+  TariProvider,
+  TemplateDefinition,
+  TransactionResult,
+  TransactionStatus,
+  VaultBalances,
+} from "@tariproject/tarijs"
 
 export const Unsupported = "UNSUPPORTED"
 
@@ -36,6 +41,10 @@ export class WalletDaemonTariProvider implements TariProvider {
     this.client = connection
   }
 
+  public isConnected(): boolean {
+    return true
+  }
+
   static async build(params: WalletDaemonParameters): Promise<WalletDaemonTariProvider> {
     const allPermissions = new TariPermissions()
     allPermissions.addPermissions(params.permissions)
@@ -49,23 +58,10 @@ export class WalletDaemonTariProvider implements TariProvider {
     return res
   }
 
-  public async token(): Promise<string | undefined> {
-    return (this.client.getTransport() as IPCRpcTransport).get_token()
-  }
-
-  public async tokenUrl(): Promise<string> {
-    const name = (this.params.name && encodeURIComponent(this.params.name)) || ""
-    const token = await this.token()
-    const permissions = JSON.stringify(this.params.permissions)
-    const optionalPermissions = JSON.stringify(this.params.optionalPermissions)
-
-    return `tari://${name}/${token}/${permissions}/${optionalPermissions}`
-  }
-
   public async createFreeTestCoins(): Promise<Account> {
     const res = await this.client.createFreeTestCoins({
       account: { Name: "template_web" },
-      amount: 1000000,
+      amount: 1_000_000,
       max_fee: null,
       key_id: 0,
     })
@@ -96,9 +92,16 @@ export class WalletDaemonTariProvider implements TariProvider {
     })
   }
 
-  public async getSubstate(substate_id: string): Promise<unknown> {
+  public async getSubstate(substate_id: string): Promise<Substate> {
     const substateId = stringToSubstateId(substate_id)
-    return await this.client.substatesGet({ substate_id: substateId })
+    const { value, record } = await this.client.substatesGet({ substate_id: substateId })
+    return {
+      value,
+      address: {
+        substate_id: substateIdToString(record.substate_id),
+        version: record.version,
+      },
+    }
   }
 
   public async submitTransaction(req: SubmitTransactionRequest): Promise<SubmitTransactionResponse> {
@@ -135,8 +138,28 @@ export class WalletDaemonTariProvider implements TariProvider {
     }
   }
 
-  public async getTemplateDefinition(template_address: string): Promise<unknown> {
+  public async getPublicKey(branch: string, index: number): Promise<string> {
+    const res = await this.client.createKey({ branch: branch as KeyBranch, specific_index: index })
+    return res.public_key
+  }
+
+  public async getTemplateDefinition(template_address: string): Promise<TemplateDefinition> {
     return await this.client.templatesGet({ template_address })
+  }
+
+  public async getConfidentialVaultBalances(
+    viewKeyId: number,
+    vaultId: string,
+    min: number | null = null,
+    max: number | null = null
+  ): Promise<VaultBalances> {
+    const res = await this.client.viewVaultBalance({
+      view_key_id: viewKeyId,
+      vault_id: vaultId,
+      minimum_expected_value: min,
+      maximum_expected_value: max,
+    })
+    return { balances: res.balances as unknown as Map<string, number | null> }
   }
 
   public async listSubstates(template: string | null, substateType: SubstateType | null) {
