@@ -22,8 +22,6 @@ import {
   VaultBalances,
 } from "@tariproject/tarijs"
 
-export const Unsupported = "UNSUPPORTED"
-
 export type WalletDaemonParameters = {
   permissions: TariPermissions
   optionalPermissions: TariPermissions
@@ -58,10 +56,10 @@ export class WalletDaemonTariProvider implements TariProvider {
     return res
   }
 
-  public async createFreeTestCoins(): Promise<Account> {
+  public async createFreeTestCoins(amount = 1_000_000): Promise<Account> {
     const res = await this.client.createFreeTestCoins({
       account: { Name: "template_web" },
-      amount: 1_000_000,
+      amount,
       max_fee: null,
       key_id: 0,
     })

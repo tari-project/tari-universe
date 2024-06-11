@@ -14,8 +14,8 @@
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.15",
     "@mui/material": "^5.15.15",
+    "@tariproject/tarijs": "^0.1.19",
     "@tariproject/wallet_jrpc_client": "^1.0.5",
-    "@tariproject/tarijs": "../tari.js",
     "@tauri-apps/api": ">=2.0.0-beta.0",
     "@tauri-apps/plugin-shell": ">=2.0.0-beta.0",
     "react": "^18.2.0",
@@ -30,6 +30,7 @@
     "internal-ip": "^7.0.0",
     "typescript": "^5.0.2",
     "vite": "^5.0.0",
+    "vite-plugin-node-polyfills": "0.17.0",
     "vite-tsconfig-paths": "^4.3.2"
   },
   "engines": {

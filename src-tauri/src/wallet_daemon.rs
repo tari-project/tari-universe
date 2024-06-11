@@ -24,7 +24,7 @@ pub async fn start_wallet_daemon(log_path: PathBuf, data_dir_path: PathBuf) -> R
   let cfg = load_configuration("config.toml", true, &cli).unwrap();
   let mut config = ApplicationConfig::load_from(&cfg).unwrap();
   config.dan_wallet_daemon.indexer_node_json_rpc_url = "https://indexer-devnet.tari.com/json_rpc".to_string();
-  config.dan_wallet_daemon.json_rpc_address = SocketAddr::from_str("127.0.0.1:19000").ok();
+  config.dan_wallet_daemon.json_rpc_address = SocketAddr::from_str("127.0.0.1:19000").ok(); //TODO: get free port from OS https://github.com/tari-project/tari-universe/issues/70
   config.dan_wallet_daemon.ui_connect_address = Some("0.0.0.0:19000".to_string());
 
   // Remove the file if it was left behind by a previous run

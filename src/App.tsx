@@ -1,12 +1,6 @@
 import "./App.css"
 import { useEffect, useRef } from "react"
-import {
-  TariPermissionAccountInfo,
-  TariPermissionKeyList,
-  TariPermissionSubstatesRead,
-  TariPermissionTransactionSend,
-  TariPermissions,
-} from "@provider/permissions"
+import { permissions as walletPermissions, TariPermissions } from "@tariproject/tarijs"
 import { ActiveTapplet } from "./components/ActiveTapplet"
 import { TabKey } from "./views/Tabs"
 import { Wallet } from "./components/Wallet"
@@ -17,6 +11,9 @@ import { ActiveDevTapplet } from "./components/DevTapplet"
 import { WalletDaemonParameters, WalletDaemonTariProvider } from "@provider/wallet_daemon"
 import { Box } from "@mui/material"
 import { useSnackBar } from "./ErrorContext"
+
+const { TariPermissionAccountInfo, TariPermissionKeyList, TariPermissionSubstatesRead, TariPermissionTransactionSend } =
+  walletPermissions
 
 let permissions = new TariPermissions()
 permissions.addPermission(new TariPermissionKeyList())
