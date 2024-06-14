@@ -56,6 +56,10 @@ pub enum DatabaseError {
 
 #[derive(Debug, Error)]
 pub enum IOError {
+  #[error("Failed to copy file from {from} to {to}")] FailedToCopyFile {
+    from: String,
+    to: String,
+  },
   #[error("Failed to read directory at path: {path}")] FailedToReadDir {
     path: String,
   },
