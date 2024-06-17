@@ -1,4 +1,5 @@
 use diesel::SqliteConnection;
+use fs::{ get_config_file, get_data_dir, get_log_dir };
 use std::{ collections::HashMap, sync::{ Arc, Mutex }, thread::sleep, time::Duration };
 use tauri::{ self, Manager };
 use tokio_util::sync::CancellationToken;
@@ -13,6 +14,7 @@ mod wallet_daemon;
 mod interface;
 mod error;
 mod constants;
+mod fs;
 
 use commands::{
   call_wallet,
@@ -39,7 +41,6 @@ use commands::{
 };
 
 use crate::{ rpc::permission_token, wallet_daemon::start_wallet_daemon };
-use crate::error::{ Error::IOError, IOError::* };
 
 pub struct Tokens {
   auth: Mutex<String>,
@@ -55,8 +56,7 @@ async fn try_get_tokens() -> (String, String) {
       Ok(tokens) => {
         return tokens;
       }
-      Err(e) => {
-        println!("Failed to get tokens: {}", e);
+      Err(_) => {
         sleep(Duration::from_millis(500));
         continue;
       }
@@ -101,24 +101,13 @@ pub fn run() {
       ]
     )
     .setup(|app| {
-      let data_dir_path = app.path().app_data_dir().unwrap();
-      if !data_dir_path.exists() {
-        std::fs
-          ::create_dir(&data_dir_path)
-          .map_err(|_| IOError(FailedToCreateDir { path: data_dir_path.to_str().unwrap().to_string() }))?;
-      }
-      let data_dir_path = data_dir_path.to_path_buf();
-
-      let log_path = app.path().app_log_dir().unwrap();
-      if !log_path.exists() {
-        std::fs
-          ::create_dir(&log_path)
-          .map_err(|_| IOError(FailedToCreateDir { path: log_path.to_str().unwrap().to_string() }))?;
-      }
-      let log_path = log_path.to_path_buf();
+      let data_dir_path = get_data_dir(app)?;
+      let log_path = get_log_dir(app)?;
+      let wallet_daemon_config_file = get_config_file(app, "wallet_daemon.config.toml").unwrap();
+      let log_config_file = get_config_file(app, "wallet_daemon.log.yml").unwrap();
 
       tauri::async_runtime::spawn(async move {
-        start_wallet_daemon(log_path, data_dir_path).await.unwrap(); // TODO handle error while starting wallet daemon https://github.com/orgs/tari-project/projects/18/views/1?pane=issue&itemId=63753279
+        start_wallet_daemon(log_path, data_dir_path, wallet_daemon_config_file, log_config_file).await.unwrap(); // TODO handle error while starting wallet daemon https://github.com/orgs/tari-project/projects/18/views/1?pane=issue&itemId=63753279
       });
       let db_path = app.path().app_data_dir().unwrap().to_path_buf().join(constants::DB_FILE_NAME);
       app.manage(DatabaseConnection(Arc::new(Mutex::new(database::establish_connection(db_path.to_str().unwrap())))));
