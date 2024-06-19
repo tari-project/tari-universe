@@ -17,14 +17,15 @@ Run [install_ubuntu_dependencies.sh](https://github.com/tari-project/tari-dan/bl
 Download Visual Studio Community 2019 from [microsoft webpage](https://learn.microsoft.com/en-us/visualstudio/releases/2019/redistribution#--download)
 On installation select `Dekstop development with C++` from `Desktop & Mobile` tab and click `Install`.
 
-## macOS
-WIP
 
 # Running Tari Universe locally
 
 Run `cargo tauri dev` to launch application locally
 
-Logs are available in `log/wallet-daemon` folder and sqlite db logs are in `igor/data`
+Logs and databases are in the app system directory 
+- linux `/home/$USER/.local/share/universe.tari`
+- macOS `$HOME/Library/Application Support`
+- windows `{FOLDERID_RoamingAppData}`
 
 # Testing tapplets locally
 

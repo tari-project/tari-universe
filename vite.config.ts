@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react"
 import { internalIpV4 } from "internal-ip"
 import tsconfigPaths from "vite-tsconfig-paths"
 import { nodePolyfills } from "vite-plugin-node-polyfills"
+import { resolve } from "path"
 
 // @ts-expect-error process is a nodejs global
 const mobile = !!/android|ios/.exec(process.env.TAURI_ENV_PLATFORM)
@@ -29,7 +30,15 @@ export default defineConfig(async () => ({
       : undefined,
     watch: {
       // 3. tell vite to ignore watching `src-tauri`
-      ignored: ["**/src-tauri/**", "**/tapplets_installed/**"],
+      ignored: ["**/src-tauri/**"],
+    },
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, "index.html"),
+        error: resolve(__dirname, "error_page.html"),
+      },
     },
   },
 }))

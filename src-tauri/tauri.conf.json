@@ -13,7 +13,16 @@
       {
         "title": "Tari Universe",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "label": "main"
+      },
+      {
+        "title": "Tari Universe - Error",
+        "label": "error",
+        "width": 600,
+        "height": 200,
+        "visible": false,
+        "url": "../error_page.html"
       }
     ],
     "security": {

@@ -11,9 +11,6 @@ node_modules
 dist
 dist-ssr
 *.local
-localnet
-igor
-data/tari_universe.sqlite3
 
 # Editor directories and files
 .vscode/*
@@ -25,6 +22,3 @@ data/tari_universe.sqlite3
 *.njsproj
 *.sln
 *.sw?
-
-# Tapplets installed dir
-tapplets_installed
