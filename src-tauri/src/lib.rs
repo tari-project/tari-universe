@@ -64,6 +64,42 @@ async fn try_get_tokens() -> (String, String) {
   }
 }
 
+fn setup_tari_universe(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+  let data_dir_path = get_data_dir(app)?;
+  let log_path = get_log_dir(app)?;
+  let wallet_daemon_config_file = get_config_file(app, "wallet_daemon.config.toml")?;
+  let log_config_file = get_config_file(app, "wallet_daemon.log.yml")?;
+
+  tauri::async_runtime::spawn(async move {
+    start_wallet_daemon(log_path, data_dir_path, wallet_daemon_config_file, log_config_file).await.unwrap();
+  });
+  let db_path = app.path().app_data_dir()?.to_path_buf().join(constants::DB_FILE_NAME);
+  app.manage(DatabaseConnection(Arc::new(Mutex::new(database::establish_connection(db_path.to_str().unwrap())))));
+
+  let tokens = app.state::<Tokens>();
+  let handle = tauri::async_runtime::spawn(try_get_tokens());
+  let (permission_token, auth_token) = tauri::async_runtime::block_on(handle)?;
+  tokens.permission
+    .lock()
+    .map_err(|_| error::Error::FailedToObtainPermissionTokenLock())?
+    .replace_range(.., &permission_token);
+  tokens.auth
+    .lock()
+    .map_err(|_| error::Error::FailedToObtainAuthTokenLock())?
+    .replace_range(.., &auth_token);
+
+  Ok(())
+}
+
+fn display_error_window(app_handle: &mut tauri::App, error_msg: String) {
+  let error_window = app_handle.get_window("error").unwrap();
+  error_window.show().unwrap();
+  error_window.emit("error_msg", error_msg).unwrap();
+
+  let main_window = app_handle.get_window("main").unwrap();
+  main_window.close().unwrap();
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder
@@ -101,29 +137,10 @@ pub fn run() {
       ]
     )
     .setup(|app| {
-      let data_dir_path = get_data_dir(app)?;
-      let log_path = get_log_dir(app)?;
-      let wallet_daemon_config_file = get_config_file(app, "wallet_daemon.config.toml").unwrap();
-      let log_config_file = get_config_file(app, "wallet_daemon.log.yml").unwrap();
-
-      tauri::async_runtime::spawn(async move {
-        start_wallet_daemon(log_path, data_dir_path, wallet_daemon_config_file, log_config_file).await.unwrap(); // TODO handle error while starting wallet daemon https://github.com/orgs/tari-project/projects/18/views/1?pane=issue&itemId=63753279
-      });
-      let db_path = app.path().app_data_dir().unwrap().to_path_buf().join(constants::DB_FILE_NAME);
-      app.manage(DatabaseConnection(Arc::new(Mutex::new(database::establish_connection(db_path.to_str().unwrap())))));
-
-      let tokens = app.state::<Tokens>();
-      let handle = tauri::async_runtime::spawn(try_get_tokens());
-      let (permission_token, auth_token) = tauri::async_runtime::block_on(handle).unwrap();
-      tokens.permission
-        .lock()
-        .map_err(|_| error::Error::FailedToObtainPermissionTokenLock())?
-        .replace_range(.., &permission_token);
-      tokens.auth
-        .lock()
-        .map_err(|_| error::Error::FailedToObtainAuthTokenLock())?
-        .replace_range(.., &auth_token);
-
+      match setup_tari_universe(app) {
+        Ok(_) => app.get_window("error").unwrap().close().unwrap(),
+        Err(e) => display_error_window(app, e.to_string()),
+      }
       Ok(())
     })
     .run(tauri::generate_context!())
