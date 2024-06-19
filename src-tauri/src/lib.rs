@@ -92,12 +92,12 @@ fn setup_tari_universe(app: &mut tauri::App) -> Result<(), Box<dyn std::error::E
 }
 
 fn display_error_window(app_handle: &mut tauri::App, error_msg: String) {
-  let error_window = app_handle.get_window("error").unwrap();
-  error_window.show().unwrap();
-  error_window.emit("error_msg", error_msg).unwrap();
-
   let main_window = app_handle.get_window("main").unwrap();
   main_window.close().unwrap();
+
+  let error_window = app_handle.get_webview_window("error").unwrap();
+  error_window.show().unwrap();
+  error_window.eval(&format!("window.setupErrorMessage='{}'", error_msg)).unwrap();
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
