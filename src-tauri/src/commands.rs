@@ -42,14 +42,13 @@ use tauri_plugin_http::reqwest::{ self };
 
 #[tauri::command]
 pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), Error> {
+  // Use default account
+  let auth_token = None;
   let permission_token = tokens.permission
     .lock()
     .map_err(|_| FailedToObtainPermissionTokenLock())?
     .clone();
-  let auth_token = tokens.auth
-    .lock()
-    .map_err(|_| FailedToObtainAuthTokenLock())?
-    .clone();
+
   let handle = tauri::async_runtime::spawn(async move { free_coins(auth_token, permission_token).await.unwrap() });
   handle.await.unwrap();
   Ok(())
@@ -57,14 +56,13 @@ pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), Error> {
 
 #[tauri::command]
 pub async fn get_balances(tokens: State<'_, Tokens>) -> Result<AccountsGetBalancesResponse, Error> {
+  // Use default account
+  let auth_token = None;
   let permission_token = tokens.permission
     .lock()
     .map_err(|_| FailedToObtainPermissionTokenLock())?
     .clone();
-  let auth_token = tokens.auth
-    .lock()
-    .map_err(|_| FailedToObtainAuthTokenLock())?
-    .clone();
+
   let handle = tauri::async_runtime::spawn(async move { balances(auth_token, permission_token).await });
   let balances = handle.await??;
 
