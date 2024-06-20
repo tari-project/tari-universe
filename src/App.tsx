@@ -56,7 +56,7 @@ function App() {
   }, [])
 
   return (
-    <Box display="flex" flexDirection="column">
+    <Box display="flex" flexDirection="column" height="100%">
       <BrowserRouter>
         <Box p={4} display="flex" alignItems="center" justifyContent="center" gap={4}>
           <Link to={TabKey.WALLET} className="nav-item">
