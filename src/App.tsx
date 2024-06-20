@@ -56,34 +56,32 @@ function App() {
   }, [])
 
   return (
-    <div className="container">
-      <div style={{ marginTop: "1px" }}>
-        <BrowserRouter>
-          <Box pb={4}>
-            <Link to={TabKey.WALLET} className="nav-item">
-              {" "}
-              Wallet{" "}
-            </Link>
-            <Link to={TabKey.TAPPLET_REGISTRY} className="nav-item">
-              {" "}
-              Tapplet Registry{" "}
-            </Link>
-            <Link to={TabKey.INSTALLED_TAPPLETS} className="nav-item">
-              {" "}
-              Installed Tapplets{" "}
-            </Link>
-          </Box>
+    <Box display="flex" flexDirection="column">
+      <BrowserRouter>
+        <Box p={4} display="flex" alignItems="center" justifyContent="center" gap={4}>
+          <Link to={TabKey.WALLET} className="nav-item">
+            {" "}
+            Wallet{" "}
+          </Link>
+          <Link to={TabKey.TAPPLET_REGISTRY} className="nav-item">
+            {" "}
+            Tapplet Registry{" "}
+          </Link>
+          <Link to={TabKey.INSTALLED_TAPPLETS} className="nav-item">
+            {" "}
+            Installed Tapplets{" "}
+          </Link>
+        </Box>
 
-          <Routes>
-            <Route path={TabKey.WALLET} element={<Wallet key={TabKey.WALLET}></Wallet>} />
-            <Route path={TabKey.TAPPLET_REGISTRY} element={<TappletsRegistered key={TabKey.TAPPLET_REGISTRY} />} />
-            <Route path={TabKey.INSTALLED_TAPPLETS} element={<TappletsInstalled key={TabKey.INSTALLED_TAPPLETS} />} />
-            <Route path={`${TabKey.ACTIVE_TAPPLET}/:id`} element={<ActiveTapplet key={TabKey.ACTIVE_TAPPLET} />} />
-            <Route path={`${TabKey.DEV_TAPPLETS}/:id`} element={<ActiveDevTapplet key={TabKey.DEV_TAPPLETS} />} />
-          </Routes>
-        </BrowserRouter>
-      </div>
-    </div>
+        <Routes>
+          <Route path={TabKey.WALLET} element={<Wallet key={TabKey.WALLET}></Wallet>} />
+          <Route path={TabKey.TAPPLET_REGISTRY} element={<TappletsRegistered key={TabKey.TAPPLET_REGISTRY} />} />
+          <Route path={TabKey.INSTALLED_TAPPLETS} element={<TappletsInstalled key={TabKey.INSTALLED_TAPPLETS} />} />
+          <Route path={`${TabKey.ACTIVE_TAPPLET}/:id`} element={<ActiveTapplet key={TabKey.ACTIVE_TAPPLET} />} />
+          <Route path={`${TabKey.DEV_TAPPLETS}/:id`} element={<ActiveDevTapplet key={TabKey.DEV_TAPPLETS} />} />
+        </Routes>
+      </BrowserRouter>
+    </Box>
   )
 }
 

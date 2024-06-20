@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { DevTapplet, InstalledTappletWithName } from "@type/tapplet"
 import { invoke } from "@tauri-apps/api/core"
-import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material"
+import { Avatar, Box, IconButton, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material"
 import { Launch, Delete } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
 import { NavLink } from "react-router-dom"
@@ -78,9 +78,11 @@ export const TappletsInstalled: React.FC = () => {
   const { devTappletsList, deleteDevTapplet } = useDevTapplets()
 
   return (
-    <div>
-      <Typography variant="h4">Installed Tapplets</Typography>
-      <List>
+    <Box margin="auto">
+      <Typography variant="h4" pt={6} textAlign="center">
+        Installed Tapplets
+      </Typography>
+      <List sx={{ width: "100%", minWidth: 500 }}>
         {installedTappletsList &&
           installedTappletsList.map((item, index) => (
             <ListItem key={index}>
@@ -99,8 +101,10 @@ export const TappletsInstalled: React.FC = () => {
             </ListItem>
           ))}
       </List>
-      <Typography variant="h4">Dev Tapplets</Typography>
-      <List>
+      <Typography variant="h4" pt={6} textAlign="center">
+        Dev Tapplets
+      </Typography>
+      <List sx={{ maxWidth: 600 }}>
         {devTappletsList &&
           devTappletsList.map((item, index) => (
             <ListItem key={index}>
@@ -119,6 +123,6 @@ export const TappletsInstalled: React.FC = () => {
             </ListItem>
           ))}
       </List>
-    </div>
+    </Box>
   )
 }

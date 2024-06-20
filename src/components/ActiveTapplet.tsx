@@ -22,13 +22,5 @@ export function ActiveTapplet() {
     }
   }, [])
 
-  return (
-    <div>
-      {tappletAddress && (
-        <Box>
-          <iframe src={tappletAddress} width="100%" height="500"></iframe>
-        </Box>
-      )}
-    </div>
-  )
+  return <Box width="100%">{tappletAddress && <iframe src={tappletAddress} width="100%" height="500"></iframe>}</Box>
 }

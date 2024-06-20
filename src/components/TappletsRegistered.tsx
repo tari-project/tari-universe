@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { invoke } from "@tauri-apps/api/core"
-import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material"
+import { Avatar, Box, IconButton, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material"
 import { InstallDesktop } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
 import AddDevTappletDialog from "./AddDevTappletDialog"
@@ -69,26 +69,30 @@ export const TappletsRegistered: React.FC = () => {
   }
 
   return (
-    <div>
-      <Typography variant="h4">Registered Tapplets</Typography>
+    <Box margin="auto">
+      <Typography variant="h4" textAlign="center" pt={6}>
+        Registered Tapplets
+      </Typography>
       {registeredTappletsList?.length ?? 0 > 0 ? (
-        <List>
+        <List sx={{ width: "100%", minWidth: 500 }}>
           {registeredTappletsList?.map((item) => (
-            <ListItem key={item.package_name}>
+            <ListItem key={item.package_name} sx={{ paddingTop: 2 }}>
               <ListItemAvatar>
                 <Avatar src={tariLogo} />
               </ListItemAvatar>
               <ListItemText primary={item.package_name} />
-              <IconButton aria-label="install" onClick={() => handleInstall(item.id)}>
+              <IconButton aria-label="install" onClick={() => handleInstall(item.id)} sx={{ marginLeft: 8 }}>
                 <InstallDesktop color="primary" />
               </IconButton>
             </ListItem>
           ))}
         </List>
       ) : (
-        <div>Registered tapplets list is empty</div>
+        <Typography textAlign="center">Registered tapplets list is empty</Typography>
       )}
-      <AddDevTappletDialog />
-    </div>
+      <Box pt={4} display="flex" justifyContent="center">
+        <AddDevTappletDialog />
+      </Box>
+    </Box>
   )
 }
