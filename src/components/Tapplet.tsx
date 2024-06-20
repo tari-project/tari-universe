@@ -9,31 +9,34 @@ export const Tapplet: React.FC<TappletProps> = ({ source }) => {
   const [height, setHeight] = useState(0)
   const tappletRef = useRef<HTMLIFrameElement | null>(null)
 
-  useEffect(() => {
-    setWidth(tappletRef?.current?.offsetWidth || 0)
-    setHeight(tappletRef?.current?.offsetHeight || 0)
-
-    const getSize = () => {
-      if (tappletRef.current) {
-        console.log("inside if")
-        setWidth(tappletRef.current.offsetWidth)
-        setHeight(tappletRef.current.offsetHeight)
-      }
-    }
-    window.addEventListener("resize", getSize)
-
-    return () => {
-      window.removeEventListener("resize", getSize)
-    }
-  }, [])
-
-  function onTappletLoad() {
+  function setSize() {
     if (tappletRef.current) {
-      console.log("inside if")
-      setWidth(tappletRef.current.offsetWidth)
-      setHeight(tappletRef.current.offsetHeight)
+      const height = tappletRef.current.offsetHeight
+      const width = tappletRef.current.offsetWidth
+      setHeight(height)
+      setWidth(width)
+
+      tappletRef.current.contentWindow?.postMessage({ height, width, type: "resize" }, source)
     }
   }
 
-  return <iframe src={source} width="100%" height="100%" ref={tappletRef} onLoad={onTappletLoad}></iframe>
+  function responseSizeRequest(event: MessageEvent) {
+    if (event.origin === source && event.data.type === "request-parent-size") {
+      if (tappletRef.current) {
+        tappletRef.current.contentWindow?.postMessage({ height, width, type: "resize" }, source)
+      }
+    }
+  }
+
+  useEffect(() => {
+    window.addEventListener("resize", setSize)
+    window.addEventListener("message", responseSizeRequest)
+
+    return () => {
+      window.removeEventListener("resize", setSize)
+      window.removeEventListener("message", responseSizeRequest)
+    }
+  }, [])
+
+  return <iframe src={source} width="100%" height="100%" ref={tappletRef} onLoad={setSize}></iframe>
 }

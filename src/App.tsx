@@ -39,6 +39,7 @@ function App() {
     })
 
     const handleMessage = async (event: any) => {
+      if (event.data.type == "request-parent-size") return
       if (!provider.current) {
         showSnackBar("Provider is not initialized yet", "error")
         return
