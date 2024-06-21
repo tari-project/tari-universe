@@ -78,7 +78,7 @@ export const TappletsInstalled: React.FC = () => {
   const { devTappletsList, deleteDevTapplet } = useDevTapplets()
 
   return (
-    <Box margin="auto">
+    <Box marginX="auto" mt={4}>
       <Typography variant="h4" pt={6} textAlign="center">
         Installed Tapplets
       </Typography>

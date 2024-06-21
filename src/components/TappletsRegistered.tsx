@@ -69,7 +69,7 @@ export const TappletsRegistered: React.FC = () => {
   }
 
   return (
-    <Box margin="auto">
+    <Box marginX="auto" mt={4}>
       <Typography variant="h4" textAlign="center" pt={6}>
         Registered Tapplets
       </Typography>
