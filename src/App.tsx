@@ -1,6 +1,4 @@
 import "./App.css"
-import { useEffect, useRef } from "react"
-import { permissions as walletPermissions, TariPermissions } from "@tariproject/tarijs"
 import { ActiveTapplet } from "./components/ActiveTapplet"
 import { TabKey } from "./views/Tabs"
 import { Wallet } from "./components/Wallet"
@@ -8,54 +6,9 @@ import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
 import { TappletsRegistered } from "./components/TappletsRegistered"
 import { TappletsInstalled } from "./components/TappletsInstalled"
 import { ActiveDevTapplet } from "./components/DevTapplet"
-import { WalletDaemonParameters, WalletDaemonTariProvider } from "@provider/wallet_daemon"
 import { Box } from "@mui/material"
-import { useSnackBar } from "./ErrorContext"
-
-const { TariPermissionAccountInfo, TariPermissionKeyList, TariPermissionSubstatesRead, TariPermissionTransactionSend } =
-  walletPermissions
-
-let permissions = new TariPermissions()
-permissions.addPermission(new TariPermissionKeyList())
-permissions.addPermission(new TariPermissionAccountInfo())
-permissions.addPermission(new TariPermissionTransactionSend())
-permissions.addPermission(new TariPermissionSubstatesRead())
-let optionalPermissions = new TariPermissions()
-const params: WalletDaemonParameters = {
-  permissions,
-  optionalPermissions,
-}
 
 function App() {
-  const provider = useRef<WalletDaemonTariProvider | null>(null)
-  const { showSnackBar } = useSnackBar()
-  useEffect(() => {
-    const initProvider = async () => {
-      const newProvider = await WalletDaemonTariProvider.build(params)
-      provider.current = newProvider
-    }
-    initProvider().catch((e) => {
-      showSnackBar(`Failed to initialize provider ${e.message}`, "error")
-    })
-
-    const handleMessage = async (event: any) => {
-      if (event.data.type == "request-parent-size") return
-      if (!provider.current) {
-        showSnackBar("Provider is not initialized yet", "error")
-        return
-      }
-
-      const { methodName, args } = event.data
-      const result = await provider.current.runOne(methodName, args)
-      event.source.postMessage({ id: event.id, result }, event.origin)
-    }
-    window.addEventListener("message", handleMessage, false)
-
-    return () => {
-      window.removeEventListener("message", handleMessage)
-    }
-  }, [])
-
   return (
     <Box display="flex" flexDirection="column" height="100%">
       <BrowserRouter>

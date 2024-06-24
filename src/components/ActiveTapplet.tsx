@@ -25,7 +25,7 @@ export function ActiveTapplet() {
   }, [])
 
   return (
-    <Box>
+    <Box height="100%">
       {tappletAddress ? (
         <Tapplet source={tappletAddress} />
       ) : (

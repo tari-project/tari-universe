@@ -29,6 +29,11 @@ export type WalletDaemonParameters = {
   onConnection?: () => void
 }
 
+export type WindowSize = {
+  width: number
+  height: number
+}
+
 export class WalletDaemonTariProvider implements TariProvider {
   public providerName = "WalletDaemon"
   params: WalletDaemonParameters
@@ -69,6 +74,12 @@ export class WalletDaemonTariProvider implements TariProvider {
       public_key: res.public_key,
       resources: [],
     }
+  }
+
+  public requestParentSize(): Promise<WindowSize> {
+    return new Promise<WindowSize>((resolve, _reject) =>
+      resolve({ width: window.innerWidth, height: window.innerHeight })
+    )
   }
 
   public async getAccount(): Promise<Account> {
