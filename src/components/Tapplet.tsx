@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react"
+import { useContext, useEffect, useRef } from "react"
+import { TariUniverseProviderContext } from "../ProviderContext"
 
 type TappletProps = {
   source: string
@@ -6,12 +7,16 @@ type TappletProps = {
 
 export const Tapplet: React.FC<TappletProps> = ({ source }) => {
   const tappletRef = useRef<HTMLIFrameElement | null>(null)
+  const provider = useContext(TariUniverseProviderContext)
 
-  function setSize() {
+  function sendWindowSize() {
     if (tappletRef.current) {
       const height = tappletRef.current.offsetHeight
       const width = tappletRef.current.offsetWidth
-      tappletRef.current.contentWindow?.postMessage({ height, width, type: "resize" }, source)
+      const tappletWindow = tappletRef.current.contentWindow
+
+      provider?.setWindowSize(width, height)
+      provider?.sendWindowSizeMessage(tappletWindow, source)
     }
   }
 
@@ -20,20 +25,23 @@ export const Tapplet: React.FC<TappletProps> = ({ source }) => {
       if (tappletRef.current) {
         const height = tappletRef.current.offsetHeight
         const width = tappletRef.current.offsetWidth
-        tappletRef.current.contentWindow?.postMessage({ height, width, type: "resize" }, source)
+        const tappletWindow = tappletRef.current.contentWindow
+
+        provider?.setWindowSize(width, height)
+        provider?.sendWindowSizeMessage(tappletWindow, source)
       }
     }
   }
 
   useEffect(() => {
-    window.addEventListener("resize", setSize)
+    window.addEventListener("resize", sendWindowSize)
     window.addEventListener("message", responseSizeRequest)
 
     return () => {
-      window.removeEventListener("resize", setSize)
+      window.removeEventListener("resize", sendWindowSize)
       window.removeEventListener("message", responseSizeRequest)
     }
   }, [])
 
-  return <iframe src={source} width="100%" height="100%" ref={tappletRef} onLoad={setSize}></iframe>
+  return <iframe src={source} width="100%" height="100%" ref={tappletRef} onLoad={sendWindowSize}></iframe>
 }

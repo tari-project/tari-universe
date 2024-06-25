@@ -39,7 +39,12 @@ export class WalletDaemonTariProvider implements TariProvider {
   params: WalletDaemonParameters
   client: WalletDaemonClient
 
-  private constructor(params: WalletDaemonParameters, connection: WalletDaemonClient) {
+  private constructor(
+    params: WalletDaemonParameters,
+    connection: WalletDaemonClient,
+    public width = 0,
+    public height = 0
+  ) {
     this.params = params
     this.client = connection
   }
@@ -54,6 +59,15 @@ export class WalletDaemonTariProvider implements TariProvider {
     allPermissions.addPermissions(params.optionalPermissions)
     const client = WalletDaemonClient.new(new IPCRpcTransport())
     return new WalletDaemonTariProvider(params, client)
+  }
+
+  public setWindowSize(width: number, height: number): void {
+    this.width = width
+    this.height = height
+  }
+
+  public sendWindowSizeMessage(tappletWindow: Window | null, targetOrigin: string): void {
+    tappletWindow?.postMessage({ height: this.height, width: this.width, type: "resize" }, targetOrigin)
   }
 
   async runOne(method: Exclude<keyof WalletDaemonTariProvider, "runOne">, args: any[]): Promise<any> {
@@ -77,9 +91,7 @@ export class WalletDaemonTariProvider implements TariProvider {
   }
 
   public requestParentSize(): Promise<WindowSize> {
-    return new Promise<WindowSize>((resolve, _reject) =>
-      resolve({ width: window.innerWidth, height: window.innerHeight })
-    )
+    return new Promise<WindowSize>((resolve, _reject) => resolve({ width: this.width, height: this.height }))
   }
 
   public async getAccount(): Promise<Account> {

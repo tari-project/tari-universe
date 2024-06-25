@@ -1,6 +1,6 @@
-import { ReactNode, createContext, useEffect, useRef } from "react"
+import { ReactNode, createContext, useEffect, useRef, useState } from "react"
 import { permissions as walletPermissions, TariPermissions } from "@tariproject/tarijs"
-import { WalletDaemonParameters, WalletDaemonTariProvider } from "@provider/wallet_daemon"
+import { WalletDaemonParameters, WalletDaemonTariProvider } from "@provider/TariUniverseProvider"
 import { useSnackBar } from "./ErrorContext"
 
 const { TariPermissionAccountInfo, TariPermissionKeyList, TariPermissionSubstatesRead, TariPermissionTransactionSend } =
@@ -17,9 +17,8 @@ const params: WalletDaemonParameters = {
   optionalPermissions,
 }
 
-export type TariUniverseProviderContextType = WalletDaemonTariProvider | null
-
-const TariUniverseProviderContext = createContext<TariUniverseProviderContextType>(null)
+type TariUniverseProviderContextType = WalletDaemonTariProvider | null
+export const TariUniverseProviderContext = createContext<TariUniverseProviderContextType>(null)
 
 interface TariUniverseProviderProps {
   children: ReactNode
@@ -27,15 +26,21 @@ interface TariUniverseProviderProps {
 
 export const TariUniverseContextProvider: React.FC<TariUniverseProviderProps> = ({ children }) => {
   const provider = useRef<WalletDaemonTariProvider | null>(null)
+  const [providerState, setProviderState] = useState<WalletDaemonTariProvider | null>(null)
   const { showSnackBar } = useSnackBar()
+
   useEffect(() => {
     const initProvider = async () => {
-      const newProvider = await WalletDaemonTariProvider.build(params)
-      provider.current = newProvider
+      return await WalletDaemonTariProvider.build(params)
     }
-    initProvider().catch((e) => {
-      showSnackBar(`Failed to initialize provider ${e.message}`, "error")
-    })
+    initProvider()
+      .then((initProvider) => {
+        provider.current = initProvider
+        setProviderState(initProvider)
+      })
+      .catch((e) => {
+        showSnackBar(`Failed to initialize provider ${e.message}`, "error")
+      })
 
     const handleMessage = async (event: any) => {
       if (!provider.current) {
@@ -53,6 +58,6 @@ export const TariUniverseContextProvider: React.FC<TariUniverseProviderProps> = 
       window.removeEventListener("message", handleMessage)
     }
   }, [])
-  const providerValue = provider.current
-  return <TariUniverseProviderContext.Provider value={providerValue}>{children}</TariUniverseProviderContext.Provider>
+
+  return <TariUniverseProviderContext.Provider value={providerState}>{children}</TariUniverseProviderContext.Provider>
 }
