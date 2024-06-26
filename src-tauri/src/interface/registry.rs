@@ -25,7 +25,6 @@ pub struct Metadata {
   pub about: About,
   pub audits: Vec<Audit>,
   pub category: String,
-  pub logo: String,
 }
 
 #[derive(Debug, serde::Deserialize, Clone)]
@@ -33,6 +32,8 @@ pub struct Version {
   pub integrity: String,
   #[serde(rename = "registryUrl")]
   pub registry_url: String,
+  #[serde(rename = "logoUrl")]
+  pub logo_url: String,
 }
 
 #[derive(Debug, serde::Deserialize, Clone)]
@@ -50,5 +51,6 @@ pub struct About {
 #[derive(Debug, serde::Deserialize, Clone)]
 pub struct Audit {
   pub auditor: String,
-  pub report: String,
+  #[serde(rename = "reportUrl")]
+  pub report_url: String,
 }

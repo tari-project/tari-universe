@@ -48,7 +48,6 @@ pub struct Tapplet {
   pub about_summary: String,
   pub about_description: String,
   pub category: String,
-  pub image_id: Option<i32>,
 }
 
 #[derive(Insertable, Debug, Deserialize)]
@@ -62,7 +61,6 @@ pub struct CreateTapplet<'a> {
   pub about_summary: &'a str,
   pub about_description: &'a str,
   pub category: &'a str,
-  pub image_id: Option<i32>,
 }
 
 impl<'a> From<&'a TappletManifest> for CreateTapplet<'a> {
@@ -75,8 +73,7 @@ impl<'a> From<&'a TappletManifest> for CreateTapplet<'a> {
       author_website: &tapplet_manifest.metadata.author.website,
       about_summary: &tapplet_manifest.metadata.about.summary,
       about_description: &tapplet_manifest.metadata.about.description,
-      category: &tapplet_manifest.metadata.category,
-      image_id: None,
+      category: &tapplet_manifest.metadata.category
     }
   }
 }
@@ -91,8 +88,7 @@ impl<'a> From<&CreateTapplet<'a>> for UpdateTapplet {
       author_website: create_tapplet.author_website.to_string(),
       about_summary: create_tapplet.about_summary.to_string(),
       about_description: create_tapplet.about_description.to_string(),
-      category: create_tapplet.category.to_string(),
-      image_id: create_tapplet.image_id,
+      category: create_tapplet.category.to_string()
     }
   }
 }
@@ -107,8 +103,7 @@ pub struct UpdateTapplet {
   pub author_website: String,
   pub about_summary: String,
   pub about_description: String,
-  pub category: String,
-  pub image_id: Option<i32>,
+  pub category: String
 }
 
 #[derive(Queryable, Selectable, Debug, Serialize)]
@@ -148,6 +143,7 @@ pub struct TappletVersion {
   pub version: String,
   pub integrity: String,
   pub registry_url: String,
+  pub logo_url: String,
 }
 
 #[derive(Insertable, Debug)]
@@ -157,6 +153,7 @@ pub struct CreateTappletVersion<'a> {
   pub version: &'a str,
   pub integrity: &'a str,
   pub registry_url: &'a str,
+  pub logo_url: &'a str,
 }
 
 impl<'a> From<&CreateTappletVersion<'a>> for UpdateTappletVersion {
@@ -166,6 +163,7 @@ impl<'a> From<&CreateTappletVersion<'a>> for UpdateTappletVersion {
       version: create_tapplet_version.version.to_string(),
       integrity: create_tapplet_version.integrity.to_string(),
       registry_url: create_tapplet_version.registry_url.to_string(),
+      logo_url: create_tapplet_version.logo_url.to_string(),
     }
   }
 }
@@ -177,6 +175,7 @@ pub struct UpdateTappletVersion {
   pub version: String,
   pub integrity: String,
   pub registry_url: String,
+  pub logo_url: String,
 }
 
 #[derive(Queryable, Selectable, Debug, Serialize)]
@@ -217,4 +216,40 @@ pub struct UpdateDevTapplet {
   pub package_name: String,
   pub tapplet_name: String,
   pub display_name: String,
+}
+
+#[derive(Queryable, Selectable, Debug, Serialize)]
+#[diesel(table_name = tapplet_audit)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+pub struct TappletAudit {
+  pub id: Option<i32>,
+  pub tapplet_id: Option<i32>,
+  pub auditor: String,
+  pub report_url: String
+}
+
+#[derive(Insertable, Debug)]
+#[diesel(table_name = tapplet_audit)]
+pub struct CreateTappletAudit<'a> {
+  pub tapplet_id: Option<i32>,
+  pub auditor: &'a str,
+  pub report_url: &'a str,
+}
+
+impl<'a> From<&CreateTappletAudit<'a>> for UpdateTappletAudit {
+  fn from(create_tapplet_audit: &CreateTappletAudit) -> Self {
+    UpdateTappletAudit {
+      tapplet_id: create_tapplet_audit.tapplet_id,
+      auditor: create_tapplet_audit.auditor.to_string(),
+      report_url: create_tapplet_audit.report_url.to_string(),
+    }
+  }
+}
+
+#[derive(Debug, AsChangeset)]
+#[diesel(table_name = tapplet_audit)]
+pub struct UpdateTappletAudit {
+  pub tapplet_id: Option<i32>,
+  pub auditor: String,
+  pub report_url: String, 
 }
