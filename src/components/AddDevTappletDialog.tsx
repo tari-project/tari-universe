@@ -37,7 +37,7 @@ export default function AddDevTappletDialog() {
 
   return (
     <Fragment>
-      <Button variant="contained" onClick={handleClickOpen}>
+      <Button variant="contained" sx={{ ml: 1 }} onClick={handleClickOpen}>
         Add dev tapplet
       </Button>
       <Dialog

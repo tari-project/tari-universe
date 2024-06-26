@@ -1,6 +1,16 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { invoke } from "@tauri-apps/api/core"
-import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material"
+import {
+  Avatar,
+  Box,
+  Button,
+  IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Typography,
+} from "@mui/material"
 import { InstallDesktop } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
 import AddDevTappletDialog from "./AddDevTappletDialog"
@@ -8,28 +18,29 @@ import { RegisteredTapplet } from "@type/tapplet"
 import { useSnackBar } from "../ErrorContext"
 
 const useRegisteredTapplets = () => {
-  const [registeredTappletsList, setRegisteredTappletsList] = useState<RegisteredTapplet[] | undefined>([])
+  const [tapplets, setTapplets] = useState<RegisteredTapplet[]>([])
   const { showSnackBar } = useSnackBar()
 
   useEffect(() => {
-    const fetchTapplets = async () => {
+    const fetchTappletsFromDb = async () => {
       try {
-        await invoke("fetch_tapplets")
-        const registeredTappletsList = await invoke("read_tapp_registry_db")
-        setRegisteredTappletsList(registeredTappletsList as RegisteredTapplet[] | undefined)
+        const tapplets = await invoke("read_tapp_registry_db")
+        setTapplets((tapplets as RegisteredTapplet[]) || [])
       } catch (error) {
         showSnackBar(error, "error")
       }
     }
 
-    fetchTapplets()
+    fetchTappletsFromDb()
   }, [])
 
-  return registeredTappletsList
+  const fetchTappletsFromRegistry = useCallback(() => invoke("fetch_tapplets"), [])
+
+  return [tapplets, fetchTappletsFromRegistry] as [RegisteredTapplet[], () => Promise<unknown>]
 }
 
 export const TappletsRegistered: React.FC = () => {
-  const registeredTappletsList = useRegisteredTapplets()
+  const [registeredTappletsList, fetchTappletsFromRegistry] = useRegisteredTapplets()
   const { showSnackBar } = useSnackBar()
 
   async function downloadAndExtract(tappletId: number) {
@@ -71,9 +82,9 @@ export const TappletsRegistered: React.FC = () => {
   return (
     <div>
       <Typography variant="h4">Registered Tapplets</Typography>
-      {registeredTappletsList?.length ?? 0 > 0 ? (
-        <List>
-          {registeredTappletsList?.map((item) => (
+      {registeredTappletsList.length ? (
+        registeredTappletsList.map((item) => (
+          <List>
             <ListItem key={item.package_name}>
               <ListItemAvatar>
                 <Avatar src={tariLogo} />
@@ -83,12 +94,18 @@ export const TappletsRegistered: React.FC = () => {
                 <InstallDesktop color="primary" />
               </IconButton>
             </ListItem>
-          ))}
-        </List>
+          </List>
+        ))
       ) : (
         <div>Registered tapplets list is empty</div>
       )}
-      <AddDevTappletDialog />
+
+      <Box>
+        <Button variant="contained" sx={{ mr: 1 }} onClick={fetchTappletsFromRegistry}>
+          Fetch Tapplet List
+        </Button>
+        <AddDevTappletDialog />
+      </Box>
     </div>
   )
 }

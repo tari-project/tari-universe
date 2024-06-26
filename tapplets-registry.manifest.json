@@ -10,6 +10,9 @@
           "name": "karczuRF",
           "website": "https://github.com/karczuRF/tapp-example"
         },
+        "codeowners": [
+          "@karczuRF"
+        ],
         "about": {
           "summary": "Short (a few words) summary.",
           "description": "Longer (a few sentences) project description."
@@ -17,20 +20,21 @@
         "audits": [
           {
             "auditor": "Auditor",
-            "report": "https://auditor-company.io/audits/tapplet-name"
+            "reportUrl": "https://auditor-company.io/audits/tapplet-name"
           }
         ],
-        "category": "tapplet category",
-        "logo": "https://github.com/karczuRF/tapp-example/blob/main/dist/assets/logo.svg"
+        "category": "tapplet category"
       },
       "versions": {
         "1.0.1": {
           "integrity": "sha512-AC2x8xfG93T4QFeKWIb2h7gohc/HzNrqZUbCXOQ54apOPbeSRN/cMSj/iVmIhJ+1NrQJeppSsJjoVVzIYmuOKg==",
-          "registryUrl": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.1.tgz"
+          "registryUrl": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.1.tgz",
+          "logoUrl": "https://github.com/karczuRF/tapp-example/blob/main/dist/assets/logo.svg"
         },
         "1.0.0": {
           "integrity": "sha512-Teya54P3ObC68rLu8E0IvPfjju0hlIgrej9llyIcNMF5CXoO5eCIBbvNnMaDt6z5nRqrWi6tHFZwlCK1yYpMaw==",
-          "registryUrl": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz"
+          "registryUrl": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz",
+          "logoUrl": "https://github.com/karczuRF/tapp-example/blob/main/dist/assets/logo.svg"
         }
       }
     },
@@ -43,6 +47,9 @@
           "name": "MCozhusheck",
           "website": "https://github.com/MCozhusheck/tapplet-example"
         },
+        "codeowners": [
+          "@MCozhusheck"
+        ],
         "about": {
           "summary": "Short (a few words) summary.",
           "description": "Longer (a few sentences) project description."
@@ -50,16 +57,16 @@
         "audits": [
           {
             "auditor": "Auditor",
-            "report": "https://auditor-company.io/audits/tapplet-example"
+            "reportUrl": "https://auditor-company.io/audits/tapplet-example"
           }
         ],
-        "category": "tapplet category",
-        "logo": "https://github.com/MCozhusheck/tapplet-example/blob/master/dist/vite.svg"
+        "category": "tapplet category"
       },
       "versions": {
         "0.0.2": {
           "integrity": "sha512-ivQM1oWaCaZrHARDCD2rib/RFmNDdSDuCQofOsEc3HLo/zgGjLXiySwm/uu3s/5lt9S+/oPC6wFE3m5agzdizA==",
-          "registryUrl": "https://registry.npmjs.org/tapplet-example/-/tapplet-example-0.0.2.tgz"
+          "registryUrl": "https://registry.npmjs.org/tapplet-example/-/tapplet-example-0.0.2.tgz",
+          "logoUrl": "https://github.com/MCozhusheck/tapplet-example/blob/master/dist/vite.svg"
         }
       }
     }
