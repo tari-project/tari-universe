@@ -6,6 +6,8 @@
       "metadata": {
         "packageName": "tapp-example",
         "displayName": "Demo tapp by karczuRF",
+        "logoUrl": "https://github.com/karczuRF/tapp-example/blob/main/dist/assets/logo.svg",
+        "backgroundUrl": "https://github.com/karczuRF/tapp-example/blob/main/dist/assets/background.svg",
         "author": {
           "name": "karczuRF",
           "website": "https://github.com/karczuRF/tapp-example"
@@ -28,13 +30,11 @@
       "versions": {
         "1.0.1": {
           "integrity": "sha512-AC2x8xfG93T4QFeKWIb2h7gohc/HzNrqZUbCXOQ54apOPbeSRN/cMSj/iVmIhJ+1NrQJeppSsJjoVVzIYmuOKg==",
-          "registryUrl": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.1.tgz",
-          "logoUrl": "https://github.com/karczuRF/tapp-example/blob/main/dist/assets/logo.svg"
+          "registryUrl": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.1.tgz"
         },
         "1.0.0": {
           "integrity": "sha512-Teya54P3ObC68rLu8E0IvPfjju0hlIgrej9llyIcNMF5CXoO5eCIBbvNnMaDt6z5nRqrWi6tHFZwlCK1yYpMaw==",
-          "registryUrl": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz",
-          "logoUrl": "https://github.com/karczuRF/tapp-example/blob/main/dist/assets/logo.svg"
+          "registryUrl": "https://registry.npmjs.org/tapp-example/-/tapp-example-1.0.0.tgz"
         }
       }
     },
@@ -43,6 +43,8 @@
       "metadata": {
         "packageName": "tapplet-example",
         "displayName": "Demo tapp by MCozhusheck",
+        "logoUrl": "https://github.com/MCozhusheck/tapplet-example/blob/master/dist/vite.svg",
+        "backgroundUrl": "https://github.com/MCozhusheck/tapplet-example/blob/master/dist/background.png",
         "author": {
           "name": "MCozhusheck",
           "website": "https://github.com/MCozhusheck/tapplet-example"
@@ -65,8 +67,7 @@
       "versions": {
         "0.0.2": {
           "integrity": "sha512-ivQM1oWaCaZrHARDCD2rib/RFmNDdSDuCQofOsEc3HLo/zgGjLXiySwm/uu3s/5lt9S+/oPC6wFE3m5agzdizA==",
-          "registryUrl": "https://registry.npmjs.org/tapplet-example/-/tapplet-example-0.0.2.tgz",
-          "logoUrl": "https://github.com/MCozhusheck/tapplet-example/blob/master/dist/vite.svg"
+          "registryUrl": "https://registry.npmjs.org/tapplet-example/-/tapplet-example-0.0.2.tgz"
         }
       }
     }

@@ -29,13 +29,13 @@ use tauri_plugin_http::reqwest::{ self };
 #[tauri::command]
 pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), Error> {
   // Use default account
-  let auth_token = None;
+  let account_name = "default".to_string();
   let permission_token = tokens.permission
     .lock()
     .map_err(|_| FailedToObtainPermissionTokenLock())?
     .clone();
 
-  let handle = tauri::async_runtime::spawn(async move { free_coins(auth_token, permission_token).await.unwrap() });
+  let handle = tauri::async_runtime::spawn(async move { free_coins(Some(account_name), permission_token).await.unwrap() });
   handle.await.unwrap();
   Ok(())
 }
@@ -43,13 +43,13 @@ pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), Error> {
 #[tauri::command]
 pub async fn get_balances(tokens: State<'_, Tokens>) -> Result<AccountsGetBalancesResponse, Error> {
   // Use default account
-  let auth_token = None;
+  let account_name = "default".to_string();
   let permission_token = tokens.permission
     .lock()
     .map_err(|_| FailedToObtainPermissionTokenLock())?
     .clone();
 
-  let handle = tauri::async_runtime::spawn(async move { balances(auth_token, permission_token).await });
+  let handle = tauri::async_runtime::spawn(async move { balances(Some(account_name), permission_token).await });
   let balances = handle.await??;
 
   Ok(balances)
@@ -221,7 +221,6 @@ pub async fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Res
           version: &version,
           integrity: &version_data.integrity,
           registry_url: &version_data.registry_url,
-          logo_url: &version_data.logo_url
         })
       )?;
     }
@@ -235,6 +234,8 @@ pub fn update_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> 
   let new_tapplet = UpdateTapplet {
     display_name: "updated_value".to_string(),
     package_name: "updated_value".to_string(),
+    logo_url: "updated_value".to_string(),
+    background_url: "updated_value".to_string(),
     about_description: "updated_value".to_string(),
     about_summary: "updated_value".to_string(),
     author_name: "updated_value".to_string(),

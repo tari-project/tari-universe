@@ -39,9 +39,9 @@ pub async fn permission_token() -> Result<(String, String), anyhow::Error> {
   Ok((acc_res.permissions_token, auth_token))
 }
 
-pub async fn free_coins(auth_token: Option<String>, permissions_token: String) -> Result<(), anyhow::Error> {
+pub async fn free_coins(account_name: Option<String>, permissions_token: String) -> Result<(), anyhow::Error> {
   let free_coins_params = AccountsCreateFreeTestCoinsRequest {
-    account: auth_token.map(|token| ComponentAddressOrName::Name(token)),
+    account: account_name.map(|acc_name| ComponentAddressOrName::Name(acc_name)),
     amount: (100_000_000).into(),
     max_fee: None,
     key_id: None,
@@ -51,9 +51,9 @@ pub async fn free_coins(auth_token: Option<String>, permissions_token: String) -
   Ok(())
 }
 
-pub async fn balances(auth_token: Option<String>, permissions_token: String) -> Result<AccountsGetBalancesResponse, Error> {
+pub async fn balances(account_name: Option<String>, permissions_token: String) -> Result<AccountsGetBalancesResponse, Error> {
   let balance_req = AccountsGetBalancesRequest {
-    account: auth_token.map(|token| ComponentAddressOrName::Name(token)),
+    account: account_name.map(|acc_name| ComponentAddressOrName::Name(acc_name)),
     refresh: false,
   };
   let method = "accounts.get_balances".to_string();

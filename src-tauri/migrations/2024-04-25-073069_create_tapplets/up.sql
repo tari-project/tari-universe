@@ -5,6 +5,8 @@ CREATE TABLE tapplet (
   registry_id TEXT NOT NULL,
   package_name TEXT NOT NULL,
   display_name TEXT NOT NULL,
+  logo_url TEXT NOT NULL,
+  background_url TEXT NOT NULL,
   author_name TEXT NOT NULL,
   author_website TEXT NOT NULL,
   about_summary TEXT NOT NULL,
@@ -20,7 +22,6 @@ CREATE TABLE tapplet_version (
   version TEXT NOT NULL,
   integrity TEXT NOT NULL,
   registry_url TEXT NOT NULL,
-  logo_url TEXT NOT NULL,
   UNIQUE(version, tapplet_id),
   FOREIGN KEY (tapplet_id) REFERENCES tapplet(id)
 );

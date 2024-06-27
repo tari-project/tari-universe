@@ -31,6 +31,8 @@ diesel::table! {
         registry_id -> Text,
         package_name -> Text,
         display_name -> Text,
+        logo_url -> Text,
+        background_url -> Text,
         author_name -> Text,
         author_website -> Text,
         about_summary -> Text,
@@ -55,7 +57,6 @@ diesel::table! {
         version -> Text,
         integrity -> Text,
         registry_url -> Text,
-        logo_url -> Text,
     }
 }
 

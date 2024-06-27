@@ -43,6 +43,8 @@ pub struct Tapplet {
   pub registry_id: String,
   pub package_name: String,
   pub display_name: String,
+  pub logo_url: String,
+  pub background_url: String,
   pub author_name: String,
   pub author_website: String,
   pub about_summary: String,
@@ -56,6 +58,8 @@ pub struct CreateTapplet<'a> {
   pub registry_id: &'a str,
   pub package_name: &'a str,
   pub display_name: &'a str,
+  pub logo_url: &'a str,
+  pub background_url: &'a str,
   pub author_name: &'a str,
   pub author_website: &'a str,
   pub about_summary: &'a str,
@@ -69,6 +73,8 @@ impl<'a> From<&'a TappletManifest> for CreateTapplet<'a> {
       registry_id: &tapplet_manifest.id,
       package_name: &tapplet_manifest.metadata.package_name,
       display_name: &tapplet_manifest.metadata.display_name,
+      logo_url: &tapplet_manifest.metadata.logo_url,
+      background_url: &tapplet_manifest.metadata.background_url,
       author_name: &tapplet_manifest.metadata.author.name,
       author_website: &tapplet_manifest.metadata.author.website,
       about_summary: &tapplet_manifest.metadata.about.summary,
@@ -84,6 +90,8 @@ impl<'a> From<&CreateTapplet<'a>> for UpdateTapplet {
       registry_id: create_tapplet.registry_id.to_string(),
       package_name: create_tapplet.package_name.to_string(),
       display_name: create_tapplet.display_name.to_string(),
+      logo_url: create_tapplet.logo_url.to_string(),
+      background_url: create_tapplet.background_url.to_string(),
       author_name: create_tapplet.author_name.to_string(),
       author_website: create_tapplet.author_website.to_string(),
       about_summary: create_tapplet.about_summary.to_string(),
@@ -99,6 +107,8 @@ pub struct UpdateTapplet {
   pub registry_id: String,
   pub package_name: String,
   pub display_name: String,
+  pub logo_url: String,
+  pub background_url: String,
   pub author_name: String,
   pub author_website: String,
   pub about_summary: String,
@@ -143,7 +153,6 @@ pub struct TappletVersion {
   pub version: String,
   pub integrity: String,
   pub registry_url: String,
-  pub logo_url: String,
 }
 
 #[derive(Insertable, Debug)]
@@ -153,7 +162,6 @@ pub struct CreateTappletVersion<'a> {
   pub version: &'a str,
   pub integrity: &'a str,
   pub registry_url: &'a str,
-  pub logo_url: &'a str,
 }
 
 impl<'a> From<&CreateTappletVersion<'a>> for UpdateTappletVersion {
@@ -163,7 +171,6 @@ impl<'a> From<&CreateTappletVersion<'a>> for UpdateTappletVersion {
       version: create_tapplet_version.version.to_string(),
       integrity: create_tapplet_version.integrity.to_string(),
       registry_url: create_tapplet_version.registry_url.to_string(),
-      logo_url: create_tapplet_version.logo_url.to_string(),
     }
   }
 }
@@ -175,7 +182,6 @@ pub struct UpdateTappletVersion {
   pub version: String,
   pub integrity: String,
   pub registry_url: String,
-  pub logo_url: String,
 }
 
 #[derive(Queryable, Selectable, Debug, Serialize)]

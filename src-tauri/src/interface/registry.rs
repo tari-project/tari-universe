@@ -21,6 +21,10 @@ pub struct Metadata {
   pub package_name: String,
   #[serde(rename = "displayName")]
   pub display_name: String,
+  #[serde(rename = "logoUrl")]
+  pub logo_url: String,
+  #[serde(rename = "backgroundUrl")]
+  pub background_url: String,
   pub author: Author,
   pub about: About,
   pub audits: Vec<Audit>,
@@ -32,8 +36,6 @@ pub struct Version {
   pub integrity: String,
   #[serde(rename = "registryUrl")]
   pub registry_url: String,
-  #[serde(rename = "logoUrl")]
-  pub logo_url: String,
 }
 
 #[derive(Debug, serde::Deserialize, Clone)]

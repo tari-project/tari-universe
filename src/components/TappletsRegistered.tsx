@@ -24,6 +24,7 @@ const useRegisteredTapplets = () => {
   useEffect(() => {
     const fetchTappletsFromDb = async () => {
       try {
+        await invoke("fetch_tapplets")
         const tapplets = await invoke("read_tapp_registry_db")
         setTapplets((tapplets as RegisteredTapplet[]) || [])
       } catch (error) {
@@ -82,9 +83,9 @@ export const TappletsRegistered: React.FC = () => {
   return (
     <div>
       <Typography variant="h4">Registered Tapplets</Typography>
-      {registeredTappletsList.length ? (
-        registeredTappletsList.map((item) => (
-          <List>
+      <List>
+        {registeredTappletsList.length ? (
+          registeredTappletsList.map((item) => (
             <ListItem key={item.package_name}>
               <ListItemAvatar>
                 <Avatar src={tariLogo} />
@@ -94,11 +95,11 @@ export const TappletsRegistered: React.FC = () => {
                 <InstallDesktop color="primary" />
               </IconButton>
             </ListItem>
-          </List>
-        ))
-      ) : (
-        <div>Registered tapplets list is empty</div>
-      )}
+          ))
+        ) : (
+          <div>Registered tapplets list is empty</div>
+        )}
+      </List>
 
       <Box>
         <Button variant="contained" sx={{ mr: 1 }} onClick={fetchTappletsFromRegistry}>
