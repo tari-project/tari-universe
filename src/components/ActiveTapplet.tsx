@@ -1,8 +1,9 @@
-import { Box } from "@mui/material"
+import { Box, Typography } from "@mui/material"
 import { invoke } from "@tauri-apps/api/core"
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { useSnackBar } from "../ErrorContext"
+import { Tapplet } from "./Tapplet"
 
 export function ActiveTapplet() {
   const [tappletAddress, setTappletAddress] = useState("")
@@ -16,6 +17,7 @@ export function ActiveTapplet() {
         setTappletAddress(res as string)
       })
       .catch((error) => showSnackBar(error, "error"))
+
     return () => {
       invoke("close_tapplet", { installedTappletId }).catch((error) => showSnackBar(error, "error"))
       setTappletAddress("")
@@ -23,12 +25,12 @@ export function ActiveTapplet() {
   }, [])
 
   return (
-    <div>
-      {tappletAddress && (
-        <Box>
-          <iframe src={tappletAddress} width="100%" height="500"></iframe>
-        </Box>
+    <Box height="100%">
+      {tappletAddress ? (
+        <Tapplet source={tappletAddress} />
+      ) : (
+        <Typography>Failed to obtain tapplet endpoint</Typography>
       )}
-    </div>
+    </Box>
   )
 }
