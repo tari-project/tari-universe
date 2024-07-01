@@ -35,7 +35,11 @@ const useRegisteredTapplets = () => {
     fetchTappletsFromDb()
   }, [])
 
-  const fetchTappletsFromRegistry = useCallback(() => invoke("fetch_tapplets"), [])
+  const fetchTappletsFromRegistry = useCallback(async () => {
+    await invoke("fetch_tapplets")
+    const tapplets = await invoke("read_tapp_registry_db")
+    setTapplets((tapplets as RegisteredTapplet[]) || [])
+  }, [])
 
   return [tapplets, fetchTappletsFromRegistry] as [RegisteredTapplet[], () => Promise<unknown>]
 }
