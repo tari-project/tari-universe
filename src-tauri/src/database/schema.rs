@@ -1,13 +1,6 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    asset (id) {
-        id -> Nullable<Integer>,
-        rel_path -> Text,
-    }
-}
-
-diesel::table! {
     dev_tapplet (id) {
         id -> Nullable<Integer>,
         package_name -> Text,
@@ -64,11 +57,4 @@ diesel::joinable!(installed_tapplet -> tapplet (tapplet_id));
 diesel::joinable!(installed_tapplet -> tapplet_version (tapplet_version_id));
 diesel::joinable!(tapplet_audit -> tapplet (tapplet_id));
 diesel::joinable!(tapplet_version -> tapplet (tapplet_id));
-diesel::allow_tables_to_appear_in_same_query!(
-    asset,
-    dev_tapplet,
-    installed_tapplet,
-    tapplet,
-    tapplet_audit,
-    tapplet_version,
-);
+diesel::allow_tables_to_appear_in_same_query!(dev_tapplet, installed_tapplet, tapplet, tapplet_audit, tapplet_version);

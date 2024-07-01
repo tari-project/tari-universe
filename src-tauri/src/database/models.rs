@@ -79,7 +79,7 @@ impl<'a> From<&'a TappletManifest> for CreateTapplet<'a> {
       author_website: &tapplet_manifest.metadata.author.website,
       about_summary: &tapplet_manifest.metadata.about.summary,
       about_description: &tapplet_manifest.metadata.about.description,
-      category: &tapplet_manifest.metadata.category
+      category: &tapplet_manifest.metadata.category,
     }
   }
 }
@@ -96,7 +96,7 @@ impl<'a> From<&CreateTapplet<'a>> for UpdateTapplet {
       author_website: create_tapplet.author_website.to_string(),
       about_summary: create_tapplet.about_summary.to_string(),
       about_description: create_tapplet.about_description.to_string(),
-      category: create_tapplet.category.to_string()
+      category: create_tapplet.category.to_string(),
     }
   }
 }
@@ -113,35 +113,7 @@ pub struct UpdateTapplet {
   pub author_website: String,
   pub about_summary: String,
   pub about_description: String,
-  pub category: String
-}
-
-#[derive(Queryable, Selectable, Debug, Serialize)]
-#[diesel(table_name = asset)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-pub struct Asset {
-  pub id: Option<i32>,
-  pub rel_path: String,
-}
-
-#[derive(Insertable, Debug)]
-#[diesel(table_name = asset)]
-pub struct CreateAsset<'a> {
-  pub rel_path: &'a str,
-}
-
-impl<'a> From<&CreateAsset<'a>> for UpdateAsset {
-  fn from(create_asset: &CreateAsset) -> Self {
-    UpdateAsset {
-      rel_path: create_asset.rel_path.to_string(),
-    }
-  }
-}
-
-#[derive(Debug, AsChangeset)]
-#[diesel(table_name = asset)]
-pub struct UpdateAsset {
-  pub rel_path: String,
+  pub category: String,
 }
 
 #[derive(Queryable, Selectable, Debug, Serialize)]
@@ -231,7 +203,7 @@ pub struct TappletAudit {
   pub id: Option<i32>,
   pub tapplet_id: Option<i32>,
   pub auditor: String,
-  pub report_url: String
+  pub report_url: String,
 }
 
 #[derive(Insertable, Debug)]
@@ -257,5 +229,5 @@ impl<'a> From<&CreateTappletAudit<'a>> for UpdateTappletAudit {
 pub struct UpdateTappletAudit {
   pub tapplet_id: Option<i32>,
   pub auditor: String,
-  pub report_url: String, 
+  pub report_url: String,
 }

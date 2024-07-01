@@ -5,13 +5,21 @@ use std::path::PathBuf;
 use crate::{
   database::{
     models::{
-      CreateDevTapplet, CreateInstalledTapplet, CreateTapplet, CreateTappletAudit, CreateTappletVersion, DevTapplet, InstalledTapplet, Tapplet, UpdateInstalledTapplet, UpdateTapplet
-    }, store::{ SqliteStore, Store }
+      CreateDevTapplet,
+      CreateInstalledTapplet,
+      CreateTapplet,
+      CreateTappletAudit,
+      CreateTappletVersion,
+      DevTapplet,
+      InstalledTapplet,
+      Tapplet,
+      UpdateInstalledTapplet,
+      UpdateTapplet,
+    },
+    store::{ SqliteStore, Store },
   },
   error::{
-    Error::{
-      self, FailedToObtainPermissionTokenLock, JsonParsingError, RequestError, TappletServerError
-    },
+    Error::{ self, FailedToObtainPermissionTokenLock, JsonParsingError, RequestError, TappletServerError },
     RequestError::*,
     TappletServerError::*,
   },
@@ -35,7 +43,9 @@ pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), Error> {
     .map_err(|_| FailedToObtainPermissionTokenLock())?
     .clone();
 
-  let handle = tauri::async_runtime::spawn(async move { free_coins(Some(account_name), permission_token).await.unwrap() });
+  let handle = tauri::async_runtime::spawn(async move {
+    free_coins(Some(account_name), permission_token).await.unwrap()
+  });
   handle.await.unwrap();
   Ok(())
 }
@@ -189,7 +199,9 @@ pub fn read_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Re
  */
 #[tauri::command]
 pub async fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<(), Error> {
-  let manifest_endpoint = String::from("https://raw.githubusercontent.com/karczuRF/tapp-registry/main/tapplets-registry.manifest.json");
+  let manifest_endpoint = String::from(
+    "https://raw.githubusercontent.com/karczuRF/tapp-registry/main/tapplets-registry.manifest.json"
+  );
   let manifest_res = reqwest
     ::get(&manifest_endpoint).await
     .map_err(|_| RequestError(FetchManifestError { endpoint: manifest_endpoint.clone() }))?

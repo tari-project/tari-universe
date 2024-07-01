@@ -44,11 +44,6 @@ CREATE TABLE installed_tapplet (
   FOREIGN KEY (tapplet_version_id) REFERENCES tapplet_version(id)
 );
 
-CREATE TABLE asset (
-  id INTEGER PRIMARY KEY,
-  rel_path TEXT NOT NULL
-);
-
 CREATE TABLE dev_tapplet (
   id INTEGER PRIMARY KEY,
   package_name TEXT NOT NULL,

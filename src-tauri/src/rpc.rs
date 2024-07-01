@@ -51,7 +51,10 @@ pub async fn free_coins(account_name: Option<String>, permissions_token: String)
   Ok(())
 }
 
-pub async fn balances(account_name: Option<String>, permissions_token: String) -> Result<AccountsGetBalancesResponse, Error> {
+pub async fn balances(
+  account_name: Option<String>,
+  permissions_token: String
+) -> Result<AccountsGetBalancesResponse, Error> {
   let balance_req = AccountsGetBalancesRequest {
     account: account_name.map(|acc_name| ComponentAddressOrName::Name(acc_name)),
     refresh: false,
