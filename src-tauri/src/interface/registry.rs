@@ -21,11 +21,14 @@ pub struct Metadata {
   pub package_name: String,
   #[serde(rename = "displayName")]
   pub display_name: String,
+  #[serde(rename = "logoUrl")]
+  pub logo_url: String,
+  #[serde(rename = "backgroundUrl")]
+  pub background_url: String,
   pub author: Author,
   pub about: About,
   pub audits: Vec<Audit>,
   pub category: String,
-  pub logo: String,
 }
 
 #[derive(Debug, serde::Deserialize, Clone)]
@@ -50,5 +53,6 @@ pub struct About {
 #[derive(Debug, serde::Deserialize, Clone)]
 pub struct Audit {
   pub auditor: String,
-  pub report: String,
+  #[serde(rename = "reportUrl")]
+  pub report_url: String,
 }

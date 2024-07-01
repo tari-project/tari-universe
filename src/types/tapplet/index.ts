@@ -9,7 +9,6 @@ export type RegisteredTapplet = {
   about_summary: string
   about_description: string
   category: string
-  image_id?: number
 }
 
 export type InstalledTapplet = {
@@ -39,6 +38,7 @@ export interface TappletVersion {
   version: string
   integrity: string
   registry_url: string
+  logo_url: string
 }
 
 export interface RegisteredTappletWithVersion {
@@ -49,4 +49,11 @@ export interface RegisteredTappletWithVersion {
 export interface InstalledTappletWithName {
   installed_tapplet: InstalledTapplet
   display_name: string
+}
+
+export interface TappletAudit {
+  id?: number;
+  tapplet_id?: number
+  auditor: string
+  report_url: string
 }
