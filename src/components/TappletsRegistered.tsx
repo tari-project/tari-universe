@@ -41,7 +41,7 @@ const useRegisteredTapplets = () => {
     setTapplets((tapplets as RegisteredTapplet[]) || [])
   }, [])
 
-  return [tapplets, fetchTappletsFromRegistry] as [RegisteredTapplet[], () => Promise<unknown>]
+  return [tapplets, fetchTappletsFromRegistry] as [RegisteredTapplet[], () => Promise<void>]
 }
 
 export const TappletsRegistered: React.FC = () => {
