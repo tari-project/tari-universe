@@ -81,32 +81,33 @@ export const TappletsRegistered: React.FC = () => {
   }
 
   return (
-    <div>
-      <Typography variant="h4">Registered Tapplets</Typography>
-      <List>
-        {registeredTappletsList.length ? (
-          registeredTappletsList.map((item) => (
-            <ListItem key={item.package_name}>
+    <Box marginX="auto" mt={4}>
+      <Typography variant="h4" textAlign="center" pt={6}>
+        Registered Tapplets
+      </Typography>
+      {registeredTappletsList?.length ?? 0 > 0 ? (
+        <List sx={{ width: "100%", minWidth: 500 }}>
+          {registeredTappletsList?.map((item) => (
+            <ListItem key={item.package_name} sx={{ paddingTop: 2 }}>
               <ListItemAvatar>
                 <Avatar src={tariLogo} />
               </ListItemAvatar>
               <ListItemText primary={item.package_name} />
-              <IconButton aria-label="install" onClick={() => handleInstall(item.id)}>
+              <IconButton aria-label="install" onClick={() => handleInstall(item.id)} sx={{ marginLeft: 8 }}>
                 <InstallDesktop color="primary" />
               </IconButton>
             </ListItem>
-          ))
-        ) : (
-          <div>Registered tapplets list is empty</div>
-        )}
-      </List>
-
-      <Box>
-        <Button variant="contained" sx={{ mr: 1 }} onClick={fetchTappletsFromRegistry}>
+          ))}
+        </List>
+      ) : (
+        <Typography textAlign="center">Registered tapplets list is empty</Typography>
+      )}
+      <Box pt={4} display="flex" justifyContent="center" gap={1}>
+        <Button variant="contained" onClick={fetchTappletsFromRegistry}>
           Fetch Tapplet List
         </Button>
         <AddDevTappletDialog />
       </Box>
-    </div>
+    </Box>
   )
 }

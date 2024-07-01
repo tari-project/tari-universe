@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom"
 import { DevTapplet } from "@type/tapplet"
 import { useEffect, useState } from "react"
 import { useSnackBar } from "../ErrorContext"
+import { Tapplet } from "./Tapplet"
 
 export function ActiveDevTapplet() {
   let { state }: { state: DevTapplet } = useLocation()
@@ -32,13 +33,5 @@ export function ActiveDevTapplet() {
     }
   }, [])
 
-  return (
-    <div>
-      {isVerified && (
-        <Box>
-          <iframe src={state.endpoint} width="100%" height="500"></iframe>
-        </Box>
-      )}
-    </div>
-  )
+  return <Box height="100%">{isVerified && <Tapplet source={state.endpoint} />}</Box>
 }

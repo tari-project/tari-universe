@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core"
 import { useState } from "react"
 
-import { Typography } from "@mui/material"
+import { Box, Button, Typography } from "@mui/material"
 import { useSnackBar } from "../ErrorContext"
 
 export const Wallet: React.FC = () => {
@@ -25,30 +25,19 @@ export const Wallet: React.FC = () => {
   }
 
   return (
-    <div className="container">
-      <div style={{ marginTop: "24px" }}></div>
-      <div style={{ marginTop: "24px" }}>
-        <h1>Tauri wallet daemon</h1>
-        <form
-          className="row"
-          onSubmit={(e) => {
-            e.preventDefault()
-            get_free_coins()
-          }}
-        >
-          <button type="submit">Get free coins</button>
-        </form>
-        <form
-          className="row"
-          onSubmit={(e) => {
-            e.preventDefault()
-            get_balances()
-          }}
-        >
-          <button type="submit">Get balances</button>
-        </form>
-        <Typography textAlign="center">balances: {JSON.stringify(balances)}</Typography>
-      </div>
-    </div>
+    <Box marginX="auto" mt={4}>
+      <Typography variant="h4" textAlign="center" pt={6}>
+        Tauri wallet daemon
+      </Typography>
+      <Box display="flex" flexDirection="column" gap={2} alignItems="center" py={4}>
+        <Button onClick={get_free_coins} variant="contained" sx={{ width: 200 }}>
+          Get free coins
+        </Button>
+        <Button onClick={get_balances} variant="contained" sx={{ width: 200 }}>
+          Get balances
+        </Button>
+      </Box>
+      <Typography textAlign="center">balances: {JSON.stringify(balances)}</Typography>
+    </Box>
   )
 }
