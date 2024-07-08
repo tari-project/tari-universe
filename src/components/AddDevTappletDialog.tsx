@@ -48,7 +48,7 @@ export default function AddDevTappletDialog() {
           onSubmit: onSubmitHandler,
         }}
       >
-        <DialogTitle>Subscribe</DialogTitle>
+        <DialogTitle textAlign="center">Add dev tapplet</DialogTitle>
         <DialogContent>
           <DialogContentText>
             To add tapplet in developer mode please enter the endpoint of the tapplet.

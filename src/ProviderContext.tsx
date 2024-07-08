@@ -2,6 +2,7 @@ import { ReactNode, createContext, useEffect, useRef, useState } from "react"
 import { permissions as walletPermissions, TariPermissions } from "@tariproject/tarijs"
 import { WalletDaemonParameters, WalletDaemonTariProvider } from "@provider/TariUniverseProvider"
 import { useSnackBar } from "./ErrorContext"
+import { useTransactionConfirmation } from "./TransactionConfirmationContext"
 
 const { TariPermissionAccountInfo, TariPermissionKeyList, TariPermissionSubstatesRead, TariPermissionTransactionSend } =
   walletPermissions
@@ -28,6 +29,7 @@ export const TariUniverseContextProvider: React.FC<TariUniverseProviderProps> = 
   const provider = useRef<WalletDaemonTariProvider | null>(null)
   const [providerState, setProviderState] = useState<WalletDaemonTariProvider | null>(null)
   const { showSnackBar } = useSnackBar()
+  const { showTransactionConfirmation } = useTransactionConfirmation()
 
   useEffect(() => {
     const initProvider = async () => {
@@ -49,6 +51,10 @@ export const TariUniverseContextProvider: React.FC<TariUniverseProviderProps> = 
       }
 
       const { methodName, args } = event.data
+      if (methodName === "submitTransaction") {
+        showTransactionConfirmation(methodName, args, provider.current, event)
+        return
+      }
       const result = await provider.current.runOne(methodName, args)
       event.source.postMessage({ id: event.data.id, result, type: "provider-call" }, event.origin)
     }

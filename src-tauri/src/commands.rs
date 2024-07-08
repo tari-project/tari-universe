@@ -43,7 +43,7 @@ use tauri_plugin_http::reqwest::{ self };
 #[tauri::command]
 pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), Error> {
   // Use default account
-  let auth_token = None;
+  let auth_token = Some("default".to_string());
   let permission_token = tokens.permission
     .lock()
     .map_err(|_| FailedToObtainPermissionTokenLock())?

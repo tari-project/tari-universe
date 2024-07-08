@@ -6,14 +6,17 @@ import { ThemeProvider } from "@emotion/react"
 import { theme } from "./theme"
 import { SnackBarProvider } from "./ErrorContext"
 import { TariUniverseContextProvider } from "./ProviderContext"
+import { TransactionConfirmationProvider } from "./TransactionConfirmationContext"
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <SnackBarProvider>
-        <TariUniverseContextProvider>
-          <App />
-        </TariUniverseContextProvider>
+        <TransactionConfirmationProvider>
+          <TariUniverseContextProvider>
+            <App />
+          </TariUniverseContextProvider>
+        </TransactionConfirmationProvider>
       </SnackBarProvider>
     </ThemeProvider>
   </React.StrictMode>
