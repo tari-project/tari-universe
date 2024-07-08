@@ -43,12 +43,13 @@ pub struct Tapplet {
   pub registry_id: String,
   pub package_name: String,
   pub display_name: String,
+  pub logo_url: String,
+  pub background_url: String,
   pub author_name: String,
   pub author_website: String,
   pub about_summary: String,
   pub about_description: String,
   pub category: String,
-  pub image_id: Option<i32>,
 }
 
 #[derive(Insertable, Debug, Deserialize)]
@@ -57,26 +58,28 @@ pub struct CreateTapplet<'a> {
   pub registry_id: &'a str,
   pub package_name: &'a str,
   pub display_name: &'a str,
+  pub logo_url: &'a str,
+  pub background_url: &'a str,
   pub author_name: &'a str,
   pub author_website: &'a str,
   pub about_summary: &'a str,
   pub about_description: &'a str,
   pub category: &'a str,
-  pub image_id: Option<i32>,
 }
 
 impl<'a> From<&'a TappletManifest> for CreateTapplet<'a> {
   fn from(tapplet_manifest: &'a TappletManifest) -> Self {
     CreateTapplet {
       registry_id: &tapplet_manifest.id,
-      package_name: &tapplet_manifest.metadata.package_name,
+      package_name: &tapplet_manifest.id,
       display_name: &tapplet_manifest.metadata.display_name,
+      logo_url: &tapplet_manifest.metadata.logo_url,
+      background_url: &tapplet_manifest.metadata.background_url,
       author_name: &tapplet_manifest.metadata.author.name,
       author_website: &tapplet_manifest.metadata.author.website,
       about_summary: &tapplet_manifest.metadata.about.summary,
       about_description: &tapplet_manifest.metadata.about.description,
       category: &tapplet_manifest.metadata.category,
-      image_id: None,
     }
   }
 }
@@ -87,12 +90,13 @@ impl<'a> From<&CreateTapplet<'a>> for UpdateTapplet {
       registry_id: create_tapplet.registry_id.to_string(),
       package_name: create_tapplet.package_name.to_string(),
       display_name: create_tapplet.display_name.to_string(),
+      logo_url: create_tapplet.logo_url.to_string(),
+      background_url: create_tapplet.background_url.to_string(),
       author_name: create_tapplet.author_name.to_string(),
       author_website: create_tapplet.author_website.to_string(),
       about_summary: create_tapplet.about_summary.to_string(),
       about_description: create_tapplet.about_description.to_string(),
       category: create_tapplet.category.to_string(),
-      image_id: create_tapplet.image_id,
     }
   }
 }
@@ -103,40 +107,13 @@ pub struct UpdateTapplet {
   pub registry_id: String,
   pub package_name: String,
   pub display_name: String,
+  pub logo_url: String,
+  pub background_url: String,
   pub author_name: String,
   pub author_website: String,
   pub about_summary: String,
   pub about_description: String,
   pub category: String,
-  pub image_id: Option<i32>,
-}
-
-#[derive(Queryable, Selectable, Debug, Serialize)]
-#[diesel(table_name = asset)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-pub struct Asset {
-  pub id: Option<i32>,
-  pub rel_path: String,
-}
-
-#[derive(Insertable, Debug)]
-#[diesel(table_name = asset)]
-pub struct CreateAsset<'a> {
-  pub rel_path: &'a str,
-}
-
-impl<'a> From<&CreateAsset<'a>> for UpdateAsset {
-  fn from(create_asset: &CreateAsset) -> Self {
-    UpdateAsset {
-      rel_path: create_asset.rel_path.to_string(),
-    }
-  }
-}
-
-#[derive(Debug, AsChangeset)]
-#[diesel(table_name = asset)]
-pub struct UpdateAsset {
-  pub rel_path: String,
 }
 
 #[derive(Queryable, Selectable, Debug, Serialize)]
@@ -217,4 +194,40 @@ pub struct UpdateDevTapplet {
   pub package_name: String,
   pub tapplet_name: String,
   pub display_name: String,
+}
+
+#[derive(Queryable, Selectable, Debug, Serialize)]
+#[diesel(table_name = tapplet_audit)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+pub struct TappletAudit {
+  pub id: Option<i32>,
+  pub tapplet_id: Option<i32>,
+  pub auditor: String,
+  pub report_url: String,
+}
+
+#[derive(Insertable, Debug)]
+#[diesel(table_name = tapplet_audit)]
+pub struct CreateTappletAudit<'a> {
+  pub tapplet_id: Option<i32>,
+  pub auditor: &'a str,
+  pub report_url: &'a str,
+}
+
+impl<'a> From<&CreateTappletAudit<'a>> for UpdateTappletAudit {
+  fn from(create_tapplet_audit: &CreateTappletAudit) -> Self {
+    UpdateTappletAudit {
+      tapplet_id: create_tapplet_audit.tapplet_id,
+      auditor: create_tapplet_audit.auditor.to_string(),
+      report_url: create_tapplet_audit.report_url.to_string(),
+    }
+  }
+}
+
+#[derive(Debug, AsChangeset)]
+#[diesel(table_name = tapplet_audit)]
+pub struct UpdateTappletAudit {
+  pub tapplet_id: Option<i32>,
+  pub auditor: String,
+  pub report_url: String,
 }

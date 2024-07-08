@@ -8,6 +8,7 @@ use crate::{
       CreateDevTapplet,
       CreateInstalledTapplet,
       CreateTapplet,
+      CreateTappletAudit,
       CreateTappletVersion,
       DevTapplet,
       InstalledTapplet,
@@ -18,14 +19,7 @@ use crate::{
     store::{ SqliteStore, Store },
   },
   error::{
-    Error::{
-      self,
-      RequestError,
-      TappletServerError,
-      FailedToObtainAuthTokenLock,
-      FailedToObtainPermissionTokenLock,
-      JsonParsingError,
-    },
+    Error::{ self, FailedToObtainPermissionTokenLock, JsonParsingError, RequestError, TappletServerError },
     RequestError::*,
     TappletServerError::*,
   },
@@ -43,13 +37,15 @@ use tauri_plugin_http::reqwest::{ self };
 #[tauri::command]
 pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), Error> {
   // Use default account
-  let auth_token = None;
+  let account_name = "default".to_string();
   let permission_token = tokens.permission
     .lock()
     .map_err(|_| FailedToObtainPermissionTokenLock())?
     .clone();
 
-  let handle = tauri::async_runtime::spawn(async move { free_coins(auth_token, permission_token).await.unwrap() });
+  let handle = tauri::async_runtime::spawn(async move {
+    free_coins(Some(account_name), permission_token).await.unwrap()
+  });
   handle.await.unwrap();
   Ok(())
 }
@@ -57,13 +53,13 @@ pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), Error> {
 #[tauri::command]
 pub async fn get_balances(tokens: State<'_, Tokens>) -> Result<AccountsGetBalancesResponse, Error> {
   // Use default account
-  let auth_token = None;
+  let account_name = "default".to_string();
   let permission_token = tokens.permission
     .lock()
     .map_err(|_| FailedToObtainPermissionTokenLock())?
     .clone();
 
-  let handle = tauri::async_runtime::spawn(async move { balances(auth_token, permission_token).await });
+  let handle = tauri::async_runtime::spawn(async move { balances(Some(account_name), permission_token).await });
   let balances = handle.await??;
 
   Ok(balances)
@@ -202,14 +198,33 @@ pub fn read_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Re
  *  REGISTERED TAPPLETS - FETCH DATA FROM MANIFEST JSON
  */
 #[tauri::command]
-pub fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<(), Error> {
-  let registry = include_str!("../../tapplets-registry.manifest.json");
-  let tapplets: RegisteredTapplets = serde_json::from_str(registry).map_err(|e| JsonParsingError(e))?;
+pub async fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<(), Error> {
+  let manifest_endpoint = String::from(
+    "https://raw.githubusercontent.com/karczuRF/tapp-registry/main/dist/tapplets-registry.manifest.json"
+  );
+  let manifest_res = reqwest
+    ::get(&manifest_endpoint).await
+    .map_err(|_| RequestError(FetchManifestError { endpoint: manifest_endpoint.clone() }))?
+    .text().await
+    .map_err(|_| RequestError(ManifestResponseError { endpoint: manifest_endpoint.clone() }))?;
+
+  let tapplets: RegisteredTapplets = serde_json::from_str(&manifest_res).map_err(|e| JsonParsingError(e))?;
+
   let mut store = SqliteStore::new(db_connection.0.clone());
 
   for tapplet_manifest in tapplets.registered_tapplets.values() {
     let inserted_tapplet = store.create(&CreateTapplet::from(tapplet_manifest))?;
     let tapplet_db_id = inserted_tapplet.id;
+
+    for audit_data in tapplet_manifest.metadata.audits.iter() {
+      store.create(
+        &(CreateTappletAudit {
+          tapplet_id: tapplet_db_id,
+          auditor: &audit_data.auditor,
+          report_url: &audit_data.report_url,
+        })
+      )?;
+    }
 
     for (version, version_data) in tapplet_manifest.versions.iter() {
       store.create(
@@ -229,9 +244,10 @@ pub fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<()
 pub fn update_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Result<usize, Error> {
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   let new_tapplet = UpdateTapplet {
-    image_id: None,
     display_name: "updated_value".to_string(),
     package_name: "updated_value".to_string(),
+    logo_url: "updated_value".to_string(),
+    background_url: "updated_value".to_string(),
     about_description: "updated_value".to_string(),
     about_summary: "updated_value".to_string(),
     author_name: "updated_value".to_string(),

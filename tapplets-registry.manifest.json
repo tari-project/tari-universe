@@ -6,10 +6,15 @@
       "metadata": {
         "packageName": "tapp-example",
         "displayName": "Demo tapp by karczuRF",
+        "logoUrl": "https://github.com/karczuRF/tapp-example/blob/main/dist/assets/logo.svg",
+        "backgroundUrl": "https://github.com/karczuRF/tapp-example/blob/main/dist/assets/background.svg",
         "author": {
           "name": "karczuRF",
           "website": "https://github.com/karczuRF/tapp-example"
         },
+        "codeowners": [
+          "@karczuRF"
+        ],
         "about": {
           "summary": "Short (a few words) summary.",
           "description": "Longer (a few sentences) project description."
@@ -20,8 +25,7 @@
             "report": "https://auditor-company.io/audits/tapplet-name"
           }
         ],
-        "category": "tapplet category",
-        "logo": "https://github.com/karczuRF/tapp-example/blob/main/dist/assets/logo.svg"
+        "category": "tapplet category"
       },
       "versions": {
         "1.0.1": {
@@ -39,10 +43,15 @@
       "metadata": {
         "packageName": "tapplet-example",
         "displayName": "Demo tapp by MCozhusheck",
+        "logoUrl": "https://github.com/MCozhusheck/tapplet-example/blob/master/dist/vite.svg",
+        "backgroundUrl": "https://github.com/MCozhusheck/tapplet-example/blob/master/dist/background.png",
         "author": {
           "name": "MCozhusheck",
           "website": "https://github.com/MCozhusheck/tapplet-example"
         },
+        "codeowners": [
+          "@MCozhusheck"
+        ],
         "about": {
           "summary": "Short (a few words) summary.",
           "description": "Longer (a few sentences) project description."
@@ -53,8 +62,7 @@
             "report": "https://auditor-company.io/audits/tapplet-example"
           }
         ],
-        "category": "tapplet category",
-        "logo": "https://github.com/MCozhusheck/tapplet-example/blob/master/dist/vite.svg"
+        "category": "tapplet category"
       },
       "versions": {
         "0.0.2": {
