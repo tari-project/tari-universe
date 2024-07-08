@@ -200,7 +200,7 @@ pub fn read_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Re
 #[tauri::command]
 pub async fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<(), Error> {
   let manifest_endpoint = String::from(
-    "https://raw.githubusercontent.com/karczuRF/tapp-registry/main/tapplets-registry.manifest.json"
+    "https://raw.githubusercontent.com/karczuRF/tapp-registry/main/dist/tapplets-registry.manifest.json"
   );
   let manifest_res = reqwest
     ::get(&manifest_endpoint).await

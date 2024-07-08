@@ -71,7 +71,7 @@ impl<'a> From<&'a TappletManifest> for CreateTapplet<'a> {
   fn from(tapplet_manifest: &'a TappletManifest) -> Self {
     CreateTapplet {
       registry_id: &tapplet_manifest.id,
-      package_name: &tapplet_manifest.metadata.package_name,
+      package_name: &tapplet_manifest.id,
       display_name: &tapplet_manifest.metadata.display_name,
       logo_url: &tapplet_manifest.metadata.logo_url,
       background_url: &tapplet_manifest.metadata.background_url,

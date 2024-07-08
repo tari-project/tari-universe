@@ -22,7 +22,7 @@
         "audits": [
           {
             "auditor": "Auditor",
-            "reportUrl": "https://auditor-company.io/audits/tapplet-name"
+            "report": "https://auditor-company.io/audits/tapplet-name"
           }
         ],
         "category": "tapplet category"
@@ -59,7 +59,7 @@
         "audits": [
           {
             "auditor": "Auditor",
-            "reportUrl": "https://auditor-company.io/audits/tapplet-example"
+            "report": "https://auditor-company.io/audits/tapplet-example"
           }
         ],
         "category": "tapplet category"
