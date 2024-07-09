@@ -1,20 +1,18 @@
-import { ReactNode, createContext, useContext, useState } from "react"
+import { ReactNode, createContext, useContext, useRef, useState } from "react"
 import Button from "@mui/material/Button"
 import Dialog from "@mui/material/Dialog"
 import DialogActions from "@mui/material/DialogActions"
 import DialogContent from "@mui/material/DialogContent"
 import DialogContentText from "@mui/material/DialogContentText"
 import DialogTitle from "@mui/material/DialogTitle"
-import { WalletDaemonTariProvider } from "@provider/TariUniverseProvider"
-import { ProviderMethodNames } from "@tariproject/tarijs/dist/providers/tari_universe"
 
 type TransactionConfirmationContextActions = {
-  showTransactionConfirmation: (
-    methodName: string,
-    args: [string],
-    provider: WalletDaemonTariProvider,
-    event: any
-  ) => void
+  showTransactionConfirmation: (methodName: string, resolve: () => void, reject: () => void) => void
+}
+
+type TransactionConfirmationResponse = {
+  resolve: () => void
+  reject: () => void
 }
 
 const TransactionConfirmationContext = createContext({} as TransactionConfirmationContextActions)
@@ -26,46 +24,25 @@ interface TransactionConfirmationContextProviderProps {
 const TransactionConfirmationProvider: React.FC<TransactionConfirmationContextProviderProps> = ({ children }) => {
   const [open, setOpen] = useState<boolean>(false)
   const [methodName, setMethodName] = useState<string>("")
-  const [args, setArgs] = useState<string[]>([])
-  const [provider, setProvider] = useState<WalletDaemonTariProvider | null>(null)
-  const [event, setEvent] = useState<any>(null)
+  const response = useRef<TransactionConfirmationResponse>({ resolve: () => {}, reject: () => {} })
 
-  const showTransactionConfirmation = (
-    method: string,
-    args: string[],
-    provider: WalletDaemonTariProvider,
-    event: any
-  ) => {
-    setProvider(provider)
-    setEvent(event)
+  const showTransactionConfirmation = (method: string, resolveCb: () => void, rejectCb: () => void) => {
+    response.current.resolve = resolveCb
+    response.current.reject = rejectCb
     setMethodName(method)
-    setArgs(args)
     setOpen(true)
   }
 
   const handleClose = async () => {
-    const resultError = "Transaction was cancelled"
-    event.source.postMessage({ id: event.data.id, result: {}, resultError, type: "provider-call" }, event.origin)
+    response.current.reject()
     setOpen(false)
     setMethodName("")
-    setArgs([])
-    setProvider(null)
   }
 
   const submitTransaction = async () => {
-    if (!provider || provider === null) {
-      console.error("Provider is not initialized")
-      const resultError = "Transaction was cancelled"
-      event.source.postMessage({ id: event.data.id, resultError, type: "provider-call" }, event.origin)
-      handleClose()
-      return
-    }
-    const result = await provider.runOne(methodName as ProviderMethodNames, args)
-    event.source.postMessage({ id: event.data.id, result, type: "provider-call" }, event.origin)
+    response.current.resolve()
     setOpen(false)
     setMethodName("")
-    setArgs([])
-    setProvider(null)
   }
 
   return (
@@ -75,10 +52,6 @@ const TransactionConfirmationProvider: React.FC<TransactionConfirmationContextPr
         <DialogContent>
           <DialogContentText>Method name: {methodName}</DialogContentText>
           <DialogContentText>TODO: display transaction simulation result</DialogContentText>
-          {/* <DialogContentText>arguments: </DialogContentText>
-          {args.map((arg, index) => (
-            <Box key={index}>{JSON.stringify(arg, null, 2)}</Box>
-          ))} */}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} variant="contained">

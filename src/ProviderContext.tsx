@@ -52,8 +52,19 @@ export const TariUniverseContextProvider: React.FC<TariUniverseProviderProps> = 
 
       const { methodName, args } = event.data
       if (methodName === "submitTransaction") {
-        showTransactionConfirmation(methodName, args, provider.current, event)
-        return
+        const resultError = "Transaction was cancelled"
+        try {
+          await new Promise<void>((resolve, reject) =>
+            showTransactionConfirmation(
+              methodName,
+              () => resolve(),
+              () => reject(resultError)
+            )
+          )
+        } catch (e) {
+          event.source.postMessage({ id: event.data.id, result: {}, resultError, type: "provider-call" }, event.origin)
+          return
+        }
       }
       const result = await provider.current.runOne(methodName, args)
       event.source.postMessage({ id: event.data.id, result, type: "provider-call" }, event.origin)
