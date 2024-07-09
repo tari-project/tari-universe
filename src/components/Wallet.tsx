@@ -25,7 +25,7 @@ export const Wallet: React.FC = () => {
   }
 
   return (
-    <Box marginX="auto" mt={4}>
+    <Box mt={4}>
       <Typography variant="h4" textAlign="center" pt={6}>
         Tauri wallet daemon
       </Typography>

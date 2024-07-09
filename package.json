@@ -14,7 +14,7 @@
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.15",
     "@mui/material": "^5.15.15",
-    "@tariproject/tarijs": "file:../tari.js",
+    "@tariproject/tarijs": "https://gitpkg.now.sh/tari-project/tari.js?main&scripts.postinstall=npm%20run%20build-tsc",
     "@tariproject/wallet_jrpc_client": "https://gitpkg.now.sh/tari-project/tari-dan/clients/javascript/wallet_daemon_client?development&scripts.postinstall=npm%20run%20build",
     "@tauri-apps/api": ">=2.0.0-beta.0",
     "@tauri-apps/plugin-shell": ">=2.0.0-beta.0",
