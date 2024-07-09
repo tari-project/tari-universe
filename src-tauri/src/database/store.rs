@@ -6,25 +6,19 @@ use diesel::prelude::*;
 use diesel::SqliteConnection;
 
 use crate::database::models::TappletVersion;
-use crate::database::models::{
-  Asset,
-  CreateAsset,
-  CreateInstalledTapplet,
-  CreateTapplet,
-  InstalledTapplet,
-  Tapplet,
-  UpdateTapplet,
-};
+use crate::database::models::TappletAudit;
+use crate::database::models::{ CreateInstalledTapplet, CreateTapplet, InstalledTapplet, Tapplet, UpdateTapplet };
 use crate::error::{ Error::{ self, DatabaseError }, DatabaseError::* };
 use crate::interface::InstalledTappletWithName;
 
 use super::models::CreateDevTapplet;
 use super::models::CreateTappletVersion;
+use super::models::CreateTappletAudit;
 use super::models::DevTapplet;
-use super::models::UpdateAsset;
 use super::models::UpdateDevTapplet;
 use super::models::UpdateInstalledTapplet;
 use super::models::UpdateTappletVersion;
+use super::models::UpdateTappletAudit;
 
 pub struct SqliteStore {
   connection: Arc<Mutex<SqliteConnection>>,
@@ -210,55 +204,6 @@ impl Store<InstalledTapplet, CreateInstalledTapplet, UpdateInstalledTapplet> for
   }
 }
 
-impl<'a> Store<Asset, CreateAsset<'a>, UpdateAsset> for SqliteStore {
-  fn get_all(&mut self) -> Result<Vec<Asset>, Error> {
-    use crate::database::schema::asset::dsl::*;
-
-    asset
-      .load::<Asset>(self.get_connection().deref_mut())
-      .map_err(|_| DatabaseError(FailedToRetrieveData { entity_name: "asset".to_string() }))
-  }
-
-  fn get_by_id(&mut self, asset_id: i32) -> Result<Asset, Error> {
-    use crate::database::schema::asset::dsl::*;
-
-    asset
-      .filter(id.eq(asset_id))
-      .first::<Asset>(self.get_connection().deref_mut())
-      .map_err(|_| DatabaseError(FailedToRetrieveData { entity_name: "asset".to_string() }))
-  }
-
-  fn create(&mut self, item: &CreateAsset) -> Result<Asset, Error> {
-    use crate::database::schema::asset;
-
-    diesel
-      ::insert_into(asset::table)
-      .values(item)
-      .on_conflict_do_nothing()
-      .get_result(self.get_connection().deref_mut())
-      .map_err(|_| DatabaseError(FailedToCreate { entity_name: "asset".to_string() }))
-  }
-
-  fn update(&mut self, old: Asset, new: &UpdateAsset) -> Result<usize, Error> {
-    use crate::database::schema::asset::dsl::*;
-
-    diesel
-      ::update(asset.filter(id.eq(old.id)))
-      .set(new)
-      .execute(self.get_connection().deref_mut())
-      .map_err(|_| DatabaseError(FailedToUpdate { entity_name: "asset".to_string() }))
-  }
-
-  fn delete(&mut self, entity: Asset) -> Result<usize, Error> {
-    use crate::database::schema::asset::dsl::*;
-
-    diesel
-      ::delete(asset.filter(id.eq(entity.id)))
-      .execute(self.get_connection().deref_mut())
-      .map_err(|_| DatabaseError(FailedToDelete { entity_name: "asset".to_string() }))
-  }
-}
-
 impl<'a> Store<TappletVersion, CreateTappletVersion<'a>, UpdateTappletVersion> for SqliteStore {
   fn get_all(&mut self) -> Result<Vec<TappletVersion>, Error> {
     use crate::database::schema::tapplet_version::dsl::*;
@@ -311,6 +256,61 @@ impl<'a> Store<TappletVersion, CreateTappletVersion<'a>, UpdateTappletVersion> f
       ::delete(tapplet_version.filter(id.eq(entity.id)))
       .execute(self.get_connection().deref_mut())
       .map_err(|_| DatabaseError(FailedToDelete { entity_name: "Tapplet version".to_string() }))
+  }
+}
+
+impl<'a> Store<TappletAudit, CreateTappletAudit<'a>, UpdateTappletAudit> for SqliteStore {
+  fn get_all(&mut self) -> Result<Vec<TappletAudit>, Error> {
+    use crate::database::schema::tapplet_audit::dsl::*;
+
+    tapplet_audit
+      .load::<TappletAudit>(self.get_connection().deref_mut())
+      .map_err(|_| DatabaseError(FailedToRetrieveData { entity_name: "Tapplet audit".to_string() }))
+  }
+
+  fn get_by_id(&mut self, tapplet_audit_id: i32) -> Result<TappletAudit, Error> {
+    use crate::database::schema::tapplet_audit::dsl::*;
+
+    tapplet_audit
+      .filter(id.eq(tapplet_audit_id))
+      .first::<TappletAudit>(self.get_connection().deref_mut())
+      .map_err(|_| DatabaseError(FailedToRetrieveData { entity_name: "Tapplet audit".to_string() }))
+  }
+
+  fn create(&mut self, item: &CreateTappletAudit) -> Result<TappletAudit, Error> {
+    use crate::database::schema::tapplet_audit;
+
+    diesel
+      ::insert_into(tapplet_audit::table)
+      .values(item)
+      .on_conflict((tapplet_audit::auditor, tapplet_audit::tapplet_id))
+      .do_update()
+      .set(UpdateTappletAudit::from(item))
+      .get_result(self.get_connection().deref_mut())
+      .map_err(|_|
+        DatabaseError(FailedToCreate {
+          entity_name: "Tapplet audit".to_string(),
+        })
+      )
+  }
+
+  fn update(&mut self, old: TappletAudit, new: &UpdateTappletAudit) -> Result<usize, Error> {
+    use crate::database::schema::tapplet_audit::dsl::*;
+
+    diesel
+      ::update(tapplet_audit.filter(id.eq(old.id)))
+      .set(new)
+      .execute(self.get_connection().deref_mut())
+      .map_err(|_| DatabaseError(FailedToUpdate { entity_name: "Tapplet audit".to_string() }))
+  }
+
+  fn delete(&mut self, entity: TappletAudit) -> Result<usize, Error> {
+    use crate::database::schema::tapplet_audit::dsl::*;
+
+    diesel
+      ::delete(tapplet_audit.filter(id.eq(entity.id)))
+      .execute(self.get_connection().deref_mut())
+      .map_err(|_| DatabaseError(FailedToDelete { entity_name: "Tapplet audit".to_string() }))
   }
 }
 

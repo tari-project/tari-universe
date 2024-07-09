@@ -1,13 +1,6 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    asset (id) {
-        id -> Nullable<Integer>,
-        rel_path -> Text,
-    }
-}
-
-diesel::table! {
     dev_tapplet (id) {
         id -> Nullable<Integer>,
         package_name -> Text,
@@ -29,14 +22,24 @@ diesel::table! {
     tapplet (id) {
         id -> Nullable<Integer>,
         registry_id -> Text,
+        package_name -> Text,
         display_name -> Text,
+        logo_url -> Text,
+        background_url -> Text,
         author_name -> Text,
         author_website -> Text,
         about_summary -> Text,
         about_description -> Text,
         category -> Text,
-        package_name -> Text,
-        image_id -> Nullable<Integer>,
+    }
+}
+
+diesel::table! {
+    tapplet_audit (id) {
+        id -> Nullable<Integer>,
+        tapplet_id -> Nullable<Integer>,
+        auditor -> Text,
+        report_url -> Text,
     }
 }
 
@@ -52,13 +55,6 @@ diesel::table! {
 
 diesel::joinable!(installed_tapplet -> tapplet (tapplet_id));
 diesel::joinable!(installed_tapplet -> tapplet_version (tapplet_version_id));
-diesel::joinable!(tapplet -> asset (image_id));
+diesel::joinable!(tapplet_audit -> tapplet (tapplet_id));
 diesel::joinable!(tapplet_version -> tapplet (tapplet_id));
-
-diesel::allow_tables_to_appear_in_same_query!(
-    asset,
-    dev_tapplet,
-    installed_tapplet,
-    tapplet,
-    tapplet_version,
-);
+diesel::allow_tables_to_appear_in_same_query!(dev_tapplet, installed_tapplet, tapplet, tapplet_audit, tapplet_version);
