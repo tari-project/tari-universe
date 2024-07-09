@@ -21,14 +21,14 @@ pub async fn start_wallet_daemon(
   let wallet_daemon_config_file = wallet_daemon_config_file.to_str().unwrap().to_owned();
 
   let mut cli = Cli::init();
-  cli.common.network = Some(Network::Igor);
+  cli.common.network = Some(Network::LocalNet);
   cli.common.base_path = data_dir_path.to_str().unwrap().to_owned();
   cli.common.config = wallet_daemon_config_file.clone();
   cli.common.log_config = Some(log_config_file.clone());
 
   let cfg = load_configuration(wallet_daemon_config_file, true, &cli).unwrap();
   let mut config = ApplicationConfig::load_from(&cfg).unwrap();
-  config.dan_wallet_daemon.indexer_node_json_rpc_url = "https://indexer-devnet.tari.com/json_rpc".to_string();
+  config.dan_wallet_daemon.indexer_node_json_rpc_url = "http://localhost:18007/json_rpc".to_string();
   config.dan_wallet_daemon.json_rpc_address = SocketAddr::from_str("127.0.0.1:19000").ok(); //TODO: get free port from OS https://github.com/tari-project/tari-universe/issues/70
   config.dan_wallet_daemon.ui_connect_address = Some("0.0.0.0:19000".to_string());
 
