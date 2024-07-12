@@ -81,11 +81,11 @@ fn setup_tari_universe(app: &mut tauri::App) -> Result<(), Box<dyn std::error::E
   let (permission_token, auth_token) = tauri::async_runtime::block_on(handle)?;
   tokens.permission
     .lock()
-    .map_err(|_| error::Error::FailedToObtainPermissionTokenLock())?
+    .map_err(|_| error::Error::FailedToObtainPermissionTokenLock)?
     .replace_range(.., &permission_token);
   tokens.auth
     .lock()
-    .map_err(|_| error::Error::FailedToObtainAuthTokenLock())?
+    .map_err(|_| error::Error::FailedToObtainAuthTokenLock)?
     .replace_range(.., &auth_token);
 
   Ok(())

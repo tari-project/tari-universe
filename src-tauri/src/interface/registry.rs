@@ -25,7 +25,7 @@ pub struct Metadata {
   pub background_url: String,
   pub author: Author,
   pub about: About,
-  pub audits: Vec<Audit>,
+  // pub audits: Vec<Audit>,
   pub category: String,
 }
 

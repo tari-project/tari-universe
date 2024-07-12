@@ -40,7 +40,7 @@ pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), Error> {
   let account_name = "default".to_string();
   let permission_token = tokens.permission
     .lock()
-    .map_err(|_| FailedToObtainPermissionTokenLock())?
+    .map_err(|_| FailedToObtainPermissionTokenLock)?
     .clone();
 
   let handle = tauri::async_runtime::spawn(async move {
@@ -56,7 +56,7 @@ pub async fn get_balances(tokens: State<'_, Tokens>) -> Result<AccountsGetBalanc
   let account_name = "default".to_string();
   let permission_token = tokens.permission
     .lock()
-    .map_err(|_| FailedToObtainPermissionTokenLock())?
+    .map_err(|_| FailedToObtainPermissionTokenLock)?
     .clone();
 
   let handle = tauri::async_runtime::spawn(async move { balances(Some(account_name), permission_token).await });
@@ -73,7 +73,7 @@ pub async fn call_wallet(
 ) -> Result<serde_json::Value, Error> {
   let permission_token = tokens.permission
     .lock()
-    .map_err(|_| FailedToObtainPermissionTokenLock())?
+    .map_err(|_| FailedToObtainPermissionTokenLock)?
     .clone();
   let req_params: serde_json::Value = serde_json::from_str(&params).map_err(|e| JsonParsingError(e))?;
   let method_clone = method.clone();
@@ -107,7 +107,7 @@ pub async fn launch_tapplet(
   let (addr, cancel_token) = handle_start.await??;
   match locked_tokens.insert(installed_tapplet_id.clone(), cancel_token) {
     Some(_) => {
-      return Err(TappletServerError(AlreadyRunning()));
+      return Err(TappletServerError(AlreadyRunning));
     }
     None => {}
   }
@@ -123,7 +123,7 @@ pub async fn close_tapplet(installed_tapplet_id: i32, shutdown_tokens: State<'_,
       lock.remove(&installed_tapplet_id);
     }
     None => {
-      return Err(TappletServerError(TokenInvalid()));
+      return Err(TappletServerError(TokenInvalid));
     }
   }
 
@@ -216,15 +216,15 @@ pub async fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Res
     let inserted_tapplet = store.create(&CreateTapplet::from(tapplet_manifest))?;
     let tapplet_db_id = inserted_tapplet.id;
 
-    for audit_data in tapplet_manifest.metadata.audits.iter() {
-      store.create(
-        &(CreateTappletAudit {
-          tapplet_id: tapplet_db_id,
-          auditor: &audit_data.auditor,
-          report_url: &audit_data.report_url,
-        })
-      )?;
-    }
+    // for audit_data in tapplet_manifest.metadata.audits.iter() {
+    //   store.create(
+    //     &(CreateTappletAudit {
+    //       tapplet_id: tapplet_db_id,
+    //       auditor: &audit_data.auditor,
+    //       report_url: &audit_data.report_url,
+    //     })
+    //   )?;
+    // }
 
     for (version, version_data) in tapplet_manifest.versions.iter() {
       store.create(

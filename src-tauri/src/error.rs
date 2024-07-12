@@ -9,8 +9,10 @@ pub enum Error {
   #[error(transparent)] TappletServerError(#[from] TappletServerError),
   #[error("Tauri error")] TauriError(#[from] tauri::Error),
   #[error(transparent)] JsonParsingError(#[from] serde_json::Error),
-  #[error("Failed to obtain permission token lock")] FailedToObtainPermissionTokenLock(),
-  #[error("Failed to obtain auth token lock")] FailedToObtainAuthTokenLock(),
+  #[error("Failed to parse tapplet version")] VersionParseError,
+  #[error("Failed to find tapplet version")] VersionNotFound,
+  #[error("Failed to obtain permission token lock")] FailedToObtainPermissionTokenLock,
+  #[error("Failed to obtain auth token lock")] FailedToObtainAuthTokenLock,
   #[error("Provider call failed for method: {method} with params: {params}")] ProviderError {
     method: String,
     params: String,
@@ -25,10 +27,10 @@ impl serde::Serialize for Error {
 
 #[derive(Debug, Error)]
 pub enum TappletServerError {
-  #[error("Failed to obtain of local address")] FailedToObtainLocalAddress(),
-  #[error("Failed to start tapplet server")] FailedToStart(),
-  #[error("Tapplet server already running")] AlreadyRunning(),
-  #[error("Token for tapplet server is invalid")] TokenInvalid(),
+  #[error("Failed to obtain of local address")] FailedToObtainLocalAddress,
+  #[error("Failed to start tapplet server")] FailedToStart,
+  #[error("Tapplet server already running")] AlreadyRunning,
+  #[error("Token for tapplet server is invalid")] TokenInvalid,
   #[error("Failed to bind port: {port}")] BindPortError {
     port: String,
   },

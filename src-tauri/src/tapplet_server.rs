@@ -24,13 +24,13 @@ pub async fn serve(app: Router, port: u16) -> Result<(String, CancellationToken)
     .map_err(|_| TappletServerError(BindPortError { port: addr.to_string() }))?;
   let address = listener
     .local_addr()
-    .map_err(|_| TappletServerError(FailedToObtainLocalAddress()))?
+    .map_err(|_| TappletServerError(FailedToObtainLocalAddress))?
     .to_string();
 
   tauri::async_runtime::spawn(async move { axum
       ::serve(listener, app)
       .with_graceful_shutdown(shutdown_signal(cancel_token_clone)).await
-      .map_err(|_| TappletServerError(FailedToStart())) });
+      .map_err(|_| TappletServerError(FailedToStart)) });
   Ok((address, cancel_token))
 }
 
