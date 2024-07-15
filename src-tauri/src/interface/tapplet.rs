@@ -1,11 +1,24 @@
 use serde::Serialize;
 
-use crate::database::models::{ InstalledTapplet, Tapplet, TappletVersion };
+use crate::{ database::models::{ InstalledTapplet, Tapplet, TappletVersion }, error::Error };
 
 #[derive(Serialize)]
 pub struct InstalledTappletWithName {
   pub installed_tapplet: InstalledTapplet,
   pub display_name: String,
+}
+
+pub struct TappletSemver {
+  pub tapplet_version: TappletVersion,
+  pub semver: semver::Version,
+}
+
+impl TryFrom<TappletVersion> for TappletSemver {
+  type Error = Error;
+  fn try_from(value: TappletVersion) -> Result<Self, Self::Error> {
+    let semver = semver::Version::parse(&value.version).map_err(|_| Error::VersionParseError)?;
+    Ok(Self { tapplet_version: value, semver })
+  }
 }
 
 #[derive(Serialize)]

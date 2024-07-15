@@ -78,13 +78,12 @@ pub fn extract_tar(tapplet_path: PathBuf) -> Result<(), Error> {
 pub fn check_extracted_files(tapplet_path: PathBuf) -> Result<bool, Error> {
   let package_dir = tapplet_path.join("package");
   let pkg_json_file_path = package_dir.join("package.json");
-  let manifest_file_path = package_dir.join("tapplet.manifest.json");
   let path = tapplet_path
     .into_os_string()
     .into_string()
     .map_err(|_| IOError(FailedToGetFilePath))?;
 
-  if pkg_json_file_path.exists() && manifest_file_path.exists() {
+  if pkg_json_file_path.exists() {
     Ok(true)
   } else {
     Err(IOError(InvalidUnpackedFiles { path }))

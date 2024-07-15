@@ -8562,6 +8562,7 @@ dependencies = [
  "diesel_migrations",
  "flate2",
  "log4rs",
+ "semver",
  "serde",
  "serde_json",
  "sha1",

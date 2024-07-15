@@ -10,6 +10,7 @@ use crate::database::models::TappletAudit;
 use crate::database::models::{ CreateInstalledTapplet, CreateTapplet, InstalledTapplet, Tapplet, UpdateTapplet };
 use crate::error::{ Error::{ self, DatabaseError }, DatabaseError::* };
 use crate::interface::InstalledTappletWithName;
+use crate::interface::TappletSemver;
 
 use super::models::CreateDevTapplet;
 use super::models::CreateTappletVersion;
@@ -89,12 +90,27 @@ impl SqliteStore {
     use crate::database::schema::tapplet::dsl::*;
     use crate::database::schema::tapplet_version::dsl::*;
 
-    tapplet
+    let boxed_tapplet = tapplet
       .filter(id.eq(registered_tapplet_id))
-      .inner_join(tapplet_version)
-      .select((tapplet::all_columns(), tapplet_version::all_columns()))
-      .first::<(Tapplet, TappletVersion)>(self.get_connection().deref_mut())
-      .map_err(|_| DatabaseError(FailedToRetrieveData { entity_name: "tapplets with version".to_string() }))
+      .first::<Tapplet>(self.get_connection().deref_mut())
+      .map_err(|_| DatabaseError(FailedToRetrieveData { entity_name: "tapplet".to_string() }))?;
+
+    let versions: Vec<TappletVersion> = tapplet_version
+      .filter(tapplet_id.eq(registered_tapplet_id))
+      .load::<TappletVersion>(self.get_connection().deref_mut())
+      .map_err(|_| DatabaseError(FailedToRetrieveData { entity_name: "tapplet version".to_string() }))?;
+
+    let versions = versions
+      .into_iter()
+      .map(|tapp_version| TappletSemver::try_from(tapp_version))
+      .collect::<Result<Vec<TappletSemver>, Error>>()?;
+
+    let newest_version = versions
+      .into_iter()
+      .max_by_key(|ver| ver.semver.clone())
+      .ok_or(Error::VersionNotFound)?;
+
+    return Ok((boxed_tapplet, newest_version.tapplet_version));
   }
 }
 
