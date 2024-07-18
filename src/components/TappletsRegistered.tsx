@@ -15,11 +15,12 @@ import { InstallDesktop } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
 import AddDevTappletDialog from "./AddDevTappletDialog"
 import { RegisteredTapplet } from "@type/tapplet"
-import { useSnackBar } from "../ErrorContext"
+import { useDispatch } from "react-redux"
+import { errorActions } from "../store/error/error.slice"
 
 const useRegisteredTapplets = () => {
   const [tapplets, setTapplets] = useState<RegisteredTapplet[]>([])
-  const { showSnackBar } = useSnackBar()
+  const dispatch = useDispatch()
 
   useEffect(() => {
     const fetchTappletsFromDb = async () => {
@@ -28,7 +29,7 @@ const useRegisteredTapplets = () => {
         const tapplets = await invoke("read_tapp_registry_db")
         setTapplets((tapplets as RegisteredTapplet[]) || [])
       } catch (error) {
-        showSnackBar(error, "error")
+        dispatch(errorActions.showError({ message: error as string }))
       }
     }
 
@@ -46,17 +47,17 @@ const useRegisteredTapplets = () => {
 
 export const TappletsRegistered: React.FC = () => {
   const [registeredTappletsList, fetchTappletsFromRegistry] = useRegisteredTapplets()
-  const { showSnackBar } = useSnackBar()
+  const dispatch = useDispatch()
 
-  async function downloadAndExtract(tappletId: number) {
+  async function downloadAndExtract(tappletId: string) {
     try {
       await invoke("download_and_extract_tapp", { tappletId: tappletId })
     } catch (error) {
-      showSnackBar(error, "error")
+      dispatch(errorActions.showError({ message: error as string }))
     }
   }
 
-  async function validateChecksum(tappletId: number) {
+  async function validateChecksum(tappletId: string) {
     //TODO use it to display the verification process status
     try {
       const isCheckumValid = await invoke("calculate_and_validate_tapp_checksum", {
@@ -64,23 +65,23 @@ export const TappletsRegistered: React.FC = () => {
       })
       console.log("Checksum validation result: ", isCheckumValid) // unused variable causes build failure
     } catch (error) {
-      showSnackBar(error, "error")
+      dispatch(errorActions.showError({ message: error as string }))
     }
   }
 
-  async function installTapplet(tappletId: number) {
+  async function installTapplet(tappletId: string) {
     await downloadAndExtract(tappletId)
     await validateChecksum(tappletId)
   }
 
-  const handleInstall = async (tappletId?: number) => {
+  const handleInstall = async (tappletId?: string) => {
     if (!tappletId) return
     await installTapplet(tappletId)
 
     try {
       await invoke("insert_installed_tapp_db", { tappletId: tappletId })
     } catch (error) {
-      showSnackBar(error, "error")
+      dispatch(errorActions.showError({ message: error as string }))
     }
   }
 

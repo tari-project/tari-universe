@@ -6,11 +6,12 @@ import { Launch, Delete } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
 import { NavLink } from "react-router-dom"
 import { TabKey } from "../views/Tabs"
-import { useSnackBar } from "../ErrorContext"
+import { useDispatch } from "react-redux"
+import { errorActions } from "../store/error/error.slice"
 
 const useInstalledTapplets = () => {
   const [installedTappletsList, setInstalledTappletsList] = useState<InstalledTappletWithName[] | undefined>([])
-  const { showSnackBar } = useSnackBar()
+  const dispatch = useDispatch()
 
   useEffect(() => {
     const fetchTapplets = async () => {
@@ -18,7 +19,7 @@ const useInstalledTapplets = () => {
         const installedTappletsList = await invoke("read_installed_tapp_db")
         setInstalledTappletsList(installedTappletsList as InstalledTappletWithName[] | undefined)
       } catch (error) {
-        showSnackBar(error, "error")
+        dispatch(errorActions.showError({ message: error as string }))
       }
     }
 
@@ -34,7 +35,7 @@ const useInstalledTapplets = () => {
       const installedTappletsList = await invoke("read_installed_tapp_db")
       setInstalledTappletsList(installedTappletsList as InstalledTappletWithName[] | undefined)
     } catch (error) {
-      showSnackBar(error, "error")
+      dispatch(errorActions.showError({ message: error as string }))
     }
   }, [])
 
@@ -43,7 +44,7 @@ const useInstalledTapplets = () => {
 
 const useDevTapplets = () => {
   const [devTappletsList, setDevTappletsList] = useState<DevTapplet[] | undefined>([])
-  const { showSnackBar } = useSnackBar()
+  const dispatch = useDispatch()
 
   useEffect(() => {
     const fetchTapplets = async () => {
@@ -51,7 +52,7 @@ const useDevTapplets = () => {
         const devTappletsList = await invoke("read_dev_tapplets")
         setDevTappletsList(devTappletsList as DevTapplet[] | undefined)
       } catch (error) {
-        showSnackBar(error, "error")
+        dispatch(errorActions.showError({ message: error as string }))
       }
     }
 
@@ -66,7 +67,7 @@ const useDevTapplets = () => {
       const devTappletsList = await invoke("read_dev_tapplets")
       setDevTappletsList(devTappletsList as DevTapplet[] | undefined)
     } catch (error) {
-      showSnackBar(error, "error")
+      dispatch(errorActions.showError({ message: error as string }))
     }
   }, [])
 

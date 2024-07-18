@@ -1,8 +1,9 @@
 import { ReactNode, createContext, useEffect, useRef, useState } from "react"
 import { permissions as walletPermissions, TariPermissions } from "@tariproject/tarijs"
 import { WalletDaemonParameters, WalletDaemonTariProvider } from "@provider/TariUniverseProvider"
-import { useSnackBar } from "./ErrorContext"
 import { useTransactionConfirmation } from "./TransactionConfirmationContext"
+import { useDispatch } from "react-redux"
+import { errorActions } from "./store/error/error.slice"
 
 const { TariPermissionAccountInfo, TariPermissionKeyList, TariPermissionSubstatesRead, TariPermissionTransactionSend } =
   walletPermissions
@@ -28,7 +29,7 @@ interface TariUniverseProviderProps {
 export const TariUniverseContextProvider: React.FC<TariUniverseProviderProps> = ({ children }) => {
   const provider = useRef<WalletDaemonTariProvider | null>(null)
   const [providerState, setProviderState] = useState<WalletDaemonTariProvider | null>(null)
-  const { showSnackBar } = useSnackBar()
+  const dispatch = useDispatch()
   const { showTransactionConfirmation } = useTransactionConfirmation()
 
   useEffect(() => {
@@ -40,13 +41,13 @@ export const TariUniverseContextProvider: React.FC<TariUniverseProviderProps> = 
         provider.current = initProvider
         setProviderState(initProvider)
       })
-      .catch((e) => {
-        showSnackBar(`Failed to initialize provider ${e.message}`, "error")
+      .catch((error) => {
+        dispatch(errorActions.showError({ message: error as string }))
       })
 
     const handleMessage = async (event: any) => {
       if (!provider.current) {
-        showSnackBar("Provider is not initialized yet", "error")
+        dispatch(errorActions.showError({ message: "Provider is not initialized yet" as string }))
         return
       }
 

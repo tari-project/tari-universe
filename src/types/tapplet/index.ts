@@ -1,6 +1,6 @@
 //TODO tauri commands cammelCase to snake
 export type RegisteredTapplet = {
-  id?: number
+  id: string
   registry_id: string
   package_name: string
   display_name: string
@@ -12,9 +12,9 @@ export type RegisteredTapplet = {
 }
 
 export type InstalledTapplet = {
-  id?: number
-  tapplet_id?: number
-  tapplet_version_id?: number
+  id: string
+  tapplet_id: string
+  tapplet_version_id: string
 }
 
 export interface InstalledTappletWithName {
@@ -23,7 +23,7 @@ export interface InstalledTappletWithName {
 }
 
 export interface DevTapplet {
-  id?: number
+  id: string
   package_name: string
   endpoint: string
   tapplet_name: string
@@ -33,8 +33,8 @@ export interface DevTapplet {
 }
 
 export interface TappletVersion {
-  id?: number
-  tapplet_id?: number
+  id: string
+  tapplet_id: string
   version: string
   integrity: string
   registry_url: string
@@ -42,6 +42,7 @@ export interface TappletVersion {
 }
 
 export interface RegisteredTappletWithVersion {
+  id: string
   registered_tapp: RegisteredTapplet
   tapp_version: TappletVersion
 }
@@ -52,8 +53,8 @@ export interface InstalledTappletWithName {
 }
 
 export interface TappletAudit {
-  id?: number;
-  tapplet_id?: number
+  id: string
+  tapplet_id: string
   auditor: string
   report_url: string
 }

@@ -4,20 +4,23 @@ import App from "./App"
 import "./styles.css"
 import { ThemeProvider } from "@emotion/react"
 import { theme } from "./theme"
-import { SnackBarProvider } from "./ErrorContext"
 import { TariUniverseContextProvider } from "./ProviderContext"
 import { TransactionConfirmationProvider } from "./TransactionConfirmationContext"
+import { Provider } from "react-redux"
+import { store } from "./store/store"
+import { ErrorSnackBar } from "./components/ErrorSnackBar"
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <SnackBarProvider>
+  <Provider store={store}>
+    <React.StrictMode>
+      <ThemeProvider theme={theme}>
+        <ErrorSnackBar />
         <TransactionConfirmationProvider>
           <TariUniverseContextProvider>
             <App />
           </TariUniverseContextProvider>
         </TransactionConfirmationProvider>
-      </SnackBarProvider>
-    </ThemeProvider>
-  </React.StrictMode>
+      </ThemeProvider>
+    </React.StrictMode>
+  </Provider>
 )

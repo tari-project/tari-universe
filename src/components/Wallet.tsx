@@ -2,17 +2,18 @@ import { invoke } from "@tauri-apps/api/core"
 import { useState } from "react"
 
 import { Box, Button, Typography } from "@mui/material"
-import { useSnackBar } from "../ErrorContext"
+import { useDispatch } from "react-redux"
+import { errorActions } from "../store/error/error.slice"
 
 export const Wallet: React.FC = () => {
   const [balances, setBalances] = useState({})
-  const { showSnackBar } = useSnackBar()
+  const dispatch = useDispatch()
 
   async function get_free_coins() {
     try {
       await invoke("get_free_coins", {})
     } catch (error) {
-      showSnackBar(error, "error")
+      dispatch(errorActions.showError({ message: error as string }))
     }
   }
 
@@ -20,7 +21,7 @@ export const Wallet: React.FC = () => {
     try {
       setBalances(await invoke("get_balances", {}))
     } catch (error) {
-      showSnackBar(error, "error")
+      dispatch(errorActions.showError({ message: error as string }))
     }
   }
 
