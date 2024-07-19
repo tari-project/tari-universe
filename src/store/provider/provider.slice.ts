@@ -2,7 +2,12 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit"
 import { listenerMiddleware } from "../store.listener"
 import { initializeAction } from "./actions/provider.action"
 import { ProviderStoreInitialState } from "./provider.constants"
-import { InitProviderFailurePayload, InitProviderRequestPayload, InitProviderSuccessPayload } from "./provider.types"
+import {
+  InitProviderFailurePayload,
+  InitProviderRequestPayload,
+  InitProviderSuccessPayload,
+  TransactionRequestPayload,
+} from "./provider.types"
 
 const providerSlice = createSlice({
   name: "provider",
@@ -20,6 +25,14 @@ const providerSlice = createSlice({
     },
 
     initializeFailure: (state, _action: PayloadAction<InitProviderFailurePayload>) => {
+      return state
+    },
+
+    submitTransaction: (state, action: PayloadAction<TransactionRequestPayload>) => {
+      return state
+    },
+
+    rejectTransaction: (state) => {
       return state
     },
   },
