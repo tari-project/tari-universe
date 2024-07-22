@@ -14,23 +14,17 @@ const registeredTappletsSlice = createSlice({
   reducers: {
     initializeRequest: (state, _action: PayloadAction<InitRegisteredTappletsReqPayload>) => {
       state.isFetching = true
-
-      return state
     },
 
     initializeSuccess: (state, action: PayloadAction<InitRegisteredTappletsFailurePayload>) => {
       registeredTappletAdapter.upsertMany(state.registeredTapplets, action.payload.registeredTapplets)
       state.isInitialized = true
       state.isFetching = false
-
-      return state
     },
 
     initializeFailure: (state, _action: PayloadAction<InitRegisteredTappletsSuccessPayload>) => {
       state.isInitialized = false
       state.isFetching = false
-
-      return state
     },
   },
 })

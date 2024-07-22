@@ -19,7 +19,10 @@ export type InitProviderSuccessPayload = {
   provider: WalletDaemonTariProvider
 }
 export type TransactionRequestPayload = {
-  methodName: string
+  methodName: Exclude<keyof WalletDaemonTariProvider, "runOne">
+  id: number
+  args: any[]
+  eventSource: typeof window.postMessage
 }
 export type TransactionFailurePayload = {
   errorMsg: string

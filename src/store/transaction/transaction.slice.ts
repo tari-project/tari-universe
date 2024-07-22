@@ -1,6 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit"
 import { transactionStoreInitialState } from "./transaction.constants"
 import { ShowTransactionPayload } from "./transaction.types"
+import { TransactionRequestPayload } from "../provider/provider.types"
 
 const transactionSlice = createSlice({
   name: "transaction",
@@ -15,7 +16,7 @@ const transactionSlice = createSlice({
     reject: (state) => {
       state.isInProgress = true
     },
-    submit: (state) => {
+    submit: (state, _: PayloadAction<TransactionRequestPayload>) => {
       state.isInProgress = true
     },
     hideDialog: (state) => {

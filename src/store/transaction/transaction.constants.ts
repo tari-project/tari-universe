@@ -4,7 +4,7 @@ import { TransactionStoreState, TransactionData } from "./transaction.types"
 export const transactionAdapter = createEntityAdapter<TransactionData>()
 
 export const transactionStoreInitialState: TransactionStoreState = {
-  methodName: "",
+  methodName: null,
   args: [],
   isInProgress: false,
   isVisible: false,

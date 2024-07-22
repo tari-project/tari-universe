@@ -2,19 +2,31 @@ import { Button, Dialog, DialogActions, DialogContent, DialogContentText, Dialog
 import { useDispatch, useSelector } from "react-redux"
 import { transactionSelector } from "../store/transaction/transaction.selector"
 import { transactionActions } from "../store/transaction/transaction.slice"
+import { errorActions } from "../store/error/error.slice"
 
 export const TransactionConfirmationModal: React.FC = () => {
-  const { methodName, isVisible } = useSelector(transactionSelector.selectTransaction)
+  const { methodName, args, transaction, isVisible } = useSelector(transactionSelector.selectTransaction)
   const dispatch = useDispatch()
 
   const handleClose = async () => {
-    console.log("handleClose")
-    dispatch(transactionActions.hideDialog())
+    dispatch(transactionActions.reject())
   }
 
   const submitTransaction = async () => {
-    console.log("submitTransaction")
-    dispatch(transactionActions.hideDialog())
+    const { id, eventSource } = transaction
+    if (!id || !eventSource || !methodName) {
+      dispatch(errorActions.showError({ message: "Invalid transaction data" }))
+      dispatch(transactionActions.reject())
+      return
+    }
+    dispatch(
+      transactionActions.submit({
+        id,
+        eventSource,
+        methodName,
+        args,
+      })
+    )
   }
 
   return (

@@ -53,7 +53,7 @@ export class WalletDaemonTariProvider implements TariProvider {
     return true
   }
 
-  static async build(params: WalletDaemonParameters): Promise<WalletDaemonTariProvider> {
+  static build(params: WalletDaemonParameters): WalletDaemonTariProvider {
     const allPermissions = new TariPermissions()
     allPermissions.addPermissions(params.permissions)
     allPermissions.addPermissions(params.optionalPermissions)

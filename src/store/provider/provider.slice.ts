@@ -1,40 +1,21 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit"
 import { listenerMiddleware } from "../store.listener"
-import { initializeAction } from "./actions/provider.action"
+import { confirmTransactionAction, initializeAction } from "./actions/provider.action"
 import { ProviderStoreInitialState } from "./provider.constants"
-import {
-  InitProviderFailurePayload,
-  InitProviderRequestPayload,
-  InitProviderSuccessPayload,
-  TransactionRequestPayload,
-} from "./provider.types"
+import { InitProviderFailurePayload, InitProviderRequestPayload, InitProviderSuccessPayload } from "./provider.types"
 
 const providerSlice = createSlice({
   name: "provider",
   initialState: ProviderStoreInitialState,
   reducers: {
-    initializeRequest: (state, _action: PayloadAction<InitProviderRequestPayload>) => {
-      return state
-    },
-
+    initializeRequest: (_, _action: PayloadAction<InitProviderRequestPayload>) => {},
     initializeSuccess: (state, action: PayloadAction<InitProviderSuccessPayload>) => {
       state.provider = action.payload.provider
       state.isInitialized = true
-
-      return state
     },
-
-    initializeFailure: (state, _action: PayloadAction<InitProviderFailurePayload>) => {
-      return state
-    },
-
-    submitTransaction: (state, action: PayloadAction<TransactionRequestPayload>) => {
-      return state
-    },
-
-    rejectTransaction: (state) => {
-      return state
-    },
+    initializeFailure: (_, _action: PayloadAction<InitProviderFailurePayload>) => {},
+    submitTransaction: (_) => {},
+    rejectTransaction: (_) => {},
   },
 })
 
@@ -42,3 +23,4 @@ export const providerActions = providerSlice.actions
 export const providerReducer = providerSlice.reducer
 
 listenerMiddleware.startListening(initializeAction())
+listenerMiddleware.startListening(confirmTransactionAction())
