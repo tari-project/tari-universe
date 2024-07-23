@@ -13,7 +13,7 @@ export const TransactionConfirmationModal: React.FC = () => {
       dispatch(errorActions.showError({ message: "No pending transaction found" }))
       return
     }
-    dispatch(transactionActions.cancelTransaction({ id: transaction.id }))
+    dispatch(transactionActions.cancelTransaction({ transaction }))
   }
 
   const submitTransaction = async () => {

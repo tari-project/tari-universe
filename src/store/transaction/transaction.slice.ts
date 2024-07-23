@@ -6,7 +6,7 @@ import {
   TransactionSuccessPayload,
 } from "./transaction.types"
 import { listenerMiddleware } from "../store.listener"
-import { executeTransactionAction, transactionFailedAction } from "./transaction.action"
+import { cancelTransactionAction, executeTransactionAction, transactionFailedAction } from "./transaction.action"
 
 export const transactionsAdapter = createEntityAdapter<Transaction>()
 
@@ -18,9 +18,9 @@ const transactionSlice = createSlice({
       transactionsAdapter.addOne(state, action.payload.transaction)
     },
     sendTransactionRequest: (_, __: PayloadAction<TransactionRequestPayload>) => {},
-    cancelTransaction: (state, action: PayloadAction<{ id: number }>) => {
+    cancelTransaction: (state, action: PayloadAction<TransactionRequestPayload>) => {
       transactionsAdapter.updateOne(state, {
-        id: action.payload.id,
+        id: action.payload.transaction.id,
         changes: { status: "cancelled" },
       })
     },
@@ -43,4 +43,5 @@ export const transactionActions = transactionSlice.actions
 export const transactionReducer = transactionSlice.reducer
 
 listenerMiddleware.startListening(executeTransactionAction())
+listenerMiddleware.startListening(cancelTransactionAction())
 listenerMiddleware.startListening(transactionFailedAction())

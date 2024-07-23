@@ -6,8 +6,8 @@ export type Transaction = {
   methodName: Exclude<keyof WalletDaemonTariProvider, "runOne">
   args: any[]
   id: number
-  eventSource: () => void
-  eventOrigin: string
+  submit: () => void
+  cancel: () => void
   status: TransactionStatus
 }
 

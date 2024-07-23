@@ -10,7 +10,7 @@ export const executeTransactionAction = () => ({
     action: PayloadAction<TransactionRequestPayload>,
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
-    const { id, eventSource } = action.payload.transaction
+    const { id, submit } = action.payload.transaction
     const state = listenerApi.getState() as RootState
     const provider = state.provider.provider
     const dispatch = listenerApi.dispatch
@@ -21,7 +21,38 @@ export const executeTransactionAction = () => ({
     }
 
     try {
-      eventSource()
+      submit()
+      dispatch(transactionActions.sendTransactionSuccess({ id }))
+    } catch (error) {
+      let message = "Error while executing transaction"
+      if (error instanceof Error) {
+        message = error.message
+      } else if (typeof error === "string") {
+        message = error
+      }
+      dispatch(transactionActions.sendTransactionFailure({ id, errorMsg: message }))
+    }
+  },
+})
+
+export const cancelTransactionAction = () => ({
+  actionCreator: transactionActions.cancelTransaction,
+  effect: async (
+    action: PayloadAction<TransactionRequestPayload>,
+    listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
+  ) => {
+    const { id, cancel } = action.payload.transaction
+    const state = listenerApi.getState() as RootState
+    const provider = state.provider.provider
+    const dispatch = listenerApi.dispatch
+
+    if (!provider) {
+      dispatch(transactionActions.sendTransactionFailure({ id, errorMsg: "Provider not initialized" }))
+      return
+    }
+
+    try {
+      cancel()
       dispatch(transactionActions.sendTransactionSuccess({ id }))
     } catch (error) {
       let message = "Error while executing transaction"

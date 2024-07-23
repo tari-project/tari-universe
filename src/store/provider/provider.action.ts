@@ -23,7 +23,6 @@ export const initializeAction = () => ({
 
       handleMessage = async (event: MessageEvent<TransactionEvent>) => {
         if (!event?.data?.args || !event?.data?.methodName) {
-          console.error("No data in event", event)
           dispatch(errorActions.showError({ message: "No data in event" }))
           return
         }
@@ -33,31 +32,33 @@ export const initializeAction = () => ({
         }
 
         const { methodName, args, id } = event.data
-        if (methodName === "submitTransaction") {
-          const postMsg = async () => {
-            try {
-              const result = await provider.runOne(methodName, args)
-              if (event.source) {
-                event.source.postMessage({ id, result, type: "provider-call" }, { targetOrigin: event.origin })
-              }
-            } catch (error) {
-              dispatch(errorActions.showError({ message: error as string }))
-            }
+        const submit = async () => {
+          const result = await provider.runOne(methodName, args)
+          if (event.source) {
+            event.source.postMessage({ id, result, type: "provider-call" }, { targetOrigin: event.origin })
           }
-          const transaction: Transaction = {
-            eventSource: postMsg,
-            eventOrigin: event.origin,
-            status: "pending",
-            methodName,
-            args,
-            id,
-          }
-          dispatch(transactionActions.addTransaction({ transaction }))
-          return
         }
-
-        const result = await provider.runOne(methodName, args)
-        event.source.postMessage({ id, result, type: "provider-call" }, { targetOrigin: event.origin })
+        const cancel = async () => {
+          if (event.source) {
+            event.source.postMessage(
+              { id, result: {}, resultError: "Transaction was cancelled", type: "provider-call" },
+              { targetOrigin: event.origin }
+            )
+          }
+        }
+        const transaction: Transaction = {
+          submit,
+          cancel,
+          status: "pending",
+          methodName,
+          args,
+          id,
+        }
+        if (methodName === "submitTransaction") {
+          dispatch(transactionActions.addTransaction({ transaction }))
+        } else {
+          dispatch(transactionActions.sendTransactionRequest({ transaction }))
+        }
       }
       window.addEventListener("message", handleMessage, false)
 
