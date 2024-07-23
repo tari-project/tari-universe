@@ -1,20 +1,27 @@
 import { WalletDaemonTariProvider } from "@provider/TariUniverseProvider"
 
-export type TransactionStoreState = {
-  methodName: Exclude<keyof WalletDaemonTariProvider, "runOne"> | null
-  args: any[]
-  isVisible: boolean
-  isInProgress: boolean
-  transaction: TransactionData
-}
+export type TransactionStatus = "pending" | "success" | "failure" | "cancelled"
 
-export type TransactionData = {
-  id: number
-  eventSource: typeof window.postMessage | null
-}
-
-export type ShowTransactionPayload = {
+export type Transaction = {
   methodName: Exclude<keyof WalletDaemonTariProvider, "runOne">
   args: any[]
-  transaction: TransactionData
+  id: number
+  eventSource: () => void
+  eventOrigin: string
+  status: TransactionStatus
+}
+
+export type TransactionStoreState = {
+  transactions: Transaction[]
+}
+
+export type TransactionRequestPayload = {
+  transaction: Transaction
+}
+export type TransactionFailurePayload = {
+  errorMsg: string
+  id: number
+}
+export type TransactionSuccessPayload = {
+  id: number
 }

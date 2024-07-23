@@ -1,30 +1,46 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit"
-import { transactionStoreInitialState } from "./transaction.constants"
-import { ShowTransactionPayload } from "./transaction.types"
-import { TransactionRequestPayload } from "../provider/provider.types"
+import { PayloadAction, createEntityAdapter, createSlice } from "@reduxjs/toolkit"
+import {
+  Transaction,
+  TransactionFailurePayload,
+  TransactionRequestPayload,
+  TransactionSuccessPayload,
+} from "./transaction.types"
+import { listenerMiddleware } from "../store.listener"
+import { executeTransactionAction, transactionFailedAction } from "./transaction.action"
+
+export const transactionsAdapter = createEntityAdapter<Transaction>()
 
 const transactionSlice = createSlice({
   name: "transaction",
-  initialState: transactionStoreInitialState,
+  initialState: transactionsAdapter.getInitialState(),
   reducers: {
-    showDialog: (state, action: PayloadAction<ShowTransactionPayload>) => {
-      state.isVisible = true
-      state.methodName = action.payload.methodName
-      state.args = action.payload.args
-      state.transaction = action.payload.transaction
+    addTransaction: (state, action: PayloadAction<TransactionRequestPayload>) => {
+      transactionsAdapter.addOne(state, action.payload.transaction)
     },
-    reject: (state) => {
-      state.isInProgress = true
+    sendTransactionRequest: (_, __: PayloadAction<TransactionRequestPayload>) => {},
+    cancelTransaction: (state, action: PayloadAction<{ id: number }>) => {
+      transactionsAdapter.updateOne(state, {
+        id: action.payload.id,
+        changes: { status: "cancelled" },
+      })
     },
-    submit: (state, _: PayloadAction<TransactionRequestPayload>) => {
-      state.isInProgress = true
+    sendTransactionSuccess: (state, action: PayloadAction<TransactionSuccessPayload>) => {
+      transactionsAdapter.updateOne(state, {
+        id: action.payload.id,
+        changes: { status: "success" },
+      })
     },
-    hideDialog: (state) => {
-      state.isInProgress = false
-      state.isVisible = false
+    sendTransactionFailure: (state, action: PayloadAction<TransactionFailurePayload>) => {
+      transactionsAdapter.updateOne(state, {
+        id: action.payload.id,
+        changes: { status: "failure" },
+      })
     },
   },
 })
 
 export const transactionActions = transactionSlice.actions
 export const transactionReducer = transactionSlice.reducer
+
+listenerMiddleware.startListening(executeTransactionAction())
+listenerMiddleware.startListening(transactionFailedAction())

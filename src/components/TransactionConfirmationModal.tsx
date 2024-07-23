@@ -5,35 +5,34 @@ import { transactionActions } from "../store/transaction/transaction.slice"
 import { errorActions } from "../store/error/error.slice"
 
 export const TransactionConfirmationModal: React.FC = () => {
-  const { methodName, args, transaction, isVisible } = useSelector(transactionSelector.selectTransaction)
+  const transaction = useSelector(transactionSelector.getPendingTransaction)
   const dispatch = useDispatch()
 
   const handleClose = async () => {
-    dispatch(transactionActions.reject())
+    if (!transaction) {
+      dispatch(errorActions.showError({ message: "No pending transaction found" }))
+      return
+    }
+    dispatch(transactionActions.cancelTransaction({ id: transaction.id }))
   }
 
   const submitTransaction = async () => {
-    const { id, eventSource } = transaction
-    if (!id || !eventSource || !methodName) {
-      dispatch(errorActions.showError({ message: "Invalid transaction data" }))
-      dispatch(transactionActions.reject())
+    if (!transaction) {
+      dispatch(errorActions.showError({ message: "No pending transaction found" }))
       return
     }
     dispatch(
-      transactionActions.submit({
-        id,
-        eventSource,
-        methodName,
-        args,
+      transactionActions.sendTransactionRequest({
+        transaction,
       })
     )
   }
 
   return (
-    <Dialog open={isVisible} maxWidth="sm" fullWidth>
+    <Dialog open={!!transaction} maxWidth="sm" fullWidth>
       <DialogTitle textAlign="center">Transaction confirmation</DialogTitle>
       <DialogContent>
-        <DialogContentText>Method name: {methodName}</DialogContentText>
+        <DialogContentText>Method name: {transaction?.methodName}</DialogContentText>
         <DialogContentText>TODO: display transaction simulation result</DialogContentText>
       </DialogContent>
       <DialogActions>
