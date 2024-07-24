@@ -9,8 +9,8 @@ export type TappletStoreState = {
 
 export type InitRegisteredTappletsReqPayload = {}
 export type InitRegisteredTappletsSuccessPayload = {
-  errorMsg: string
+  registeredTapplets: RegisteredTapplet[]
 }
 export type InitRegisteredTappletsFailurePayload = {
-  registeredTapplets: RegisteredTapplet[]
+  errorMsg: string
 }

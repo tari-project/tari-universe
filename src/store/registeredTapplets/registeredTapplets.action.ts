@@ -1,6 +1,6 @@
 import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
-import { registeredTappletsActions } from "../registeredTapplets.slice"
-import { InitRegisteredTappletsReqPayload } from "../registeredTapplets.types"
+import { registeredTappletsActions } from "./registeredTapplets.slice"
+import { InitRegisteredTappletsReqPayload } from "./registeredTapplets.types"
 import { invoke } from "@tauri-apps/api/core"
 import { RegisteredTapplet } from "@type/tapplet"
 

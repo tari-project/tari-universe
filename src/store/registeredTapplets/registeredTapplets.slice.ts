@@ -1,28 +1,34 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit"
+import { PayloadAction, createEntityAdapter, createSlice } from "@reduxjs/toolkit"
+import { RegisteredTapplet } from "@type/tapplet"
 import { listenerMiddleware } from "../store.listener"
-import { initializeAction } from "./actions/registeredTapplets.action"
-import { TappletStoreInitialState, registeredTappletAdapter } from "./registeredTapplets.constants"
+import { initializeAction } from "./registeredTapplets.action"
 import {
   InitRegisteredTappletsReqPayload,
   InitRegisteredTappletsSuccessPayload,
   InitRegisteredTappletsFailurePayload,
 } from "./registeredTapplets.types"
 
+export const registeredTappletAdapter = createEntityAdapter<RegisteredTapplet>()
+
 const registeredTappletsSlice = createSlice({
   name: "registeredTapplets",
-  initialState: TappletStoreInitialState,
+  initialState: {
+    isInitialized: false,
+    isFetching: false,
+    registeredTapplets: registeredTappletAdapter.getInitialState(),
+  },
   reducers: {
     initializeRequest: (state, _action: PayloadAction<InitRegisteredTappletsReqPayload>) => {
       state.isFetching = true
     },
 
-    initializeSuccess: (state, action: PayloadAction<InitRegisteredTappletsFailurePayload>) => {
+    initializeSuccess: (state, action: PayloadAction<InitRegisteredTappletsSuccessPayload>) => {
       registeredTappletAdapter.upsertMany(state.registeredTapplets, action.payload.registeredTapplets)
       state.isInitialized = true
       state.isFetching = false
     },
 
-    initializeFailure: (state, _action: PayloadAction<InitRegisteredTappletsSuccessPayload>) => {
+    initializeFailure: (state, _action: PayloadAction<InitRegisteredTappletsFailurePayload>) => {
       state.isInitialized = false
       state.isFetching = false
     },

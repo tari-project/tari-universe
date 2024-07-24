@@ -4,10 +4,14 @@ import { providerReducer } from "./provider/provider.slice"
 import { listenerMiddleware } from "./store.listener"
 import { errorReducer } from "./error/error.slice"
 import { transactionReducer } from "./transaction/transaction.slice"
+import { installedTappletsReducer } from "./installedTapplets/installedTapplets.slice"
+import { devTappletsReducer } from "./devTapplets/devTapplets.slice"
 
 export const store = configureStore({
   reducer: {
     registeredTapplets: registeredTappletsReducer,
+    installedTapplets: installedTappletsReducer,
+    devTapplets: devTappletsReducer,
     provider: providerReducer,
     error: errorReducer,
     transaction: transactionReducer,

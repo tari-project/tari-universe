@@ -1,30 +1,18 @@
 import { createSelector } from "@reduxjs/toolkit"
 import { RootState } from "../store"
-import { registeredTappletAdapter } from "./registeredTapplets.constants"
+import { registeredTappletAdapter } from "./registeredTapplets.slice"
 
-const selectAccessToken = createSelector(
-  [(state: RootState) => state?.registeredTapplets?.registeredTapplets],
-  (state) => (id?: string) => {
-    if (!id) return null
+const registeredTappletsStateSelector = (state: RootState) => state.registeredTapplets
 
-    const token = registeredTappletAdapter.getSelectors().selectById(state, id)
-
-    return token
-  }
+export const registeredTappletsSelectors = registeredTappletAdapter.getSelectors<RootState>(
+  (state) => state.registeredTapplets.registeredTapplets
 )
 
-const isInitialized = createSelector(
-  (state: RootState) => state.registeredTapplets.isInitialized,
-  (isInitialized) => isInitialized
-)
+const isInitialized = createSelector([registeredTappletsStateSelector], (state) => state.isInitialized)
 
-const isFetching = createSelector(
-  (state: RootState) => state.registeredTapplets.isFetching,
-  (isFetching) => isFetching
-)
+const isFetching = createSelector([registeredTappletsStateSelector], (state) => state.isFetching)
 
-export const tappletSelector = {
-  selectAccessToken,
+export const registeredTappletSelector = {
   isInitialized,
   isFetching,
 }

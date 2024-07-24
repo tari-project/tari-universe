@@ -11,12 +11,16 @@ import { useEffect } from "react"
 import { useDispatch } from "react-redux"
 import { providerActions } from "./store/provider/provider.slice"
 import { registeredTappletsActions } from "./store/registeredTapplets/registeredTapplets.slice"
+import { installedTappletsActions } from "./store/installedTapplets/installedTapplets.slice"
+import { devTappletsActions } from "./store/devTapplets/devTapplets.slice"
 
 function App() {
   const dispatch = useDispatch()
   useEffect(() => {
     dispatch(providerActions.initializeRequest({}))
     dispatch(registeredTappletsActions.initializeRequest({}))
+    dispatch(installedTappletsActions.initializeRequest({}))
+    dispatch(devTappletsActions.initializeRequest({}))
   }, [])
   return (
     <Box display="flex" flexDirection="column" height="100%">

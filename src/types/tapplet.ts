@@ -12,7 +12,6 @@ export type RegisteredTapplet = {
 }
 
 export type InstalledTapplet = {
-  id: string
   tapplet_id: string
   tapplet_version_id: string
 }
@@ -45,11 +44,6 @@ export interface RegisteredTappletWithVersion {
   id: string
   registered_tapp: RegisteredTapplet
   tapp_version: TappletVersion
-}
-
-export interface InstalledTappletWithName {
-  installed_tapplet: InstalledTapplet
-  display_name: string
 }
 
 export interface TappletAudit {
