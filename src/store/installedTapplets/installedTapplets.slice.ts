@@ -30,7 +30,7 @@ const installedTappletsSlice = createSlice({
       state.isFetching = true
     },
     initializeSuccess: (state, action: PayloadAction<InitInstalledTappletsSuccessPayload>) => {
-      installedTappletAdapter.upsertMany(state.installedTapplets, action.payload.installedTapplets)
+      installedTappletAdapter.setAll(state.installedTapplets, action.payload.installedTapplets)
       state.isInitialized = true
       state.isFetching = false
     },

@@ -28,10 +28,7 @@ export const TappletsInstalled: React.FC = () => {
               </ListItemAvatar>
               <ListItemText primary={item.display_name} />
               <IconButton aria-label="launch" style={{ marginRight: 10 }}>
-                <NavLink
-                  to={`/${TabKey.ACTIVE_TAPPLET}/${item.installed_tapplet.tapplet_id}`}
-                  style={{ display: "contents" }}
-                >
+                <NavLink to={`/${TabKey.ACTIVE_TAPPLET}/${item.installed_tapplet.id}`} style={{ display: "contents" }}>
                   <Launch color="primary" />
                 </NavLink>
               </IconButton>

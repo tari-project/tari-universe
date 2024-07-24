@@ -12,6 +12,7 @@ export type RegisteredTapplet = {
 }
 
 export type InstalledTapplet = {
+  id: number
   tapplet_id: string
   tapplet_version_id: string
 }

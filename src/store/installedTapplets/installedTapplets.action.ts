@@ -31,8 +31,8 @@ export const deleteInstalledTappletAction = () => ({
   ) => {
     const item = action.payload.item
     try {
-      await invoke("delete_installed_tapp", { tappletId: item.installed_tapplet.tapplet_id })
-      await invoke("delete_installed_tapp_db", { tappletId: item.installed_tapplet.tapplet_id })
+      await invoke("delete_installed_tapp", { tappletId: item.installed_tapplet.id })
+      await invoke("delete_installed_tapp_db", { tappletId: item.installed_tapplet.id })
 
       listenerApi.dispatch(installedTappletsActions.deleteInstalledTappletSuccess({}))
       listenerApi.dispatch(installedTappletsActions.initializeRequest({}))

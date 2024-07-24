@@ -24,7 +24,7 @@ export type DeleteDevTappletFailurePayload = {
 }
 
 export type AddDevTappletReqPayload = {
-  tappletId: string
+  endpoint: string
 }
 export type AddDevTappletSuccessPayload = {}
 export type AddDevTappletFailurePayload = {

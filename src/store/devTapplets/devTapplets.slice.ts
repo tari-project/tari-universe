@@ -28,7 +28,7 @@ const devTappletsSlice = createSlice({
       state.isFetching = true
     },
     initializeSuccess: (state, action: PayloadAction<InitDevTappletsSuccessPayload>) => {
-      devTappletAdapter.upsertMany(state.devTapplets, action.payload.devTapplets)
+      devTappletAdapter.setAll(state.devTapplets, action.payload.devTapplets)
       state.isInitialized = true
       state.isFetching = false
     },

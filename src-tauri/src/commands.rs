@@ -94,9 +94,7 @@ pub async fn launch_tapplet(
   let mut locked_tokens = shutdown_tokens.0.lock().await;
   let mut store = SqliteStore::new(db_connection.0.clone());
 
-  let (_installed_tapp, registered_tapp, tapp_version) = store
-    .get_installed_tapplet_full_by_id(installed_tapplet_id)
-    .unwrap();
+  let (_installed_tapp, registered_tapp, tapp_version) = store.get_installed_tapplet_full_by_id(installed_tapplet_id)?;
 
   // get download path
   let tapplet_path = get_tapp_download_path(registered_tapp.registry_id, tapp_version.version, app_handle).unwrap();

@@ -23,7 +23,7 @@ const registeredTappletsSlice = createSlice({
     },
 
     initializeSuccess: (state, action: PayloadAction<InitRegisteredTappletsSuccessPayload>) => {
-      registeredTappletAdapter.upsertMany(state.registeredTapplets, action.payload.registeredTapplets)
+      registeredTappletAdapter.setAll(state.registeredTapplets, action.payload.registeredTapplets)
       state.isInitialized = true
       state.isFetching = false
     },
