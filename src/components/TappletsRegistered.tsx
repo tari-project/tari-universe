@@ -36,7 +36,7 @@ export const TappletsRegistered: React.FC = () => {
       </Typography>
       {registeredTapplets.length ?? 0 > 0 ? (
         <List sx={{ width: "100%", minWidth: 500 }}>
-          {Object.values(registeredTapplets).map((item) => (
+          {registeredTapplets.map((item) => (
             <ListItem key={item.package_name} sx={{ paddingTop: 2 }}>
               <ListItemAvatar>
                 <Avatar src={tariLogo} />
