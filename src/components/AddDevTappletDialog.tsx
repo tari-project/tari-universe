@@ -6,20 +6,22 @@ import DialogActions from "@mui/material/DialogActions"
 import DialogContent from "@mui/material/DialogContent"
 import DialogContentText from "@mui/material/DialogContentText"
 import DialogTitle from "@mui/material/DialogTitle"
-import { invoke } from "@tauri-apps/api/core"
+import { devTappletsActions } from "../store/devTapplets/devTapplets.slice"
+import { useDispatch } from "react-redux"
 
 export default function AddDevTappletDialog() {
   const [open, setOpen] = useState(false)
   const [hasError, setHasError] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
+  const dispatch = useDispatch()
 
-  const onSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
+  const onSubmitHandler = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const formJson = Object.fromEntries((formData as any).entries())
     const endpoint = formJson.endpoint
     try {
-      await invoke("add_dev_tapplet", { endpoint })
+      dispatch(devTappletsActions.addDevTappletRequest({ endpoint }))
       handleClose()
     } catch (error) {
       setHasError(true)

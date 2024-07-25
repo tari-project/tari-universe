@@ -1,5 +1,6 @@
-import { useContext, useEffect, useRef } from "react"
-import { TariUniverseProviderContext } from "../ProviderContext"
+import { useEffect, useRef } from "react"
+import { useSelector } from "react-redux"
+import { providerSelector } from "../store/provider/provider.selector"
 
 type TappletProps = {
   source: string
@@ -7,7 +8,7 @@ type TappletProps = {
 
 export const Tapplet: React.FC<TappletProps> = ({ source }) => {
   const tappletRef = useRef<HTMLIFrameElement | null>(null)
-  const provider = useContext(TariUniverseProviderContext)
+  const provider = useSelector(providerSelector.selectProvider)
 
   function sendWindowSize() {
     if (tappletRef.current) {

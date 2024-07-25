@@ -2,13 +2,14 @@ import { Box } from "@mui/material"
 import { useLocation } from "react-router-dom"
 import { DevTapplet } from "@type/tapplet"
 import { useEffect, useState } from "react"
-import { useSnackBar } from "../ErrorContext"
 import { Tapplet } from "./Tapplet"
+import { useDispatch } from "react-redux"
+import { errorActions } from "../store/error/error.slice"
 
 export function ActiveDevTapplet() {
   let { state }: { state: DevTapplet } = useLocation()
   const [isVerified, setIsVerified] = useState<boolean>(false)
-  const { showSnackBar } = useSnackBar()
+  const dispatch = useDispatch()
 
   useEffect(() => {
     const fetchTappletManifest = async () => {
@@ -18,13 +19,18 @@ export function ActiveDevTapplet() {
         if (manifest?.id === state?.package_name) {
           setIsVerified(true)
         } else {
-          showSnackBar(
-            `Tapplet manifest does not match package name. Expected: ${state?.package_name} Received: ${manifest?.id} from: ${state?.endpoint}/tapplet.manifest.json`,
-            "error"
+          dispatch(
+            errorActions.showError({
+              message: `Tapplet manifest does not match package name. Expected: ${state?.package_name} Received: ${manifest?.id} from: ${state?.endpoint}/tapplet.manifest.json`,
+            })
           )
         }
       } catch (error) {
-        showSnackBar(`Error fetching tapplet manifest: ${error}`, "error")
+        dispatch(
+          errorActions.showError({
+            message: `Error fetching tapplet manifest: ${error}`,
+          })
+        )
       }
     }
 
