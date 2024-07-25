@@ -15,7 +15,7 @@ export default function AddDevTappletDialog() {
   const [errorMsg, setErrorMsg] = useState("")
   const dispatch = useDispatch()
 
-  const onSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
+  const onSubmitHandler = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const formJson = Object.fromEntries((formData as any).entries())

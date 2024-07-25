@@ -2,7 +2,6 @@ import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "
 import { registeredTappletsActions } from "./registeredTapplets.slice"
 import { InitRegisteredTappletsReqPayload } from "./registeredTapplets.types"
 import { invoke } from "@tauri-apps/api/core"
-import { RegisteredTapplet } from "@type/tapplet"
 
 export const initializeAction = () => ({
   actionCreator: registeredTappletsActions.initializeRequest,
@@ -12,7 +11,7 @@ export const initializeAction = () => ({
   ) => {
     try {
       await invoke("fetch_tapplets")
-      const registeredTapplets = (await invoke("read_tapp_registry_db")) as RegisteredTapplet[]
+      const registeredTapplets = await invoke("read_tapp_registry_db")
       listenerApi.dispatch(registeredTappletsActions.initializeSuccess({ registeredTapplets }))
     } catch (error) {
       listenerApi.dispatch(registeredTappletsActions.initializeFailure({ errorMsg: error as string }))

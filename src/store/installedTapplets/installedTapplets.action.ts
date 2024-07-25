@@ -15,7 +15,7 @@ export const initializeAction = () => ({
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
     try {
-      const installedTapplets: InstalledTappletWithName[] = await invoke("read_installed_tapp_db")
+      const installedTapplets = await invoke("read_installed_tapp_db")
       listenerApi.dispatch(installedTappletsActions.initializeSuccess({ installedTapplets }))
     } catch (error) {
       listenerApi.dispatch(installedTappletsActions.initializeFailure({ errorMsg: error as string }))

@@ -2,7 +2,6 @@ import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "
 import { devTappletsActions } from "./devTapplets.slice"
 import { AddDevTappletReqPayload, DeleteDevTappletReqPayload, InitDevTappletsReqPayload } from "./devTapplets.types"
 import { invoke } from "@tauri-apps/api/core"
-import { DevTapplet } from "@type/tapplet"
 
 export const initializeAction = () => ({
   actionCreator: devTappletsActions.initializeRequest,
@@ -11,7 +10,7 @@ export const initializeAction = () => ({
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
     try {
-      const devTapplets = (await invoke("read_dev_tapplets")) as DevTapplet[]
+      const devTapplets = await invoke("read_dev_tapplets")
       listenerApi.dispatch(devTappletsActions.initializeSuccess({ devTapplets }))
     } catch (error) {
       listenerApi.dispatch(devTappletsActions.initializeFailure({ errorMsg: error as string }))
