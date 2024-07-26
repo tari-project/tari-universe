@@ -5,7 +5,6 @@ import {
   DeleteInstalledTappletReqPayload,
   InitInstalledTappletsReqPayload,
 } from "./installedTapplets.types"
-import { InstalledTappletWithName } from "@type/tapplet"
 import { invoke } from "@tauri-apps/api/core"
 
 export const initializeAction = () => ({

@@ -46,21 +46,30 @@ pub trait Store<T, U, G> {
 impl SqliteStore {
   pub fn get_installed_tapplets_with_display_name(&mut self) -> Result<Vec<InstalledTappletWithName>, Error> {
     use crate::database::schema::installed_tapplet::dsl::*;
-    use crate::database::schema::tapplet;
+    use crate::database::schema::tapplet::dsl::*;
+    use crate::database::schema::tapplet_version::dsl::*;
 
-    let tapplets = installed_tapplet
-      .inner_join(tapplet::table)
-      .select((installed_tapplet::all_columns(), tapplet::display_name))
-      .load::<(InstalledTapplet, String)>(self.get_connection().deref_mut())
-      .map_err(|_| FailedToRetrieveData { entity_name: "installed tapplet".to_string() })?;
+    let tapplets: Vec<(InstalledTapplet, Tapplet, TappletVersion)> = installed_tapplet
+      .inner_join(tapplet)
+      .inner_join(tapplet_version)
+      .select((installed_tapplet::all_columns(), tapplet::all_columns(), tapplet_version::all_columns()))
+      .load::<(InstalledTapplet, Tapplet, TappletVersion)>(self.get_connection().deref_mut())
+      .map_err(|_| DatabaseError(FailedToRetrieveData { entity_name: "installed tapplet".to_string() }))?;
 
     let result = tapplets
       .into_iter()
-      .map(|(tapplet, display_name)| InstalledTappletWithName {
-        installed_tapplet: tapplet,
-        display_name,
+      .map(|(installed_tapp, tapp, tapp_version)| {
+        let test1 = self.get_registered_tapplet_with_version(tapp.id.unwrap()).unwrap();
+
+        return InstalledTappletWithName {
+          installed_tapplet: installed_tapp,
+          display_name: tapp.display_name,
+          installed_version: tapp_version.version,
+          latest_version: test1.1.version,
+        };
       })
       .collect();
+
     Ok(result)
   }
 

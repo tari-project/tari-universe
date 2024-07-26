@@ -20,6 +20,8 @@ export type InstalledTapplet = {
 export interface InstalledTappletWithName {
   installed_tapplet: InstalledTapplet
   display_name: string
+  installed_veresion: string
+  latest_version: string
 }
 
 export interface DevTapplet {

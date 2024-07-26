@@ -13,6 +13,7 @@ export const TappletsInstalled: React.FC = () => {
   const installedTapplets = useSelector(installedTappletsSelectors.selectAll)
   const devTapplets = useSelector(devTappletsSelectors.selectAll)
   const dispatch = useDispatch()
+  console.log(installedTapplets)
 
   return (
     <Box marginX="auto" mt={4}>
