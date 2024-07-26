@@ -7,6 +7,7 @@ import {
   UpdateInstalledTappletReqPayload,
 } from "./installedTapplets.types"
 import { invoke } from "@tauri-apps/api/core"
+import { RootState } from "../store"
 
 export const initializeAction = () => ({
   actionCreator: installedTappletsActions.initializeRequest,
@@ -75,8 +76,27 @@ export const updateInstalledTappletAction = () => ({
       listenerApi.dispatch(
         installedTappletsActions.deleteInstalledTappletRequest({ tappletId: item.installed_tapplet.id })
       )
-      const tappletDeleted = createAction(installedTappletsActions.deleteInstalledTappletSuccess.type)
-      await listenerApi.take(tappletDeleted.match, 1000)
+      const fetchedTapplets = createAction(installedTappletsActions.initializeSuccess.type)
+      await listenerApi.condition((action, currentState, previousState) => {
+        const { installedTapplets } = currentState as RootState
+        const { installedTapplets: previousInstalledTapplets } = previousState as RootState
+
+        const previousInstalledTapplet =
+          previousInstalledTapplets.installedTapplets.entities[item.installed_tapplet.tapplet_id]
+        const currentInstalledTapplet = installedTapplets.installedTapplets.entities[item.installed_tapplet.tapplet_id]
+
+        if (action.type !== fetchedTapplets.type) {
+          return false
+        }
+
+        if (previousInstalledTapplet && !currentInstalledTapplet) {
+          if (previousInstalledTapplet.installed_version === item.installed_version) {
+            return true
+          }
+        }
+
+        return false
+      }, 1000)
       listenerApi.dispatch(
         installedTappletsActions.addInstalledTappletRequest({ tappletId: item.installed_tapplet.tapplet_id })
       )

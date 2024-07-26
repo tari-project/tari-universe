@@ -114,12 +114,12 @@ impl SqliteStore {
       .map(|tapp_version| TappletSemver::try_from(tapp_version))
       .collect::<Result<Vec<TappletSemver>, Error>>()?;
 
-    let newest_version = versions
+    let latest_version = versions
       .into_iter()
       .max_by_key(|ver| ver.semver.clone())
       .ok_or(Error::VersionNotFound)?;
 
-    return Ok((boxed_tapplet, newest_version.tapplet_version));
+    return Ok((boxed_tapplet, latest_version.tapplet_version));
   }
 }
 
