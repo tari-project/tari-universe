@@ -1,9 +1,10 @@
-import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
+import { createAction, ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
 import { installedTappletsActions } from "./installedTapplets.slice"
 import {
   AddInstalledTappletReqPayload,
   DeleteInstalledTappletReqPayload,
   InitInstalledTappletsReqPayload,
+  UpdateInstalledTappletReqPayload,
 } from "./installedTapplets.types"
 import { invoke } from "@tauri-apps/api/core"
 
@@ -28,10 +29,10 @@ export const deleteInstalledTappletAction = () => ({
     action: PayloadAction<DeleteInstalledTappletReqPayload>,
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
-    const item = action.payload.item
+    const tappletId = action.payload.tappletId
     try {
-      await invoke("delete_installed_tapp", { tappletId: item.installed_tapplet.id })
-      await invoke("delete_installed_tapp_db", { tappletId: item.installed_tapplet.id })
+      await invoke("delete_installed_tapp", { tappletId })
+      await invoke("delete_installed_tapp_db", { tappletId })
 
       listenerApi.dispatch(installedTappletsActions.deleteInstalledTappletSuccess({}))
       listenerApi.dispatch(installedTappletsActions.initializeRequest({}))
@@ -57,6 +58,28 @@ export const addInstalledTappletAction = () => ({
       await invoke("insert_installed_tapp_db", { tappletId })
       listenerApi.dispatch(installedTappletsActions.addInstalledTappletSuccess({}))
       listenerApi.dispatch(installedTappletsActions.initializeRequest({}))
+    } catch (error) {
+      listenerApi.dispatch(installedTappletsActions.addInstalledTappletFailure({ errorMsg: error as string }))
+    }
+  },
+})
+
+export const updateInstalledTappletAction = () => ({
+  actionCreator: installedTappletsActions.updateInstalledTappletRequest,
+  effect: async (
+    action: PayloadAction<UpdateInstalledTappletReqPayload>,
+    listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
+  ) => {
+    const item = action.payload.item
+    try {
+      listenerApi.dispatch(
+        installedTappletsActions.deleteInstalledTappletRequest({ tappletId: item.installed_tapplet.id })
+      )
+      const tappletDeleted = createAction(installedTappletsActions.deleteInstalledTappletSuccess.type)
+      await listenerApi.take(tappletDeleted.match, 1000)
+      listenerApi.dispatch(
+        installedTappletsActions.addInstalledTappletRequest({ tappletId: item.installed_tapplet.tapplet_id })
+      )
     } catch (error) {
       listenerApi.dispatch(installedTappletsActions.addInstalledTappletFailure({ errorMsg: error as string }))
     }

@@ -1,5 +1,5 @@
 import { Avatar, Box, IconButton, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material"
-import { Launch, Delete } from "@mui/icons-material"
+import { Launch, Delete, Update } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
 import { NavLink } from "react-router-dom"
 import { TabKey } from "../views/Tabs"
@@ -13,8 +13,6 @@ export const TappletsInstalled: React.FC = () => {
   const installedTapplets = useSelector(installedTappletsSelectors.selectAll)
   const devTapplets = useSelector(devTappletsSelectors.selectAll)
   const dispatch = useDispatch()
-  console.log(installedTapplets)
-
   return (
     <Box marginX="auto" mt={4}>
       <Typography variant="h4" pt={6} textAlign="center">
@@ -32,10 +30,23 @@ export const TappletsInstalled: React.FC = () => {
                 <Launch color="primary" />
               </NavLink>
             </IconButton>
+            {item.installed_version !== item.latest_version && (
+              <IconButton
+                aria-label="update"
+                style={{ marginRight: 10 }}
+                onClick={() => dispatch(installedTappletsActions.updateInstalledTappletRequest({ item }))}
+              >
+                <Update color="primary" />
+              </IconButton>
+            )}
             <IconButton
               aria-label="delete"
               style={{ marginRight: 10 }}
-              onClick={() => dispatch(installedTappletsActions.deleteInstalledTappletRequest({ item }))}
+              onClick={() =>
+                dispatch(
+                  installedTappletsActions.deleteInstalledTappletRequest({ tappletId: item.installed_tapplet.id })
+                )
+              }
             >
               <Delete color="primary" />
             </IconButton>

@@ -12,7 +12,7 @@ export type RegisteredTapplet = {
 }
 
 export type InstalledTapplet = {
-  id: number
+  id: string
   tapplet_id: string
   tapplet_version_id: string
 }
@@ -20,7 +20,7 @@ export type InstalledTapplet = {
 export interface InstalledTappletWithName {
   installed_tapplet: InstalledTapplet
   display_name: string
-  installed_veresion: string
+  installed_version: string
   latest_version: string
 }
 

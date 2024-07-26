@@ -10,9 +10,15 @@ import {
   InitInstalledTappletsFailurePayload,
   InitInstalledTappletsReqPayload,
   InitInstalledTappletsSuccessPayload,
+  UpdateInstalledTappletReqPayload,
 } from "./installedTapplets.types"
 import { listenerMiddleware } from "../store.listener"
-import { addInstalledTappletAction, deleteInstalledTappletAction, initializeAction } from "./installedTapplets.action"
+import {
+  addInstalledTappletAction,
+  deleteInstalledTappletAction,
+  initializeAction,
+  updateInstalledTappletAction,
+} from "./installedTapplets.action"
 
 export const installedTappletAdapter = createEntityAdapter<InstalledTappletWithName, string>({
   selectId: ({ installed_tapplet }) => installed_tapplet.tapplet_id,
@@ -56,6 +62,9 @@ const installedTappletsSlice = createSlice({
     addInstalledTappletFailure: (state, _: PayloadAction<AddInstalledTappletFailurePayload>) => {
       state.isFetching = false
     },
+    updateInstalledTappletRequest: (state, _: PayloadAction<UpdateInstalledTappletReqPayload>) => {
+      state.isFetching = true
+    },
   },
 })
 
@@ -65,3 +74,4 @@ export const installedTappletsReducer = installedTappletsSlice.reducer
 listenerMiddleware.startListening(initializeAction())
 listenerMiddleware.startListening(deleteInstalledTappletAction())
 listenerMiddleware.startListening(addInstalledTappletAction())
+listenerMiddleware.startListening(updateInstalledTappletAction())

@@ -16,7 +16,7 @@ export type InitInstalledTappletsFailurePayload = {
 }
 
 export type DeleteInstalledTappletReqPayload = {
-  item: InstalledTappletWithName
+  tappletId: string
 }
 export type DeleteInstalledTappletSuccessPayload = {}
 export type DeleteInstalledTappletFailurePayload = {
@@ -29,4 +29,8 @@ export type AddInstalledTappletReqPayload = {
 export type AddInstalledTappletSuccessPayload = {}
 export type AddInstalledTappletFailurePayload = {
   errorMsg: string
+}
+
+export type UpdateInstalledTappletReqPayload = {
+  item: InstalledTappletWithName
 }
