@@ -1,3 +1,4 @@
+import { useCallback } from "react"
 import { Avatar, Box, IconButton, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material"
 import { Launch, Delete, Update } from "@mui/icons-material"
 import tariLogo from "../assets/tari.svg"
@@ -8,11 +9,25 @@ import { installedTappletsSelectors } from "../store/installedTapplets/installed
 import { devTappletsSelectors } from "../store/devTapplets/devTapplets.selector"
 import { installedTappletsActions } from "../store/installedTapplets/installedTapplets.slice"
 import { devTappletsActions } from "../store/devTapplets/devTapplets.slice"
+import { DevTapplet, InstalledTappletWithName } from "@type/tapplet"
 
 export const TappletsInstalled: React.FC = () => {
   const installedTapplets = useSelector(installedTappletsSelectors.selectAll)
   const devTapplets = useSelector(devTappletsSelectors.selectAll)
   const dispatch = useDispatch()
+
+  const updateInstalledTappletHandler = useCallback(
+    (item: InstalledTappletWithName) => dispatch(installedTappletsActions.updateInstalledTappletRequest({ item })),
+    [dispatch]
+  )
+  const deleteInstalledTappletHandler = useCallback(
+    (tappletId: string) => dispatch(installedTappletsActions.deleteInstalledTappletRequest({ tappletId })),
+    [dispatch]
+  )
+  const deleteDevTappletHandler = useCallback(
+    (item: DevTapplet) => dispatch(devTappletsActions.deleteDevTappletRequest({ item })),
+    [dispatch]
+  )
   return (
     <Box marginX="auto" mt={4}>
       <Typography variant="h4" pt={6} textAlign="center">
@@ -34,7 +49,7 @@ export const TappletsInstalled: React.FC = () => {
               <IconButton
                 aria-label="update"
                 style={{ marginRight: 10 }}
-                onClick={() => dispatch(installedTappletsActions.updateInstalledTappletRequest({ item }))}
+                onClick={() => updateInstalledTappletHandler(item)}
               >
                 <Update color="primary" />
               </IconButton>
@@ -42,11 +57,7 @@ export const TappletsInstalled: React.FC = () => {
             <IconButton
               aria-label="delete"
               style={{ marginRight: 10 }}
-              onClick={() =>
-                dispatch(
-                  installedTappletsActions.deleteInstalledTappletRequest({ tappletId: item.installed_tapplet.id })
-                )
-              }
+              onClick={() => deleteInstalledTappletHandler(item.installed_tapplet.id)}
             >
               <Delete color="primary" />
             </IconButton>
@@ -68,11 +79,7 @@ export const TappletsInstalled: React.FC = () => {
                 <Launch color="primary" />
               </NavLink>
             </IconButton>
-            <IconButton
-              aria-label="delete"
-              style={{ marginRight: 10 }}
-              onClick={() => dispatch(devTappletsActions.deleteDevTappletRequest({ item }))}
-            >
+            <IconButton aria-label="delete" style={{ marginRight: 10 }} onClick={() => deleteDevTappletHandler(item)}>
               <Delete color="primary" />
             </IconButton>
           </ListItem>
