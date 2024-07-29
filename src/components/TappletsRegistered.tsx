@@ -27,6 +27,7 @@ export const TappletsRegistered: React.FC = () => {
 
   const fetchTappletsFromRegistry = async () => {
     dispatch(registeredTappletsActions.initializeRequest({}))
+    dispatch(installedTappletsActions.initializeRequest({}))
   }
 
   return (

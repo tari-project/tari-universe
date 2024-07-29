@@ -4,8 +4,8 @@ import {
   AddInstalledTappletReqPayload,
   DeleteInstalledTappletReqPayload,
   InitInstalledTappletsReqPayload,
+  UpdateInstalledTappletReqPayload,
 } from "./installedTapplets.types"
-import { InstalledTappletWithName } from "@type/tapplet"
 import { invoke } from "@tauri-apps/api/core"
 
 export const initializeAction = () => ({
@@ -29,10 +29,9 @@ export const deleteInstalledTappletAction = () => ({
     action: PayloadAction<DeleteInstalledTappletReqPayload>,
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
-    const item = action.payload.item
+    const tappletId = action.payload.tappletId
     try {
-      await invoke("delete_installed_tapp", { tappletId: item.installed_tapplet.id })
-      await invoke("delete_installed_tapp_db", { tappletId: item.installed_tapplet.id })
+      await invoke("delete_installed_tapp", { tappletId })
 
       listenerApi.dispatch(installedTappletsActions.deleteInstalledTappletSuccess({}))
       listenerApi.dispatch(installedTappletsActions.initializeRequest({}))
@@ -60,6 +59,23 @@ export const addInstalledTappletAction = () => ({
       listenerApi.dispatch(installedTappletsActions.initializeRequest({}))
     } catch (error) {
       listenerApi.dispatch(installedTappletsActions.addInstalledTappletFailure({ errorMsg: error as string }))
+    }
+  },
+})
+
+export const updateInstalledTappletAction = () => ({
+  actionCreator: installedTappletsActions.updateInstalledTappletRequest,
+  effect: async (
+    action: PayloadAction<UpdateInstalledTappletReqPayload>,
+    listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
+  ) => {
+    const installedTappletId = action.payload.item.installed_tapplet.id
+    const tappletId = action.payload.item.installed_tapplet.tapplet_id
+    try {
+      const installedTapplets = await invoke("update_tapp", { tappletId, installedTappletId })
+      listenerApi.dispatch(installedTappletsActions.updateInstalledTappletSuccess({ installedTapplets }))
+    } catch (error) {
+      listenerApi.dispatch(installedTappletsActions.updateInstalledTappletFailure({ errorMsg: error as string }))
     }
   },
 })

@@ -6,8 +6,10 @@ use crate::{ database::models::{ InstalledTapplet, Tapplet, TappletVersion }, er
 pub struct InstalledTappletWithName {
   pub installed_tapplet: InstalledTapplet,
   pub display_name: String,
+  pub installed_version: String,
+  pub latest_version: String,
 }
-
+#[derive(Debug)]
 pub struct TappletSemver {
   pub tapplet_version: TappletVersion,
   pub semver: semver::Version,

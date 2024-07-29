@@ -10,12 +10,21 @@ import {
   InitInstalledTappletsFailurePayload,
   InitInstalledTappletsReqPayload,
   InitInstalledTappletsSuccessPayload,
+  UpdateInstalledTappletFailurePayload,
+  UpdateInstalledTappletReqPayload,
+  UpdateInstalledTappletSuccessPayload,
 } from "./installedTapplets.types"
 import { listenerMiddleware } from "../store.listener"
-import { addInstalledTappletAction, deleteInstalledTappletAction, initializeAction } from "./installedTapplets.action"
+import {
+  addInstalledTappletAction,
+  deleteInstalledTappletAction,
+  initializeAction,
+  updateInstalledTappletAction,
+} from "./installedTapplets.action"
 
 export const installedTappletAdapter = createEntityAdapter<InstalledTappletWithName, string>({
   selectId: ({ installed_tapplet }) => installed_tapplet.tapplet_id,
+  sortComparer: (a, b) => (a.installed_tapplet.tapplet_id > b.installed_tapplet.tapplet_id ? 1 : -1),
 })
 
 const installedTappletsSlice = createSlice({
@@ -56,6 +65,16 @@ const installedTappletsSlice = createSlice({
     addInstalledTappletFailure: (state, _: PayloadAction<AddInstalledTappletFailurePayload>) => {
       state.isFetching = false
     },
+    updateInstalledTappletRequest: (state, _: PayloadAction<UpdateInstalledTappletReqPayload>) => {
+      state.isFetching = true
+    },
+    updateInstalledTappletSuccess: (state, action: PayloadAction<UpdateInstalledTappletSuccessPayload>) => {
+      installedTappletAdapter.setAll(state.installedTapplets, action.payload.installedTapplets)
+      state.isFetching = false
+    },
+    updateInstalledTappletFailure: (state, _: PayloadAction<UpdateInstalledTappletFailurePayload>) => {
+      state.isFetching = false
+    },
   },
 })
 
@@ -65,3 +84,4 @@ export const installedTappletsReducer = installedTappletsSlice.reducer
 listenerMiddleware.startListening(initializeAction())
 listenerMiddleware.startListening(deleteInstalledTappletAction())
 listenerMiddleware.startListening(addInstalledTappletAction())
+listenerMiddleware.startListening(updateInstalledTappletAction())
