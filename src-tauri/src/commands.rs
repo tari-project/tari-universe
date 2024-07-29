@@ -239,6 +239,24 @@ pub async fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Res
 }
 
 #[tauri::command]
+pub async fn update_tapp(
+  tapplet_id: i32,
+  installed_tapplet_id: i32,
+  db_connection: State<'_, DatabaseConnection>,
+  app_handle: tauri::AppHandle
+) -> Result<Vec<InstalledTappletWithName>, Error> {
+  delete_installed_tapp(installed_tapplet_id, db_connection.clone(), app_handle.clone())?;
+  download_and_extract_tapp(tapplet_id, db_connection.clone(), app_handle.clone()).await?;
+  calculate_and_validate_tapp_checksum(tapplet_id, db_connection.clone(), app_handle.clone())?;
+  insert_installed_tapp_db(tapplet_id, db_connection.clone())?;
+
+  let mut store = SqliteStore::new(db_connection.0.clone());
+  let installed_tapplets = store.get_installed_tapplets_with_display_name()?;
+
+  return Ok(installed_tapplets);
+}
+
+#[tauri::command]
 pub fn update_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Result<usize, Error> {
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   let new_tapplet = UpdateTapplet {
@@ -320,26 +338,18 @@ pub fn update_installed_tapp_db(
 }
 
 #[tauri::command]
-pub fn delete_installed_tapp_db(tapplet_id: i32, db_connection: State<'_, DatabaseConnection>) -> Result<usize, Error> {
-  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  let installed_tapplet: InstalledTapplet = tapplet_store.get_by_id(tapplet_id)?;
-  tapplet_store.delete(installed_tapplet)
-}
-
-#[tauri::command]
 pub fn delete_installed_tapp(
   tapplet_id: i32,
   db_connection: State<'_, DatabaseConnection>,
   app_handle: tauri::AppHandle
-) -> Result<(), Error> {
+) -> Result<usize, Error> {
   let mut store = SqliteStore::new(db_connection.0.clone());
-
   let (_installed_tapp, registered_tapp, tapp_version) = store.get_installed_tapplet_full_by_id(tapplet_id)?;
-
-  // get download path
   let tapplet_path = get_tapp_download_path(registered_tapp.registry_id, tapp_version.version, app_handle).unwrap();
+  delete_tapplet(tapplet_path)?;
 
-  delete_tapplet(tapplet_path)
+  let installed_tapplet: InstalledTapplet = store.get_by_id(tapplet_id)?;
+  store.delete(installed_tapplet)
 }
 
 #[tauri::command]

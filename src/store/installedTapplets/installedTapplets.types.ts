@@ -34,3 +34,7 @@ export type AddInstalledTappletFailurePayload = {
 export type UpdateInstalledTappletReqPayload = {
   item: InstalledTappletWithName
 }
+export type UpdateInstalledTappletSuccessPayload = {
+  installedTapplets: InstalledTappletWithName[]
+}
+export type UpdateInstalledTappletFailurePayload = {}

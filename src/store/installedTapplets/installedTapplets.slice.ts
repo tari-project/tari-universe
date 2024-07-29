@@ -10,7 +10,9 @@ import {
   InitInstalledTappletsFailurePayload,
   InitInstalledTappletsReqPayload,
   InitInstalledTappletsSuccessPayload,
+  UpdateInstalledTappletFailurePayload,
   UpdateInstalledTappletReqPayload,
+  UpdateInstalledTappletSuccessPayload,
 } from "./installedTapplets.types"
 import { listenerMiddleware } from "../store.listener"
 import {
@@ -22,6 +24,7 @@ import {
 
 export const installedTappletAdapter = createEntityAdapter<InstalledTappletWithName, string>({
   selectId: ({ installed_tapplet }) => installed_tapplet.tapplet_id,
+  sortComparer: (a, b) => (a.installed_tapplet.tapplet_id > b.installed_tapplet.tapplet_id ? 1 : -1),
 })
 
 const installedTappletsSlice = createSlice({
@@ -64,6 +67,13 @@ const installedTappletsSlice = createSlice({
     },
     updateInstalledTappletRequest: (state, _: PayloadAction<UpdateInstalledTappletReqPayload>) => {
       state.isFetching = true
+    },
+    updateInstalledTappletSuccess: (state, action: PayloadAction<UpdateInstalledTappletSuccessPayload>) => {
+      installedTappletAdapter.setAll(state.installedTapplets, action.payload.installedTapplets)
+      state.isFetching = false
+    },
+    updateInstalledTappletFailure: (state, _: PayloadAction<UpdateInstalledTappletFailurePayload>) => {
+      state.isFetching = false
     },
   },
 })

@@ -1,4 +1,4 @@
-import { createAction, ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
+import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
 import { installedTappletsActions } from "./installedTapplets.slice"
 import {
   AddInstalledTappletReqPayload,
@@ -7,7 +7,6 @@ import {
   UpdateInstalledTappletReqPayload,
 } from "./installedTapplets.types"
 import { invoke } from "@tauri-apps/api/core"
-import { RootState } from "../store"
 
 export const initializeAction = () => ({
   actionCreator: installedTappletsActions.initializeRequest,
@@ -33,7 +32,6 @@ export const deleteInstalledTappletAction = () => ({
     const tappletId = action.payload.tappletId
     try {
       await invoke("delete_installed_tapp", { tappletId })
-      await invoke("delete_installed_tapp_db", { tappletId })
 
       listenerApi.dispatch(installedTappletsActions.deleteInstalledTappletSuccess({}))
       listenerApi.dispatch(installedTappletsActions.initializeRequest({}))
@@ -71,37 +69,13 @@ export const updateInstalledTappletAction = () => ({
     action: PayloadAction<UpdateInstalledTappletReqPayload>,
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
-    const item = action.payload.item
+    const installedTappletId = action.payload.item.installed_tapplet.id
+    const tappletId = action.payload.item.installed_tapplet.tapplet_id
     try {
-      listenerApi.dispatch(
-        installedTappletsActions.deleteInstalledTappletRequest({ tappletId: item.installed_tapplet.id })
-      )
-      const fetchedTapplets = createAction(installedTappletsActions.initializeSuccess.type)
-      await listenerApi.condition((action, currentState, previousState) => {
-        const { installedTapplets } = currentState as RootState
-        const { installedTapplets: previousInstalledTapplets } = previousState as RootState
-
-        const previousInstalledTapplet =
-          previousInstalledTapplets.installedTapplets.entities[item.installed_tapplet.tapplet_id]
-        const currentInstalledTapplet = installedTapplets.installedTapplets.entities[item.installed_tapplet.tapplet_id]
-
-        if (action.type !== fetchedTapplets.type) {
-          return false
-        }
-
-        if (previousInstalledTapplet && !currentInstalledTapplet) {
-          if (previousInstalledTapplet.installed_version === item.installed_version) {
-            return true
-          }
-        }
-
-        return false
-      }, 1000)
-      listenerApi.dispatch(
-        installedTappletsActions.addInstalledTappletRequest({ tappletId: item.installed_tapplet.tapplet_id })
-      )
+      const installedTapplets = await invoke("update_tapp", { tappletId, installedTappletId })
+      listenerApi.dispatch(installedTappletsActions.updateInstalledTappletSuccess({ installedTapplets }))
     } catch (error) {
-      listenerApi.dispatch(installedTappletsActions.addInstalledTappletFailure({ errorMsg: error as string }))
+      listenerApi.dispatch(installedTappletsActions.updateInstalledTappletFailure({ errorMsg: error as string }))
     }
   },
 })
