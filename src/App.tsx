@@ -1,4 +1,5 @@
 import "./App.css"
+import "./i18initializer"
 import { ActiveTapplet } from "./components/ActiveTapplet"
 import { TabKey } from "./views/Tabs"
 import { Wallet } from "./components/Wallet"
