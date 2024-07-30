@@ -5,8 +5,10 @@ import { useParams } from "react-router-dom"
 import { Tapplet } from "./Tapplet"
 import { useDispatch } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
+import { useTranslation } from "react-i18next"
 
 export function ActiveTapplet() {
+  const { t } = useTranslation("components")
   const [tappletAddress, setTappletAddress] = useState("")
   const { id } = useParams()
   const installedTappletId = Number(id)
@@ -29,11 +31,7 @@ export function ActiveTapplet() {
 
   return (
     <Box height="100%">
-      {tappletAddress ? (
-        <Tapplet source={tappletAddress} />
-      ) : (
-        <Typography>Failed to obtain tapplet endpoint</Typography>
-      )}
+      {tappletAddress ? <Tapplet source={tappletAddress} /> : <Typography>{t("taplet-obtain-failure")}</Typography>}
     </Box>
   )
 }

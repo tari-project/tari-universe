@@ -8,8 +8,10 @@ import DialogContentText from "@mui/material/DialogContentText"
 import DialogTitle from "@mui/material/DialogTitle"
 import { devTappletsActions } from "../store/devTapplets/devTapplets.slice"
 import { useDispatch } from "react-redux"
+import { useTranslation } from "react-i18next"
 
 export default function AddDevTappletDialog() {
+  const { t } = useTranslation(["components", "common"])
   const [open, setOpen] = useState(false)
   const [hasError, setHasError] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
@@ -40,7 +42,7 @@ export default function AddDevTappletDialog() {
   return (
     <Fragment>
       <Button variant="contained" onClick={handleClickOpen} sx={{ width: 200, ml: 1 }}>
-        Add dev tapplet
+        {t("add-dev-taplet", { ns: "components" })}
       </Button>
       <Dialog
         open={open}
@@ -50,11 +52,9 @@ export default function AddDevTappletDialog() {
           onSubmit: onSubmitHandler,
         }}
       >
-        <DialogTitle textAlign="center">Add dev tapplet</DialogTitle>
+        <DialogTitle textAlign="center">{t("add-dev-taplet", { ns: "components" })}</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            To add tapplet in developer mode please enter the endpoint of the tapplet.
-          </DialogContentText>
+          <DialogContentText>{t("add-dev-taplet-description", { ns: "components" })}</DialogContentText>
           <TextField
             error={hasError}
             helperText={errorMsg}
@@ -73,8 +73,8 @@ export default function AddDevTappletDialog() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit">Add</Button>
+          <Button onClick={handleClose}>{t("cancel", { ns: "common" })}</Button>
+          <Button type="submit">{t("add", { ns: "common" })}</Button>
         </DialogActions>
       </Dialog>
     </Fragment>

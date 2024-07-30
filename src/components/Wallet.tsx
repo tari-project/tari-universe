@@ -4,8 +4,10 @@ import { useState } from "react"
 import { Box, Button, Typography } from "@mui/material"
 import { useDispatch } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
+import { useTranslation } from "react-i18next"
 
 export const Wallet: React.FC = () => {
+  const { t } = useTranslation(["components", "common"])
   const [balances, setBalances] = useState({})
   const dispatch = useDispatch()
 
@@ -28,17 +30,17 @@ export const Wallet: React.FC = () => {
   return (
     <Box mt={4}>
       <Typography variant="h4" textAlign="center" pt={6}>
-        Tauri wallet daemon
+        {t("tauri-wallet-daemon", { ns: "components" })}
       </Typography>
       <Box display="flex" flexDirection="column" gap={2} alignItems="center" py={4}>
         <Button onClick={get_free_coins} variant="contained" sx={{ width: 200 }}>
-          Get free coins
+          {t("get-free-coins", { ns: "components" })}
         </Button>
         <Button onClick={get_balances} variant="contained" sx={{ width: 200 }}>
-          Get balances
+          {t("get-balances", { ns: "components" })}
         </Button>
       </Box>
-      <Typography textAlign="center">balances: {JSON.stringify(balances)}</Typography>
+      <Typography textAlign="center">{`${t("balances", { ns: "common" })}:${JSON.stringify(balances)}`}</Typography>
     </Box>
   )
 }
