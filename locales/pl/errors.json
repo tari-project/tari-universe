@@ -1,0 +1,4 @@
+{
+  "manifest-package-name-mismatch": "Manifest tapplet'u nie pasuje do nazwy pakietu. Oczekiwano: {{ packageName }} Otrzymano: {{ manifestId }} z: {{ endpoint }}/tapplet.manifest.json",
+  "fetching-taplet-manifest-failed": "Błąd pobierania manifestu tapplet'u: {{ error }}"
+}
