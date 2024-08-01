@@ -88,7 +88,7 @@ pub async fn make_request<T: Serialize>(
   };
   let mut builder = client.post(url).header(CONTENT_TYPE, "application/json");
   if let Some(token) = token {
-    builder = builder.header(AUTHORIZATION, format!("Bearer {token}"));W
+    builder = builder.header(AUTHORIZATION, format!("Bearer {token}"));
   }
   let resp = builder.json(&body).send().await?.json::<JsonRpcResponse>().await?;
   match resp.result {
