@@ -1,4 +1,4 @@
-use std::num::ParseIntError;
+use std::{io, num::ParseIntError};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -7,13 +7,13 @@ pub enum Error {
   #[error(transparent)] IOError(#[from] IOError),
   #[error(transparent)] RequestError(#[from] RequestError),
   #[error(transparent)] TappletServerError(#[from] TappletServerError),
-  #[error("Tauri error")] TauriError(#[from] tauri::Error),
+  #[error("tauri-error")] TauriError(#[from] tauri::Error),
   #[error(transparent)] JsonParsingError(#[from] serde_json::Error),
-  #[error("Failed to parse tapplet version")] VersionParseError,
-  #[error("Failed to find tapplet version")] VersionNotFound,
-  #[error("Failed to obtain permission token lock")] FailedToObtainPermissionTokenLock,
-  #[error("Failed to obtain auth token lock")] FailedToObtainAuthTokenLock,
-  #[error("Provider call failed for method: {method} with params: {params}")] ProviderError {
+  #[error("failed-to-parse-tapplet-version")] VersionParseError,
+  #[error("failed-to-find-tapplet-version")] VersionNotFound,
+  #[error("failed-to-obtain-permission-token-lock")] FailedToObtainPermissionTokenLock,
+  #[error("failed-to-obtain-auth-token-lock")] FailedToObtainAuthTokenLock,
+  #[error("provider-call-failed-for-method | method-{method} & params-{params}")] ProviderError {
     method: String,
     params: String,
   },
@@ -27,78 +27,79 @@ impl serde::Serialize for Error {
 
 #[derive(Debug, Error)]
 pub enum TappletServerError {
-  #[error("Failed to obtain of local address")] FailedToObtainLocalAddress,
-  #[error("Failed to start tapplet server")] FailedToStart,
-  #[error("Tapplet server already running")] AlreadyRunning,
-  #[error("Token for tapplet server is invalid")] TokenInvalid,
-  #[error("Failed to bind port: {port}")] BindPortError {
+  #[error("failed-to-obtain-local-address")] FailedToObtainLocalAddress,
+  #[error("failed-to-start-tapplet-server")] FailedToStart,
+  #[error("tapplet-server-already-running")] AlreadyRunning,
+  #[error("token-for-tapplet-server-is-invalid")] TokenInvalid,
+  #[error("failed-to-bind-port | port-{port}")] BindPortError {
     port: String,
   },
 }
 
 #[derive(Debug, Error)]
 pub enum DatabaseError {
-  #[error("{entity_name} with this {field_name} already exists")] AlreadyExists {
+  #[error("already-exists | entity_name-{entity_name} & field_name-{field_name}")] AlreadyExists{
     entity_name: String,
     field_name: String,
   },
-  #[error("Failed to retrieve {entity_name} data")] FailedToRetrieveData {
+  #[error("failed-to-retrieve-data | entity_name-{entity_name}")] FailedToRetrieveData {
     entity_name: String,
   },
-  #[error("Failed to delete {entity_name}")] FailedToDelete {
+  #[error("failed-to-delete | entity_name-{entity_name}")] FailedToDelete {
     entity_name: String,
   },
-  #[error("Failed to update {entity_name}")] FailedToUpdate {
+  #[error("failed-to-update | entity_name-{entity_name}")] FailedToUpdate {
     entity_name: String,
   },
-  #[error("Failed to create {entity_name}")] FailedToCreate {
+  #[error("failed-to-create | entity_name-{entity_name}")] FailedToCreate {
     entity_name: String,
   },
 }
 
+
 #[derive(Debug, Error)]
 pub enum IOError {
-  #[error("Failed to copy file from {from} to {to}")] FailedToCopyFile {
+  #[error("failed-to-copy-file | from-{from} & to-{to}")] FailedToCopyFile {
     from: String,
     to: String,
   },
-  #[error("Failed to read directory at path: {path}")] FailedToReadDir {
+  #[error("failed-to-read-dir | path-{path}")] FailedToReadDir {
     path: String,
   },
-  #[error("Failed to read file at path: {path}")] FailedToReadFile {
+  #[error("failed-to-read-file | path-{path}")] FailedToReadFile {
     path: String,
   },
-  #[error("Failed to create directory at path: {path}")] FailedToCreateDir {
+  #[error("failed-to-create-dir | path-{path}")] FailedToCreateDir {
     path: String,
   },
-  #[error("Failed to create file at path: {path}")] FailedToCreateFile {
+  #[error("failed-to-create-file | path-{path}")] FailedToCreateFile {
     path: String,
   },
-  #[error("Failed to write file at path: {path}")] FailedToWriteFile {
+  #[error("failed-to-write-file | path-{path}")] FailedToWriteFile {
+    path: String
+  },
+  #[error("failed-to-parse-int")] ParseIntError(#[from] ParseIntError),
+  #[error("failed-to-unpack-file | path-{path}")] FailedToUnpackFile {
     path: String,
   },
-  #[error("Failed to parse int")] ParseIntError(#[from] ParseIntError),
-  #[error("Failed to unpack file at path: {path}")] FailedToUnpackFile {
+  #[error("missing-package-json-or-tapplet-manifest-json | path-{path}")] InvalidUnpackedFiles {
     path: String,
   },
-  #[error("Missing package.json or tapplet.manifest.json from unpacked tapplet at path: {path}")] InvalidUnpackedFiles {
+  #[error("failed-to-delete-tapplet | path-{path}")] FailedToDeleteTapplet {
     path: String,
   },
-  #[error("Failed to delete tapplet folder at path: {path}")] FailedToDeleteTapplet {
-    path: String,
-  },
-  #[error("Failed to get file path")] FailedToGetFilePath,
+  #[error("failed-to-get-file-path")] FailedToGetFilePath,
 }
 
 #[derive(Debug, Error)]
 pub enum RequestError {
-  #[error("Failed to fetch manifest from {endpoint}")] FetchManifestError {
+  #[error("fetch-manifest-error | endpoint-{endpoint}")] FetchManifestError{
     endpoint: String,
   },
-  #[error("Failed to receive manifest {endpoint}")] ManifestResponseError {
+  #[error("manifest-response-error | endpoint-{endpoint}")] ManifestResponseError{
     endpoint: String,
   },
-  #[error("Failed to download file from {url}")] FailedToDownload {
+  #[error("failed-to-download | url-{url}")] FailedToDownload{
     url: String,
-  },
+  }
 }

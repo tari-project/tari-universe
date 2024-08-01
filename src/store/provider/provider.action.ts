@@ -7,6 +7,7 @@ import { Transaction } from "../transaction/transaction.types"
 import { errorActions } from "../error/error.slice"
 import { RootState } from "../store"
 import { providerSelector } from "./provider.selector"
+import { ErrorSource } from "../error/error.types"
 
 let handleMessage: typeof window.postMessage
 
@@ -23,11 +24,11 @@ export const initializeAction = () => ({
 
       handleMessage = async (event: MessageEvent<TransactionEvent>) => {
         if (!event?.data?.args || !event?.data?.methodName) {
-          dispatch(errorActions.showError({ message: "No data in event" }))
+          dispatch(errorActions.showError({ message: "no-data-in-event", errorSource: ErrorSource.FRONTEND }))
           return
         }
         if (!event.source) {
-          dispatch(errorActions.showError({ message: "No source in event" }))
+          dispatch(errorActions.showError({ message: "no-source-in-event", errorSource: ErrorSource.FRONTEND }))
           return
         }
 

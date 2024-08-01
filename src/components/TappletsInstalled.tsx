@@ -10,8 +10,10 @@ import { devTappletsSelectors } from "../store/devTapplets/devTapplets.selector"
 import { installedTappletsActions } from "../store/installedTapplets/installedTapplets.slice"
 import { devTappletsActions } from "../store/devTapplets/devTapplets.slice"
 import { DevTapplet, InstalledTappletWithName } from "@type/tapplet"
+import { useTranslation } from "react-i18next"
 
 export const TappletsInstalled: React.FC = () => {
+  const { t } = useTranslation("components")
   const installedTapplets = useSelector(installedTappletsSelectors.selectAll)
   const devTapplets = useSelector(devTappletsSelectors.selectAll)
   const dispatch = useDispatch()
@@ -31,7 +33,7 @@ export const TappletsInstalled: React.FC = () => {
   return (
     <Box marginX="auto" mt={4}>
       <Typography variant="h4" pt={6} textAlign="center">
-        Installed Tapplets
+        {t("installed-taplets")}
       </Typography>
       <List sx={{ width: "100%", minWidth: 500 }}>
         {installedTapplets.map((item, index) => (
@@ -65,7 +67,7 @@ export const TappletsInstalled: React.FC = () => {
         ))}
       </List>
       <Typography variant="h4" pt={6} textAlign="center">
-        Dev Tapplets
+        {t("dev-taplets")}
       </Typography>
       <List sx={{ maxWidth: 600 }}>
         {devTapplets.map((item, index) => (

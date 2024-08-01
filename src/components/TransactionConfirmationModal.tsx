@@ -3,14 +3,17 @@ import { useDispatch, useSelector } from "react-redux"
 import { transactionSelector } from "../store/transaction/transaction.selector"
 import { transactionActions } from "../store/transaction/transaction.slice"
 import { errorActions } from "../store/error/error.slice"
+import { useTranslation } from "react-i18next"
+import { ErrorSource } from "../store/error/error.types"
 
 export const TransactionConfirmationModal: React.FC = () => {
+  const { t } = useTranslation(["components", "common"])
   const transaction = useSelector(transactionSelector.getPendingTransaction)
   const dispatch = useDispatch()
 
   const handleClose = async () => {
     if (!transaction) {
-      dispatch(errorActions.showError({ message: "No pending transaction found" }))
+      dispatch(errorActions.showError({ message: "no-pending-transaction-found", errorSource: ErrorSource.FRONTEND }))
       return
     }
     dispatch(transactionActions.cancelTransaction({ transaction }))
@@ -18,7 +21,7 @@ export const TransactionConfirmationModal: React.FC = () => {
 
   const submitTransaction = async () => {
     if (!transaction) {
-      dispatch(errorActions.showError({ message: "No pending transaction found" }))
+      errorActions.showError({ message: "no-pending-transaction-found", errorSource: ErrorSource.FRONTEND })
       return
     }
     dispatch(
@@ -30,17 +33,19 @@ export const TransactionConfirmationModal: React.FC = () => {
 
   return (
     <Dialog open={!!transaction} maxWidth="sm" fullWidth>
-      <DialogTitle textAlign="center">Transaction confirmation</DialogTitle>
+      <DialogTitle textAlign="center">{t("transaction-confirmation", { ns: "components" })}</DialogTitle>
       <DialogContent>
-        <DialogContentText>Method name: {transaction?.methodName}</DialogContentText>
-        <DialogContentText>TODO: display transaction simulation result</DialogContentText>
+        <DialogContentText>
+          {t("method-name", { methodName: transaction?.methodName, ns: "components" })}
+        </DialogContentText>
+        <DialogContentText>{t("todo-display-transaction-simulation-result", { ns: "components" })}</DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} variant="contained">
-          Cancel
+          {t("cancel", { ns: "common" })}
         </Button>
         <Button onClick={submitTransaction} variant="contained">
-          Submit
+          {t("submit", { ns: "common" })}
         </Button>
       </DialogActions>
     </Dialog>

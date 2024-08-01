@@ -16,8 +16,10 @@ import { useDispatch, useSelector } from "react-redux"
 import { registeredTappletsSelectors } from "../store/registeredTapplets/registeredTapplets.selector"
 import { registeredTappletsActions } from "../store/registeredTapplets/registeredTapplets.slice"
 import { installedTappletsActions } from "../store/installedTapplets/installedTapplets.slice"
+import { useTranslation } from "react-i18next"
 
 export const TappletsRegistered: React.FC = () => {
+  const { t } = useTranslation("components")
   const registeredTapplets = useSelector(registeredTappletsSelectors.selectAll)
   const dispatch = useDispatch()
 
@@ -33,7 +35,7 @@ export const TappletsRegistered: React.FC = () => {
   return (
     <Box marginX="auto" mt={4}>
       <Typography variant="h4" textAlign="center" pt={6}>
-        Registered Tapplets
+        {t("registered-taplets")}
       </Typography>
       {registeredTapplets.length ?? 0 > 0 ? (
         <List sx={{ width: "100%", minWidth: 500 }}>
@@ -50,11 +52,11 @@ export const TappletsRegistered: React.FC = () => {
           ))}
         </List>
       ) : (
-        <Typography textAlign="center">Registered tapplets list is empty</Typography>
+        <Typography textAlign="center">{t("registered-taplets-list-empty")}</Typography>
       )}
       <Box pt={4} display="flex" justifyContent="center" gap={1}>
         <Button variant="contained" onClick={fetchTappletsFromRegistry}>
-          Fetch Tapplet List
+          {t("fetch-taplet-list")}
         </Button>
         <AddDevTappletDialog />
       </Box>
