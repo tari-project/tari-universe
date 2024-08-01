@@ -6,6 +6,7 @@ import { Tapplet } from "./Tapplet"
 import { useDispatch } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
 import { useTranslation } from "react-i18next"
+import { ErrorSource } from "../store/error/error.types"
 
 export function ActiveTapplet() {
   const { t } = useTranslation("components")
@@ -19,11 +20,11 @@ export function ActiveTapplet() {
       .then((res: unknown) => {
         setTappletAddress(res as string)
       })
-      .catch((error) => dispatch(errorActions.showError({ message: error as string })))
+      .catch((error: string) => dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND })))
 
     return () => {
-      invoke("close_tapplet", { installedTappletId }).catch((error) =>
-        dispatch(errorActions.showError({ message: error as string }))
+      invoke("close_tapplet", { installedTappletId }).catch((error: string) =>
+        dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND }))
       )
       setTappletAddress("")
     }

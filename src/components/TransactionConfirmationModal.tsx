@@ -4,6 +4,7 @@ import { transactionSelector } from "../store/transaction/transaction.selector"
 import { transactionActions } from "../store/transaction/transaction.slice"
 import { errorActions } from "../store/error/error.slice"
 import { useTranslation } from "react-i18next"
+import { ErrorSource } from "../store/error/error.types"
 
 export const TransactionConfirmationModal: React.FC = () => {
   const { t } = useTranslation(["components", "common"])
@@ -12,7 +13,7 @@ export const TransactionConfirmationModal: React.FC = () => {
 
   const handleClose = async () => {
     if (!transaction) {
-      dispatch(errorActions.showError({ message: "No pending transaction found" }))
+      dispatch(errorActions.showError({ message: "no-pending-transaction-found", errorSource: ErrorSource.FRONTEND }))
       return
     }
     dispatch(transactionActions.cancelTransaction({ transaction }))
@@ -20,7 +21,7 @@ export const TransactionConfirmationModal: React.FC = () => {
 
   const submitTransaction = async () => {
     if (!transaction) {
-      dispatch(errorActions.showError({ message: "No pending transaction found" }))
+      errorActions.showError({ message: "no-pending-transaction-found", errorSource: ErrorSource.FRONTEND })
       return
     }
     dispatch(

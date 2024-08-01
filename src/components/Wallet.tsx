@@ -5,6 +5,7 @@ import { Box, Button, Typography } from "@mui/material"
 import { useDispatch } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
 import { useTranslation } from "react-i18next"
+import { ErrorSource } from "../store/error/error.types"
 
 export const Wallet: React.FC = () => {
   const { t } = useTranslation(["components", "common"])
@@ -15,7 +16,9 @@ export const Wallet: React.FC = () => {
     try {
       await invoke("get_free_coins", {})
     } catch (error) {
-      dispatch(errorActions.showError({ message: error as string }))
+      if (typeof error === "string") {
+        dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND }))
+      }
     }
   }
 
@@ -23,7 +26,9 @@ export const Wallet: React.FC = () => {
     try {
       setBalances(await invoke("get_balances", {}))
     } catch (error) {
-      dispatch(errorActions.showError({ message: error as string }))
+      if (typeof error === "string") {
+        dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND }))
+      }
     }
   }
 

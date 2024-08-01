@@ -5,10 +5,9 @@ import { useEffect, useState } from "react"
 import { Tapplet } from "./Tapplet"
 import { useDispatch } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
-import { useTranslation } from "react-i18next"
+import { ErrorSource } from "../store/error/error.types"
 
 export function ActiveDevTapplet() {
-  const { t } = useTranslation("errors")
   let { state }: { state: DevTapplet } = useLocation()
   const [isVerified, setIsVerified] = useState<boolean>(false)
   const dispatch = useDispatch()
@@ -23,20 +22,16 @@ export function ActiveDevTapplet() {
         } else {
           dispatch(
             errorActions.showError({
-              message: t("manifest-package-name-mismatch", {
-                packageName: state?.package_name,
-                manifestId: manifest?.id,
-                endpoint: state?.endpoint,
-              }),
+              message: `manifest-package-name-mismatch | packageName: ${state?.package_name} & manifestId: ${manifest?.id} & endpoint: ${state?.endpoint}`,
+              errorSource: ErrorSource.FRONTEND,
             })
           )
         }
       } catch (error) {
         dispatch(
           errorActions.showError({
-            message: t("fetching-taplet-manifest-failed", {
-              error,
-            }),
+            message: `fetching-taplet-manifest-failed | error: ${error}`,
+            errorSource: ErrorSource.FRONTEND,
           })
         )
       }

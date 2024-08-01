@@ -8,6 +8,8 @@ export enum Language {
   PL = "pl",
 }
 
+export const LanguageList = Object.values(Language)
+
 i18n
   .use(HttpBackend)
   .use(LanguageDetector)
@@ -20,4 +22,5 @@ i18n
       loadPath: "/locales/{{lng}}/{{ns}}.json",
     },
     supportedLngs: [Language.EN, Language.PL],
+    saveMissingTo: "all",
   })
