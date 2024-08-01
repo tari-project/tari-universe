@@ -8,6 +8,7 @@ export type Transaction = {
   id: number
   submit: () => void
   cancel: () => void
+  runSimulation: () => void
   status: TransactionStatus
 }
 
@@ -24,4 +25,8 @@ export type TransactionFailurePayload = {
 }
 export type TransactionSuccessPayload = {
   id: number
+}
+
+export type TransactionSimulationPayload = {
+  transaction: Transaction
 }

@@ -1,4 +1,5 @@
 import { DevTapplet, InstalledTappletWithName, RegisteredTapplet } from "@type/tapplet"
+import { WalletBalances } from "./wallet"
 
 declare module "@tauri-apps/api/core" {
   function invoke(param: "read_installed_tapp_db"): Promise<InstalledTappletWithName[]>
@@ -9,4 +10,5 @@ declare module "@tauri-apps/api/core" {
     param: "update_tapp",
     payload: { tappletId: string; installedTappletId: string }
   ): Promise<InstalledTappletWithName[]>
+  function invoke(param: "get_balances", payload: {}): Promise<WalletBalances>
 }

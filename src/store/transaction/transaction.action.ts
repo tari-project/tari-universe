@@ -3,6 +3,7 @@ import { transactionActions } from "./transaction.slice"
 import { TransactionRequestPayload } from "./transaction.types"
 import { errorActions } from "../error/error.slice"
 import { RootState } from "../store"
+import { run } from "node:test"
 
 export const executeTransactionAction = () => ({
   actionCreator: transactionActions.sendTransactionRequest,
@@ -10,7 +11,7 @@ export const executeTransactionAction = () => ({
     action: PayloadAction<TransactionRequestPayload>,
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
-    const { id, submit } = action.payload.transaction
+    const { id, submit, runSimulation } = action.payload.transaction
     const state = listenerApi.getState() as RootState
     const provider = state.provider.provider
     const dispatch = listenerApi.dispatch
@@ -21,6 +22,7 @@ export const executeTransactionAction = () => ({
     }
 
     try {
+      runSimulation()
       submit()
       dispatch(transactionActions.sendTransactionSuccess({ id }))
     } catch (error) {
@@ -75,5 +77,38 @@ export const transactionFailedAction = () => ({
     const dispatch = listenerApi.dispatch
 
     dispatch(errorActions.showError({ message: action.payload.errorMsg }))
+  },
+})
+
+export const runTransactionSimulationAction = () => ({
+  actionCreator: transactionActions.runSimulation,
+  effect: async (
+    action: PayloadAction<TransactionRequestPayload>,
+    listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
+  ) => {
+    const { id, runSimulation } = action.payload.transaction
+    const state = listenerApi.getState() as RootState
+    const provider = state.provider.provider
+    const dispatch = listenerApi.dispatch
+
+    if (!provider) {
+      dispatch(transactionActions.sendTransactionFailure({ id, errorMsg: "Provider not initialized" }))
+      return
+    }
+
+    try {
+      console.log("Running simulation")
+      runSimulation()
+      console.log("Simulation success")
+      dispatch(transactionActions.sendTransactionSuccess({ id }))
+    } catch (error) {
+      let message = "Error while executing transaction"
+      if (error instanceof Error) {
+        message = error.message
+      } else if (typeof error === "string") {
+        message = error
+      }
+      dispatch(transactionActions.sendTransactionFailure({ id, errorMsg: message }))
+    }
   },
 })

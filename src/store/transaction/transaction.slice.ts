@@ -36,6 +36,7 @@ const transactionSlice = createSlice({
         changes: { status: "failure" },
       })
     },
+    runSimulation: (_, __: PayloadAction<TransactionRequestPayload>) => {},
   },
 })
 

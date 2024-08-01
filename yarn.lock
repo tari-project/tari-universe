@@ -771,6 +771,11 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.18.1.tgz#0cb240c147c0dfd0e3eaff4cc060a772d39e155c"
   integrity sha512-yjk2MAkQmoaPYCSu35RLJ62+dz358nE83VfTePJRp8CG7aMg25mEJYpXFiD+NcevhX8LxD5OP5tktPXnXN7GDw==
 
+"@tari-project/typescript-bindings@1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@tari-project/typescript-bindings/-/typescript-bindings-1.0.3.tgz#9f35ef08f8605408cb52940da43807dcafb62562"
+  integrity sha512-CWJAxXgorgDXWO3U3gg/LOB3KoYgrq63zYwR1Z0tEZW0HkkA4BKlyHywRn/WpgvoCCAmAMOM6pO2jV5x1iqM/w==
+
 "@tariproject/tarijs@https://gitpkg.now.sh/tari-project/tari.js?main&scripts.postinstall=npm%20run%20build-tsc":
   version "0.1.19"
   resolved "https://gitpkg.now.sh/tari-project/tari.js?main&scripts.postinstall=npm%20run%20build-tsc#2b327ad420b11216461cce07103527cfdab188b7"

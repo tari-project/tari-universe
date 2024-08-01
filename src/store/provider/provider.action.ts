@@ -7,8 +7,41 @@ import { Transaction } from "../transaction/transaction.types"
 import { errorActions } from "../error/error.slice"
 import { RootState } from "../store"
 import { providerSelector } from "./provider.selector"
+import { SubmitTransactionRequest } from "@tariproject/tarijs"
+import { invoke } from "@tauri-apps/api/core"
+import {
+  SubstateDiff,
+  TransactionResult,
+  FinalizeResult,
+  VaultId,
+  Vault,
+  SubstateId,
+  SubstateValue,
+  ResourceContainer,
+  ResourceAddress,
+  Amount,
+} from "@tari-project/typescript-bindings"
+import { AccountsGetBalancesResponse } from "@tariproject/wallet_jrpc_client"
 
 let handleMessage: typeof window.postMessage
+
+const isAccept = (result: TransactionResult): result is { Accept: SubstateDiff } => {
+  return "Accept" in result
+}
+
+const isVaultId = (substateId: SubstateId): substateId is { Vault: VaultId } => {
+  return "Vault" in substateId
+}
+
+const isVaultSubstate = (substate: SubstateValue): substate is { Vault: Vault } => {
+  return "Vault" in substate
+}
+
+type Fungible = { Fungible: { address: ResourceAddress; amount: Amount; locked_amount: Amount } }
+
+const isFungible = (resourceContainer: ResourceContainer): resourceContainer is Fungible => {
+  return "Fungible" in resourceContainer
+}
 
 export const initializeAction = () => ({
   actionCreator: providerActions.initializeRequest,
@@ -32,6 +65,36 @@ export const initializeAction = () => ({
         }
 
         const { methodName, args, id } = event.data
+        const runSimulation = async () => {
+          if (methodName !== "submitTransaction") {
+            return
+          }
+          const transactionReq: SubmitTransactionRequest = { ...args[0] }
+          transactionReq.is_dry_run = true
+          const tx = await provider.runOne(methodName, [transactionReq])
+          const txReceipt = await provider.getTransactionResult(tx.transaction_id)
+
+          const walletBalances: AccountsGetBalancesResponse = await invoke("get_balances", {})
+          const txResult = txReceipt.result as FinalizeResult
+          if (!isAccept(txResult.result)) return
+
+          const { up_substates } = txResult.result.Accept
+
+          const updatedVaults = up_substates
+            .map((upSubstate) => {
+              const [substateId, { substate }] = upSubstate
+              if (!isVaultId(substateId) || !isVaultSubstate(substate)) return
+              if (!isFungible(substate.Vault.resource_container)) return
+              const userBalance = walletBalances.balances.find((balance) => {
+                if (!isVaultId(balance.vault_address)) return false
+                return balance.vault_address.Vault === substateId.Vault
+              })
+              if (!userBalance) return
+              return { vault: substateId.Vault, balance: substate.Vault.resource_container.Fungible.amount }
+            })
+            .filter((vault) => vault !== undefined)
+          console.log(updatedVaults)
+        }
         const submit = async () => {
           const result = await provider.runOne(methodName, args)
           if (event.source) {
@@ -49,6 +112,7 @@ export const initializeAction = () => ({
         const transaction: Transaction = {
           submit,
           cancel,
+          runSimulation,
           status: "pending",
           methodName,
           args,
