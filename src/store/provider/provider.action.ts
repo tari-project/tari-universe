@@ -22,6 +22,7 @@ import {
   Amount,
 } from "@tari-project/typescript-bindings"
 import { AccountsGetBalancesResponse } from "@tariproject/wallet_jrpc_client"
+import { BalanceUpdate } from "../simulation/simulation.types"
 
 let handleMessage: typeof window.postMessage
 
@@ -67,7 +68,7 @@ export const initializeAction = () => ({
         const { methodName, args, id } = event.data
         const runSimulation = async () => {
           if (methodName !== "submitTransaction") {
-            return
+            return []
           }
           const transactionReq: SubmitTransactionRequest = { ...args[0] }
           transactionReq.is_dry_run = true
@@ -76,11 +77,11 @@ export const initializeAction = () => ({
 
           const walletBalances: AccountsGetBalancesResponse = await invoke("get_balances", {})
           const txResult = txReceipt.result as FinalizeResult
-          if (!isAccept(txResult.result)) return
+          if (!isAccept(txResult.result)) return []
 
           const { up_substates } = txResult.result.Accept
 
-          const updatedVaults = up_substates
+          const balanceUpdates: BalanceUpdate[] = up_substates
             .map((upSubstate) => {
               const [substateId, { substate }] = upSubstate
               if (!isVaultId(substateId) || !isVaultSubstate(substate)) return
@@ -90,10 +91,15 @@ export const initializeAction = () => ({
                 return balance.vault_address.Vault === substateId.Vault
               })
               if (!userBalance) return
-              return { vault: substateId.Vault, balance: substate.Vault.resource_container.Fungible.amount }
+              return {
+                vaultAddress: substateId.Vault,
+                tokenSymbol: userBalance.token_symbol || "",
+                currentBalance: userBalance.balance,
+                newBalance: substate.Vault.resource_container.Fungible.amount,
+              }
             })
             .filter((vault) => vault !== undefined)
-          console.log(updatedVaults)
+          return balanceUpdates
         }
         const submit = async () => {
           const result = await provider.runOne(methodName, args)
