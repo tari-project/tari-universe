@@ -4,6 +4,7 @@ import { TransactionRequestPayload } from "./transaction.types"
 import { errorActions } from "../error/error.slice"
 import { RootState } from "../store"
 import { simulationActions } from "../simulation/simulation.slice"
+import { ErrorSource } from "../error/error.types"
 
 export const addTransactionAction = () => ({
   actionCreator: transactionActions.addTransaction,
@@ -88,6 +89,6 @@ export const transactionFailedAction = () => ({
   ) => {
     const dispatch = listenerApi.dispatch
 
-    dispatch(errorActions.showError({ message: action.payload.errorMsg }))
+    dispatch(errorActions.showError({ message: action.payload.errorMsg, errorSource: ErrorSource.BACKEND }))
   },
 })

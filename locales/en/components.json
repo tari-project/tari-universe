@@ -1,0 +1,18 @@
+{
+  "taplet-obtain-failure": "Failed to obtain tapplet endpoint",
+  "add-dev-taplet": "Add dev tapplet",
+  "add-dev-taplet-description": "To add tapplet in developer mode please enter the endpoint of the tapplet.",
+  "tari-universe-crashed": "Tari Universe Crashed",
+  "close-tari-universe": "Close Tari Universe",
+  "installed-taplets": "Installed Tapplets",
+  "dev-taplets": "Dev Tapplets",
+  "registered-taplets": "Registered Tapplets",
+  "registered-taplets-list-empty": "Registered tapplets list is empty",
+  "fetch-taplet-list": "Fetch Tapplet List",
+  "transaction-confirmation": "Transaction confirmation",
+  "method-name": "Method name: {{ methodName }}",
+  "todo-display-transaction-simulation-result": "TODO: display transaction simulation result",
+  "tauri-wallet-daemon": "Tauri wallet daemon",
+  "get-free-coins": " Get free coins",
+  "get-balances": "Get balances"
+}

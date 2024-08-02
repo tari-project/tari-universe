@@ -1,0 +1,18 @@
+{
+  "taplet-obtain-failure": "Nie udało się uzyskać ścieżki api tapplet'u",
+  "add-dev-taplet": "Dodaj tapplet deweloperski",
+  "add-dev-taplet-description": "Aby dodać tapplet w trybie deweloperskim, wprowadź ścieżke api tapplet'u.",
+  "tari-universe-crashed": "Tari Universe uległ awarii",
+  "close-tari-universe": "Zamknij Tari Universe",
+  "installed-taplets": "Zainstalowane tapplet'y",
+  "dev-taplets": "Tapplet'y deweloperskie",
+  "registered-taplets": "Zarejestrowane tapplet'y",
+  "registered-taplets-list-empty": "Lista zarejestrowanych tapplet'ów jest pusta",
+  "fetch-taplet-list": "Pobierz listę tapplet'ów",
+  "transaction-confirmation": "Potwierdzenie transakcji",
+  "method-name": "Nazwa metody: {{ methodName }}",
+  "todo-display-transaction-simulation-result": "TODO: wyświetl wynik symulacji transakcji",
+  "tauri-wallet-daemon": "Demon portfela Tauri",
+  "get-free-coins": "Odbierz darmowe monety",
+  "get-balances": "Pobierz balanse"
+}

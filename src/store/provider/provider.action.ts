@@ -23,6 +23,7 @@ import {
 } from "@tari-project/typescript-bindings"
 import { AccountsGetBalancesResponse } from "@tariproject/wallet_jrpc_client"
 import { BalanceUpdate } from "../simulation/simulation.types"
+import { ErrorSource } from "../error/error.types"
 
 let handleMessage: typeof window.postMessage
 
@@ -57,11 +58,11 @@ export const initializeAction = () => ({
 
       handleMessage = async (event: MessageEvent<TransactionEvent>) => {
         if (!event?.data?.args || !event?.data?.methodName) {
-          dispatch(errorActions.showError({ message: "No data in event" }))
+          dispatch(errorActions.showError({ message: "no-data-in-event", errorSource: ErrorSource.FRONTEND }))
           return
         }
         if (!event.source) {
-          dispatch(errorActions.showError({ message: "No source in event" }))
+          dispatch(errorActions.showError({ message: "no-source-in-event", errorSource: ErrorSource.FRONTEND }))
           return
         }
 

@@ -8,17 +8,20 @@ import { RootState } from "../store/store"
 import { useEffect } from "react"
 import { simulationActions } from "../store/simulation/simulation.slice"
 import { BalanceUpdateView } from "./BalanceUpdate"
+import { useTranslation } from "react-i18next"
+import { ErrorSource } from "../store/error/error.types"
 
 const selectSimulationById = (state: RootState, id?: number) => (id ? simulationsSelectors.selectById(state, id) : null)
 
 export const TransactionConfirmationModal: React.FC = () => {
+  const { t } = useTranslation(["components", "common"])
   const transaction = useSelector(transactionSelector.getPendingTransaction)
   const simulation = useSelector((state: RootState) => selectSimulationById(state, transaction?.id))
   const dispatch = useDispatch()
 
   const handleClose = async () => {
     if (!transaction) {
-      dispatch(errorActions.showError({ message: "No pending transaction found" }))
+      dispatch(errorActions.showError({ message: "no-pending-transaction-found", errorSource: ErrorSource.FRONTEND }))
       return
     }
     dispatch(transactionActions.cancelTransaction({ transaction }))
@@ -32,7 +35,7 @@ export const TransactionConfirmationModal: React.FC = () => {
 
   const submitTransaction = async () => {
     if (!transaction) {
-      dispatch(errorActions.showError({ message: "No pending transaction found" }))
+      errorActions.showError({ message: "no-pending-transaction-found", errorSource: ErrorSource.FRONTEND })
       return
     }
     dispatch(
@@ -44,9 +47,11 @@ export const TransactionConfirmationModal: React.FC = () => {
 
   return (
     <Dialog open={!!transaction} maxWidth="sm" fullWidth>
-      <DialogTitle textAlign="center">Transaction confirmation</DialogTitle>
+      <DialogTitle textAlign="center">{t("transaction-confirmation", { ns: "components" })}</DialogTitle>
       <DialogContent>
-        <DialogContentText>Method name: {transaction?.methodName}</DialogContentText>
+        <DialogContentText>
+          {t("method-name", { methodName: transaction?.methodName, ns: "components" })}
+        </DialogContentText>
         <DialogContentText>
           Balance updates:
           {simulation?.balanceUpdates?.map((update, index) => (
@@ -56,10 +61,10 @@ export const TransactionConfirmationModal: React.FC = () => {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} variant="contained">
-          Cancel
+          {t("cancel", { ns: "common" })}
         </Button>
         <Button onClick={submitTransaction} variant="contained">
-          Submit
+          {t("submit", { ns: "common" })}
         </Button>
       </DialogActions>
     </Dialog>
