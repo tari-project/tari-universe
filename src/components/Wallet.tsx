@@ -35,7 +35,7 @@ export const Wallet: React.FC = () => {
   return (
     <Box mt={4}>
       <Typography variant="h4" textAlign="center" pt={6}>
-        {t("tauri-wallet-daemon", { ns: "components" })}
+        {t("tari-wallet-daemon", { ns: "components" })}
       </Typography>
       <Box display="flex" flexDirection="column" gap={2} alignItems="center" py={4}>
         <Button onClick={get_free_coins} variant="contained" sx={{ width: 200 }}>

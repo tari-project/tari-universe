@@ -53,7 +53,7 @@ export const TransactionConfirmationModal: React.FC = () => {
           {t("method-name", { methodName: transaction?.methodName, ns: "components" })}
         </DialogContentText>
         <DialogContentText>
-          Balance updates:
+          {t("balance-updates", { ns: "components" })}:
           {simulation?.balanceUpdates?.map((update, index) => (
             <BalanceUpdateView key={index} {...update} />
           ))}
