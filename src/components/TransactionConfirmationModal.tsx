@@ -7,6 +7,7 @@ import { simulationsSelectors } from "../store/simulation/simulation.selector"
 import { RootState } from "../store/store"
 import { useEffect } from "react"
 import { simulationActions } from "../store/simulation/simulation.slice"
+import { BalanceUpdateView } from "./BalanceUpdate"
 
 const selectSimulationById = (state: RootState, id?: number) => (id ? simulationsSelectors.selectById(state, id) : null)
 
@@ -49,7 +50,7 @@ export const TransactionConfirmationModal: React.FC = () => {
         <DialogContentText>
           Balance updates:
           {simulation?.balanceUpdates?.map((update, index) => (
-            <span key={index}>{JSON.stringify(update, null, 2)}</span>
+            <BalanceUpdateView key={index} {...update} />
           ))}
         </DialogContentText>
       </DialogContent>
