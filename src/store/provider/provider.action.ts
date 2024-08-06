@@ -71,8 +71,7 @@ export const initializeAction = () => ({
           if (methodName !== "submitTransaction") {
             return []
           }
-          const transactionReq: SubmitTransactionRequest = { ...args[0] }
-          transactionReq.is_dry_run = true
+          const transactionReq: SubmitTransactionRequest = { ...args[0], is_dry_run: true }
           const tx = await provider.runOne(methodName, [transactionReq])
           const txReceipt = await provider.getTransactionResult(tx.transaction_id)
 
