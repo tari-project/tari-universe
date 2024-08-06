@@ -6,6 +6,7 @@ import { errorReducer } from "./error/error.slice"
 import { transactionReducer } from "./transaction/transaction.slice"
 import { installedTappletsReducer } from "./installedTapplets/installedTapplets.slice"
 import { devTappletsReducer } from "./devTapplets/devTapplets.slice"
+import { simulationReducer } from "./simulation/simulation.slice"
 import { metadataReducer } from "./metadata/metadata.slice"
 
 export const store = configureStore({
@@ -16,6 +17,7 @@ export const store = configureStore({
     provider: providerReducer,
     error: errorReducer,
     transaction: transactionReducer,
+    simulation: simulationReducer,
     metadata: metadataReducer,
   },
 

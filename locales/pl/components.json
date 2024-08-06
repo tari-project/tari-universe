@@ -11,8 +11,8 @@
   "fetch-taplet-list": "Pobierz listę tapplet'ów",
   "transaction-confirmation": "Potwierdzenie transakcji",
   "method-name": "Nazwa metody: {{ methodName }}",
-  "todo-display-transaction-simulation-result": "TODO: wyświetl wynik symulacji transakcji",
-  "tauri-wallet-daemon": "Demon portfela Tauri",
+  "tari-wallet-daemon": "Demon portfela Tari",
   "get-free-coins": "Odbierz darmowe monety",
-  "get-balances": "Pobierz balanse"
+  "get-balances": "Pobierz balanse",
+  "balance-updates": "Zmiana balansów"
 }

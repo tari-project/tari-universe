@@ -11,8 +11,8 @@
   "fetch-taplet-list": "Fetch Tapplet List",
   "transaction-confirmation": "Transaction confirmation",
   "method-name": "Method name: {{ methodName }}",
-  "todo-display-transaction-simulation-result": "TODO: display transaction simulation result",
-  "tauri-wallet-daemon": "Tauri wallet daemon",
+  "tari-wallet-daemon": "Tari wallet daemon",
   "get-free-coins": " Get free coins",
-  "get-balances": "Get balances"
+  "get-balances": "Get balances",
+  "balance-updates": "Balance updates"
 }

@@ -3,7 +3,21 @@ import { transactionActions } from "./transaction.slice"
 import { TransactionRequestPayload } from "./transaction.types"
 import { errorActions } from "../error/error.slice"
 import { RootState } from "../store"
+import { simulationActions } from "../simulation/simulation.slice"
 import { ErrorSource } from "../error/error.types"
+
+export const addTransactionAction = () => ({
+  actionCreator: transactionActions.addTransaction,
+  effect: async (
+    action: PayloadAction<TransactionRequestPayload>,
+    listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
+  ) => {
+    const { id } = action.payload.transaction
+    const dispatch = listenerApi.dispatch
+
+    dispatch(simulationActions.runSimulationRequest({ transactionId: id }))
+  },
+})
 
 export const executeTransactionAction = () => ({
   actionCreator: transactionActions.sendTransactionRequest,

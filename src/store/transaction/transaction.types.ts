@@ -1,4 +1,5 @@
 import { WalletDaemonTariProvider } from "@provider/TariUniverseProvider"
+import { BalanceUpdate } from "../simulation/simulation.types"
 
 export type TransactionStatus = "pending" | "success" | "failure" | "cancelled"
 
@@ -8,11 +9,8 @@ export type Transaction = {
   id: number
   submit: () => void
   cancel: () => void
+  runSimulation: () => Promise<BalanceUpdate[]>
   status: TransactionStatus
-}
-
-export type TransactionStoreState = {
-  transactions: Transaction[]
 }
 
 export type TransactionRequestPayload = {
