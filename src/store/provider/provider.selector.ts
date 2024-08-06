@@ -1,4 +1,4 @@
-import { permissions as walletPermissions, TariPermissions } from "@tariproject/tarijs"
+import { permissions as walletPermissions, TariPermissions } from "@tari-project/tarijs"
 import { createSelector } from "@reduxjs/toolkit"
 import { RootState } from "../store"
 import { WalletDaemonParameters, WalletDaemonTariProvider } from "@provider/TariUniverseProvider"
