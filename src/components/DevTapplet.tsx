@@ -22,7 +22,7 @@ export function ActiveDevTapplet() {
         } else {
           dispatch(
             errorActions.showError({
-              message: `manifest-package-name-mismatch | packageName: ${state?.package_name} & manifestId: ${manifest?.id} & endpoint: ${state?.endpoint}`,
+              message: `manifest-package-name-mismatch | packageName-${state?.package_name} & manifestId-${manifest?.id} & endpoint-${state?.endpoint}`,
               errorSource: ErrorSource.FRONTEND,
             })
           )
@@ -30,7 +30,7 @@ export function ActiveDevTapplet() {
       } catch (error) {
         dispatch(
           errorActions.showError({
-            message: `fetching-taplet-manifest-failed | error: ${error}`,
+            message: `fetching-tapplet-manifest-failed | error-${error}`,
             errorSource: ErrorSource.FRONTEND,
           })
         )
