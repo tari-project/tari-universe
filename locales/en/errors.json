@@ -1,5 +1,5 @@
 {
-  "manifest-package-name-mismatch": "Tapplet manifest does not match package name. Expected: {{ packageName }} Received: {{ manifestId }} from: {{ endpoint }}/tapplet.manifest.json",
+  "manifest-package-name-mismatch": "Tapplet manifest does not match package name. Expected: {{ expectedPackageName }} Received: {{ receivedPackageName }} from: {{- endpoint }}/tapplet.manifest.json",
   "fetching-taplet-manifest-failed": "Error fetching tapplet manifest: {{ error }}",
   "no-pending-transaction-found": "No pending transaction found",
   "no-data-in-event": "No data in event",

@@ -48,7 +48,6 @@ CREATE TABLE dev_tapplet (
   id INTEGER PRIMARY KEY,
   package_name TEXT NOT NULL,
   endpoint TEXT NOT NULL,
-  tapplet_name TEXT NOT NULL,
   display_name TEXT NOT NULL,
   UNIQUE(endpoint)
 );

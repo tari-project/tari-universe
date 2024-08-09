@@ -163,7 +163,6 @@ pub struct DevTapplet {
   pub id: Option<i32>,
   pub package_name: String,
   pub endpoint: String,
-  pub tapplet_name: String,
   pub display_name: String,
 }
 
@@ -172,7 +171,6 @@ pub struct DevTapplet {
 pub struct CreateDevTapplet<'a> {
   pub endpoint: &'a str,
   pub package_name: &'a str,
-  pub tapplet_name: &'a str,
   pub display_name: &'a str,
 }
 
@@ -181,7 +179,6 @@ impl<'a> From<&CreateDevTapplet<'a>> for UpdateDevTapplet {
     UpdateDevTapplet {
       endpoint: create_dev_tapplet.endpoint.to_string(),
       package_name: create_dev_tapplet.package_name.to_string(),
-      tapplet_name: create_dev_tapplet.tapplet_name.to_string(),
       display_name: create_dev_tapplet.display_name.to_string(),
     }
   }
@@ -192,7 +189,6 @@ impl<'a> From<&CreateDevTapplet<'a>> for UpdateDevTapplet {
 pub struct UpdateDevTapplet {
   pub endpoint: String,
   pub package_name: String,
-  pub tapplet_name: String,
   pub display_name: String,
 }
 
