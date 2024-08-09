@@ -17,12 +17,12 @@ export function ActiveDevTapplet() {
       try {
         const response = await fetch(`${state?.endpoint}/tapplet.manifest.json`)
         const manifest = await response.json()
-        if (manifest?.id === state?.package_name) {
+        if (manifest?.packageName === state?.package_name) {
           setIsVerified(true)
         } else {
           dispatch(
             errorActions.showError({
-              message: `manifest-package-name-mismatch | packageName-${state?.package_name} & manifestId-${manifest?.id} & endpoint-${state?.endpoint}`,
+              message: `manifest-package-name-mismatch | expectedPackageName-${state?.package_name} & receivedPackageName-${manifest?.packageName} & endpoint-${state?.endpoint}`,
               errorSource: ErrorSource.FRONTEND,
             })
           )
