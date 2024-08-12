@@ -1,4 +1,4 @@
-import { transports } from "@tariproject/wallet_jrpc_client"
+import { transports } from "@tari-project/wallet_jrpc_client"
 import { invoke } from "@tauri-apps/api/core"
 
 export class IPCRpcTransport implements transports.RpcTransport {
