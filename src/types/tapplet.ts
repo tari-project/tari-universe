@@ -28,7 +28,6 @@ export interface DevTapplet {
   id: string
   package_name: string
   endpoint: string
-  tapplet_name: string
   display_name: string
   about_summary: string
   about_description: string

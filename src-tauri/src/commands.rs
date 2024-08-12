@@ -366,8 +366,7 @@ pub async fn add_dev_tapplet(
   let mut store = SqliteStore::new(db_connection.0.clone());
   let new_dev_tapplet = CreateDevTapplet {
     endpoint: &endpoint,
-    package_name: &manifest_res.id,
-    tapplet_name: &manifest_res.name,
+    package_name: &manifest_res.package_name,
     display_name: &manifest_res.display_name,
   };
 
