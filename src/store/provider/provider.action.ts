@@ -7,7 +7,7 @@ import { Transaction } from "../transaction/transaction.types"
 import { errorActions } from "../error/error.slice"
 import { RootState } from "../store"
 import { providerSelector } from "./provider.selector"
-import { SubmitTransactionRequest } from "@tariproject/tarijs"
+import { SubmitTransactionRequest } from "@tari-project/tarijs"
 import { invoke } from "@tauri-apps/api/core"
 import {
   SubstateDiff,
@@ -21,7 +21,7 @@ import {
   ResourceAddress,
   Amount,
 } from "@tari-project/typescript-bindings"
-import { AccountsGetBalancesResponse } from "@tariproject/wallet_jrpc_client"
+import { AccountsGetBalancesResponse } from "@tari-project/wallet_jrpc_client"
 import { BalanceUpdate } from "../simulation/simulation.types"
 import { ErrorSource } from "../error/error.types"
 

@@ -6,7 +6,7 @@ import {
   SubstateType,
   substateIdToString,
   KeyBranch,
-} from "@tariproject/wallet_jrpc_client"
+} from "@tari-project/wallet_jrpc_client"
 import { IPCRpcTransport } from "./ipc_transport"
 import {
   Account,
@@ -19,8 +19,8 @@ import {
   TransactionResult,
   TransactionStatus,
   VaultBalances,
-} from "@tariproject/tarijs"
-import { ListSubstatesResponse } from "@tariproject/tarijs/dist/providers"
+} from "@tari-project/tarijs"
+import { ListSubstatesResponse } from "@tari-project/tarijs/dist/providers"
 
 export type WalletDaemonParameters = {
   permissions: TariPermissions
