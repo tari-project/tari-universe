@@ -34,6 +34,15 @@ diesel::table! {
 }
 
 diesel::table! {
+    tapplet_asset (id) {
+        id -> Nullable<Integer>,
+        tapplet_id -> Nullable<Integer>,
+        icon_url -> Text,
+        background_url -> Text,
+    }
+}
+
+diesel::table! {
     tapplet_audit (id) {
         id -> Nullable<Integer>,
         tapplet_id -> Nullable<Integer>,
@@ -54,6 +63,7 @@ diesel::table! {
 
 diesel::joinable!(installed_tapplet -> tapplet (tapplet_id));
 diesel::joinable!(installed_tapplet -> tapplet_version (tapplet_version_id));
+diesel::joinable!(tapplet_asset -> tapplet (tapplet_id));
 diesel::joinable!(tapplet_audit -> tapplet (tapplet_id));
 diesel::joinable!(tapplet_version -> tapplet (tapplet_id));
 
@@ -61,6 +71,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     dev_tapplet,
     installed_tapplet,
     tapplet,
+    tapplet_asset,
     tapplet_audit,
     tapplet_version,
 );

@@ -3,7 +3,11 @@ use tauri_plugin_http::reqwest::{ self };
 use std::{ fs, io::Write, path::PathBuf };
 use flate2::read::GzDecoder;
 use tar::Archive;
-use crate::error::{ Error::{ self, IOError, RequestError }, IOError::*, RequestError::* };
+use crate::{
+  constants::REGISTRY_URL,
+  error::{ Error::{ self, IOError, RequestError }, IOError::*, RequestError::* },
+  interface::TappletAssets,
+};
 
 use crate::constants::TAPPLETS_INSTALLED_DIR;
 
@@ -16,7 +20,7 @@ pub fn delete_tapplet(tapplet_path: PathBuf) -> Result<(), Error> {
   fs::remove_dir_all(tapplet_path).map_err(|_| IOError(FailedToDeleteTapplet { path }))
 }
 
-pub async fn download_file(url: &str, tapplet_path: PathBuf) -> Result<(), anyhow::Error> {
+pub async fn download_file_and_archive(url: &str, tapplet_path: PathBuf) -> Result<(), Error> {
   // Download the file
   let client = reqwest::Client::new();
   let mut response = client
@@ -101,4 +105,67 @@ pub fn get_tapp_download_path(
   let tapplet_path = app_path.join(tapp_dir_path);
 
   Ok(tapplet_path)
+}
+
+async fn download_file(url: &str, dest: PathBuf) -> Result<(), Error> {
+  let client = reqwest::Client::new();
+  let mut response = client
+    .get(url)
+    .send().await
+    .map_err(|_| RequestError(FailedToDownload { url: url.to_string() }))?;
+
+  if response.status().is_success() {
+    let dest_parent = dest.parent().unwrap();
+    let path = dest
+      .clone()
+      .into_os_string()
+      .into_string()
+      .map_err(|_| IOError(FailedToGetFilePath))?;
+    fs
+      ::create_dir_all(&dest_parent)
+      .map_err(|_| IOError(FailedToCreateDir { path: dest_parent.to_str().unwrap().to_owned() }))?;
+
+    let mut file = fs::File::create(dest).map_err(|_| IOError(FailedToCreateFile { path: path.clone() }))?;
+
+    while
+      let Some(chunk) = response.chunk().await.map_err(|_| RequestError(FailedToDownload { url: url.to_string() }))?
+    {
+      file.write_all(&chunk).map_err(|_| IOError(FailedToWriteFile { path: path.clone() }))?;
+    }
+  } else if response.status().is_server_error() {
+    println!("Download server error! Status: {:?}", response.status());
+  } else {
+    println!("Download failed. Something else happened. Status: {:?}", response);
+  }
+
+  Ok(())
+}
+
+fn get_or_create_tapp_asset_dir(tapp_root_dir: PathBuf, tapplet_name: &str) -> Result<PathBuf, Error> {
+  let tapp_asset_dir = tapp_root_dir.join("assets").join(tapplet_name);
+  let path = tapp_asset_dir
+    .clone()
+    .into_os_string()
+    .into_string()
+    .map_err(|_| IOError(FailedToGetFilePath))?;
+  fs::create_dir_all(path.clone()).map_err(|_| IOError(FailedToCreateDir { path }))?;
+  return Ok(tapp_asset_dir);
+}
+
+pub async fn download_asset(app_handle: tauri::AppHandle, tapplet_name: String) -> Result<TappletAssets, Error> {
+  let tapp_root_dir: PathBuf = app_handle.path().app_data_dir().unwrap().to_path_buf();
+  let tapp_asset_dir = get_or_create_tapp_asset_dir(tapp_root_dir, &tapplet_name)?;
+  let icon_url = format!("{}/src/{}/images/logo.svg", REGISTRY_URL, tapplet_name);
+  let background_url = format!("{}/src/{}/images/background.svg", REGISTRY_URL, tapplet_name);
+
+  let icon_dest = tapp_asset_dir.join("logo.svg");
+  let background_dest = tapp_asset_dir.join("background.svg");
+
+  download_file(&icon_url, icon_dest.clone()).await?;
+  download_file(&background_url, background_dest.clone()).await?;
+
+  Ok(TappletAssets {
+    icon_url: icon_dest.into_os_string().into_string().unwrap(),
+    background_url: background_dest.into_os_string().into_string().unwrap(),
+  })
 }

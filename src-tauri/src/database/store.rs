@@ -13,11 +13,14 @@ use crate::interface::InstalledTappletWithName;
 use crate::interface::TappletSemver;
 
 use super::models::CreateDevTapplet;
+use super::models::CreateTappletAsset;
 use super::models::CreateTappletVersion;
 use super::models::CreateTappletAudit;
 use super::models::DevTapplet;
+use super::models::TappletAsset;
 use super::models::UpdateDevTapplet;
 use super::models::UpdateInstalledTapplet;
+use super::models::UpdateTappletAsset;
 use super::models::UpdateTappletVersion;
 use super::models::UpdateTappletAudit;
 
@@ -120,6 +123,16 @@ impl SqliteStore {
       .ok_or(Error::VersionNotFound)?;
 
     return Ok((boxed_tapplet, latest_version.tapplet_version));
+  }
+
+  pub fn get_tapplet_assets_by_tapplet_id(&mut self, tapp_id: i32) -> Result<Option<TappletAsset>, Error> {
+    use crate::database::schema::tapplet_asset::dsl::*;
+
+    tapplet_asset
+      .filter(tapplet_id.eq(tapp_id))
+      .first::<TappletAsset>(self.get_connection().deref_mut())
+      .optional()
+      .map_err(|_| DatabaseError(FailedToRetrieveData { entity_name: "tapplet asset".to_string() }))
   }
 }
 
@@ -389,5 +402,57 @@ impl<'a> Store<DevTapplet, CreateDevTapplet<'a>, UpdateDevTapplet> for SqliteSto
       ::delete(dev_tapplet.filter(id.eq(entity.id)))
       .execute(self.get_connection().deref_mut())
       .map_err(|_| DatabaseError(FailedToDelete { entity_name: "Dev Tapplet".to_string() }))
+  }
+}
+
+impl<'a> Store<TappletAsset, CreateTappletAsset<'a>, UpdateTappletAsset> for SqliteStore {
+  fn get_all(&mut self) -> Result<Vec<TappletAsset>, Error> {
+    use crate::database::schema::tapplet_asset::dsl::*;
+
+    tapplet_asset
+      .load::<TappletAsset>(self.get_connection().deref_mut())
+      .map_err(|_| DatabaseError(FailedToRetrieveData { entity_name: "Tapplet asset".to_string() }))
+  }
+
+  fn get_by_id(&mut self, tapplet_asset_id: i32) -> Result<TappletAsset, Error> {
+    use crate::database::schema::tapplet_asset::dsl::*;
+
+    tapplet_asset
+      .filter(id.eq(tapplet_asset_id))
+      .first::<TappletAsset>(self.get_connection().deref_mut())
+      .map_err(|_| DatabaseError(FailedToRetrieveData { entity_name: "Tapplet asset".to_string() }))
+  }
+
+  fn create(&mut self, item: &CreateTappletAsset) -> Result<TappletAsset, Error> {
+    use crate::database::schema::tapplet_asset;
+
+    diesel
+      ::insert_into(tapplet_asset::table)
+      .values(item)
+      .get_result(self.get_connection().deref_mut())
+      .map_err(|_|
+        DatabaseError(FailedToCreate {
+          entity_name: "Tapplet asset".to_string(),
+        })
+      )
+  }
+
+  fn update(&mut self, old: TappletAsset, new: &UpdateTappletAsset) -> Result<usize, Error> {
+    use crate::database::schema::tapplet_asset::dsl::*;
+
+    diesel
+      ::update(tapplet_asset.filter(id.eq(old.id)))
+      .set(new)
+      .execute(self.get_connection().deref_mut())
+      .map_err(|_| DatabaseError(FailedToUpdate { entity_name: "Tapplet asset".to_string() }))
+  }
+
+  fn delete(&mut self, entity: TappletAsset) -> Result<usize, Error> {
+    use crate::database::schema::tapplet_asset::dsl::*;
+
+    diesel
+      ::delete(tapplet_asset.filter(id.eq(entity.id)))
+      .execute(self.get_connection().deref_mut())
+      .map_err(|_| DatabaseError(FailedToDelete { entity_name: "Tapplet asset".to_string() }))
   }
 }
