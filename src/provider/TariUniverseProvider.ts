@@ -192,8 +192,8 @@ export class WalletDaemonTariProvider implements TariProvider {
     const res = await this.client.substatesList({
       filter_by_template,
       filter_by_type,
-      limit: BigInt(limit ?? 0),
-      offset: BigInt(offset ?? 0),
+      limit: limit ? BigInt(limit) : null,
+      offset: offset ? BigInt(offset) : null,
     })
     const substates = res.substates.map((s) => ({
       substate_id: substateIdToString(s.substate_id),
