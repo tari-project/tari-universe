@@ -12,7 +12,13 @@ export const initializeAction = () => ({
     try {
       await invoke("fetch_tapplets")
       const registeredTapplets = await invoke("read_tapp_registry_db")
-      listenerApi.dispatch(registeredTappletsActions.initializeSuccess({ registeredTapplets }))
+      const assetsServerAddr = await invoke("get_assets_server_addr")
+      const tappletsWithAssets = registeredTapplets.map((tapp) => ({
+        ...tapp,
+        logoAddr: `${assetsServerAddr}/${tapp.package_name}/logo.svg`,
+        backgroundAddr: `${assetsServerAddr}/${tapp.package_name}/background.svg`,
+      }))
+      listenerApi.dispatch(registeredTappletsActions.initializeSuccess({ registeredTapplets: tappletsWithAssets }))
     } catch (error) {
       listenerApi.dispatch(registeredTappletsActions.initializeFailure({ errorMsg: error as string }))
     }

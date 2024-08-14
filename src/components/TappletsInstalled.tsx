@@ -5,16 +5,16 @@ import tariLogo from "../assets/tari.svg"
 import { NavLink } from "react-router-dom"
 import { TabKey } from "../views/Tabs"
 import { useDispatch, useSelector } from "react-redux"
-import { installedTappletsSelectors } from "../store/installedTapplets/installedTapplets.selector"
 import { devTappletsSelectors } from "../store/devTapplets/devTapplets.selector"
 import { installedTappletsActions } from "../store/installedTapplets/installedTapplets.slice"
 import { devTappletsActions } from "../store/devTapplets/devTapplets.slice"
 import { DevTapplet, InstalledTappletWithName } from "@type/tapplet"
 import { useTranslation } from "react-i18next"
+import { installedTappletsListSelector } from "../store/installedTapplets/installedTapplets.selector"
 
 export const TappletsInstalled: React.FC = () => {
   const { t } = useTranslation("components")
-  const installedTapplets = useSelector(installedTappletsSelectors.selectAll)
+  const installedTapplets = useSelector(installedTappletsListSelector)
   const devTapplets = useSelector(devTappletsSelectors.selectAll)
   const dispatch = useDispatch()
 
@@ -39,7 +39,7 @@ export const TappletsInstalled: React.FC = () => {
         {installedTapplets.map((item, index) => (
           <ListItem key={index}>
             <ListItemAvatar>
-              <Avatar src={tariLogo} />
+              <Avatar src={item.logoAddr} />
             </ListItemAvatar>
             <ListItemText primary={item.display_name} />
             <IconButton aria-label="launch" style={{ marginRight: 10 }}>

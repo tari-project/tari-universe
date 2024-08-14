@@ -1,5 +1,5 @@
 import { PayloadAction, createEntityAdapter, createSlice } from "@reduxjs/toolkit"
-import { RegisteredTapplet } from "@type/tapplet"
+import { RegisteredTappletWithAssets } from "@type/tapplet"
 import { listenerMiddleware } from "../store.listener"
 import { initializeAction } from "./registeredTapplets.action"
 import {
@@ -8,7 +8,7 @@ import {
   InitRegisteredTappletsFailurePayload,
 } from "./registeredTapplets.types"
 
-export const registeredTappletAdapter = createEntityAdapter<RegisteredTapplet>()
+export const registeredTappletAdapter = createEntityAdapter<RegisteredTappletWithAssets>()
 
 const registeredTappletsSlice = createSlice({
   name: "registeredTapplets",

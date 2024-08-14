@@ -15,7 +15,6 @@ use crate::{
       DevTapplet,
       InstalledTapplet,
       Tapplet,
-      TappletAsset,
       UpdateInstalledTapplet,
       UpdateTapplet,
     },
@@ -38,6 +37,7 @@ use crate::{
     get_tapp_download_path,
   },
   tapplet_server::start,
+  AssetServer,
   DatabaseConnection,
   ShutdownTokens,
   Tokens,
@@ -136,6 +136,11 @@ pub async fn close_tapplet(installed_tapplet_id: i32, shutdown_tokens: State<'_,
   }
 
   Ok(())
+}
+
+#[tauri::command]
+pub fn get_assets_server_addr(state: tauri::State<'_, AssetServer>) -> Result<String, String> {
+  Ok(format!("http://{}", state.addr))
 }
 
 #[tauri::command]

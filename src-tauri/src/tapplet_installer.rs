@@ -4,7 +4,7 @@ use std::{ fs, io::Write, path::PathBuf };
 use flate2::read::GzDecoder;
 use tar::Archive;
 use crate::{
-  constants::REGISTRY_URL,
+  constants::{ REGISTRY_URL, TAPPLETS_ASSETS_DIR },
   error::{ Error::{ self, IOError, RequestError }, IOError::*, RequestError::* },
   interface::TappletAssets,
 };
@@ -142,7 +142,7 @@ async fn download_file(url: &str, dest: PathBuf) -> Result<(), Error> {
 }
 
 fn get_or_create_tapp_asset_dir(tapp_root_dir: PathBuf, tapplet_name: &str) -> Result<PathBuf, Error> {
-  let tapp_asset_dir = tapp_root_dir.join("assets").join(tapplet_name);
+  let tapp_asset_dir = tapp_root_dir.join(TAPPLETS_ASSETS_DIR).join(tapplet_name);
   let path = tapp_asset_dir
     .clone()
     .into_os_string()

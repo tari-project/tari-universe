@@ -11,4 +11,5 @@ declare module "@tauri-apps/api/core" {
     payload: { tappletId: string; installedTappletId: string }
   ): Promise<InstalledTappletWithName[]>
   function invoke(param: "get_balances", payload: {}): Promise<WalletBalances> // TODO use AccountsGetBalancesResponse from typescript-bindings packages after it's fixed
+  function invoke(param: "get_assets_server_addr"): Promise<string>
 }
