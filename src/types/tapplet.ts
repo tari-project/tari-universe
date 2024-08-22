@@ -11,6 +11,11 @@ export type RegisteredTapplet = {
   category: string
 }
 
+export type RegisteredTappletWithAssets = RegisteredTapplet & {
+  logoAddr: string
+  backgroundAddr: string
+}
+
 export type InstalledTapplet = {
   id: string
   tapplet_id: string

@@ -1,5 +1,7 @@
+use constants::TAPPLETS_ASSETS_DIR;
 use diesel::SqliteConnection;
 use fs::{ get_config_file, get_data_dir, get_log_dir };
+use tapplet_server::start;
 use std::{ collections::HashMap, sync::{ Arc, Mutex }, thread::sleep, time::Duration };
 use tauri::{ self, Manager };
 use tokio_util::sync::CancellationToken;
@@ -21,6 +23,7 @@ use commands::{
   calculate_and_validate_tapp_checksum,
   launch_tapplet,
   close_tapplet,
+  get_assets_server_addr,
   download_and_extract_tapp,
   get_balances,
   get_free_coins,
@@ -49,6 +52,10 @@ pub struct Tokens {
 #[derive(Default)]
 pub struct ShutdownTokens(Arc<tokio::sync::Mutex<HashMap<i32, CancellationToken>>>);
 pub struct DatabaseConnection(Arc<Mutex<SqliteConnection>>);
+pub struct AssetServer {
+  pub addr: String,
+  pub cancel_token: CancellationToken,
+}
 
 async fn try_get_tokens() -> (String, String) {
   loop {
@@ -88,6 +95,12 @@ fn setup_tari_universe(app: &mut tauri::App) -> Result<(), Box<dyn std::error::E
     .map_err(|_| error::Error::FailedToObtainAuthTokenLock)?
     .replace_range(.., &auth_token);
 
+  let app_path = app.path().app_data_dir().unwrap().to_path_buf();
+  let tapplet_assets_path = app_path.join(TAPPLETS_ASSETS_DIR);
+  let handle_start = tauri::async_runtime::spawn(async move { start(tapplet_assets_path).await });
+  let (addr, cancel_token) = tauri::async_runtime::block_on(handle_start)?.unwrap();
+  app.manage(AssetServer { addr, cancel_token });
+
   Ok(())
 }
 
@@ -117,6 +130,7 @@ pub fn run() {
         get_balances,
         launch_tapplet,
         close_tapplet,
+        get_assets_server_addr,
         call_wallet,
         insert_installed_tapp_db,
         read_installed_tapp_db,

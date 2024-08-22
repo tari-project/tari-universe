@@ -10,7 +10,6 @@ import {
   Typography,
 } from "@mui/material"
 import { InstallDesktop } from "@mui/icons-material"
-import tariLogo from "../assets/tari.svg"
 import AddDevTappletDialog from "./AddDevTappletDialog"
 import { useDispatch, useSelector } from "react-redux"
 import { registeredTappletsSelectors } from "../store/registeredTapplets/registeredTapplets.selector"
@@ -42,7 +41,7 @@ export const TappletsRegistered: React.FC = () => {
           {registeredTapplets.map((item) => (
             <ListItem key={item.package_name} sx={{ paddingTop: 2 }}>
               <ListItemAvatar>
-                <Avatar src={tariLogo} />
+                <Avatar src={item.logoAddr} />
               </ListItemAvatar>
               <ListItemText primary={item.package_name} />
               <IconButton aria-label="install" onClick={() => handleInstall(item.id)} sx={{ marginLeft: 8 }}>

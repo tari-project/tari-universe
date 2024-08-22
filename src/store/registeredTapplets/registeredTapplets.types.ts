@@ -1,4 +1,4 @@
-import { RegisteredTapplet } from "../../types/tapplet"
+import { RegisteredTapplet, RegisteredTappletWithAssets } from "../../types/tapplet"
 import { EntityState } from "@reduxjs/toolkit"
 
 export type TappletStoreState = {
@@ -9,7 +9,7 @@ export type TappletStoreState = {
 
 export type InitRegisteredTappletsReqPayload = {}
 export type InitRegisteredTappletsSuccessPayload = {
-  registeredTapplets: RegisteredTapplet[]
+  registeredTapplets: RegisteredTappletWithAssets[]
 }
 export type InitRegisteredTappletsFailurePayload = {
   errorMsg: string

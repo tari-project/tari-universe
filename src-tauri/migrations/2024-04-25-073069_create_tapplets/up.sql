@@ -51,3 +51,11 @@ CREATE TABLE dev_tapplet (
   display_name TEXT NOT NULL,
   UNIQUE(endpoint)
 );
+
+CREATE TABLE tapplet_asset (
+  id INTEGER PRIMARY KEY,
+  tapplet_id INTEGER,
+  icon_url TEXT NOT NULL,
+  background_url TEXT NOT NULL,
+  FOREIGN KEY (tapplet_id) REFERENCES tapplet(id)
+);

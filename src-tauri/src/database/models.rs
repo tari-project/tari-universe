@@ -227,3 +227,39 @@ pub struct UpdateTappletAudit {
   pub auditor: String,
   pub report_url: String,
 }
+
+#[derive(Queryable, Selectable, Debug, Serialize)]
+#[diesel(table_name = tapplet_asset)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+pub struct TappletAsset {
+  pub id: Option<i32>,
+  pub tapplet_id: Option<i32>,
+  pub icon_url: String,
+  pub background_url: String,
+}
+
+#[derive(Insertable, Debug)]
+#[diesel(table_name = tapplet_asset)]
+pub struct CreateTappletAsset<'a> {
+  pub tapplet_id: Option<i32>,
+  pub icon_url: &'a str,
+  pub background_url: &'a str,
+}
+
+impl<'a> From<&CreateTappletAsset<'a>> for UpdateTappletAsset {
+  fn from(create_tapplet_asset: &CreateTappletAsset) -> Self {
+    UpdateTappletAsset {
+      tapplet_id: create_tapplet_asset.tapplet_id,
+      icon_url: create_tapplet_asset.icon_url.to_string(),
+      background_url: create_tapplet_asset.background_url.to_string(),
+    }
+  }
+}
+
+#[derive(Debug, AsChangeset)]
+#[diesel(table_name = tapplet_asset)]
+pub struct UpdateTappletAsset {
+  pub tapplet_id: Option<i32>,
+  pub icon_url: String,
+  pub background_url: String,
+}

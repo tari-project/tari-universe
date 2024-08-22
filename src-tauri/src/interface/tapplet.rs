@@ -28,3 +28,9 @@ pub struct RegisteredTappletWithVersion {
   pub registered_tapp: Tapplet,
   pub tapp_version: TappletVersion,
 }
+
+#[derive(Serialize)]
+pub struct TappletAssets {
+  pub icon_url: String,
+  pub background_url: String,
+}

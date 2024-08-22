@@ -1,13 +1,15 @@
 use tari_wallet_daemon_client::types::AccountsGetBalancesResponse;
-use tauri::{ self, State };
+use tauri::{ self, AppHandle, State };
 use std::path::PathBuf;
 
 use crate::{
+  constants::REGISTRY_URL,
   database::{
     models::{
       CreateDevTapplet,
       CreateInstalledTapplet,
       CreateTapplet,
+      CreateTappletAsset,
       CreateTappletAudit,
       CreateTappletVersion,
       DevTapplet,
@@ -26,8 +28,16 @@ use crate::{
   hash_calculator::calculate_checksum,
   interface::{ DevTappletResponse, InstalledTappletWithName, RegisteredTappletWithVersion, RegisteredTapplets },
   rpc::{ balances, free_coins, make_request },
-  tapplet_installer::{ check_extracted_files, delete_tapplet, download_file, extract_tar, get_tapp_download_path },
+  tapplet_installer::{
+    check_extracted_files,
+    delete_tapplet,
+    download_asset,
+    download_file_and_archive,
+    extract_tar,
+    get_tapp_download_path,
+  },
   tapplet_server::start,
+  AssetServer,
   DatabaseConnection,
   ShutdownTokens,
   Tokens,
@@ -129,6 +139,11 @@ pub async fn close_tapplet(installed_tapplet_id: i32, shutdown_tokens: State<'_,
 }
 
 #[tauri::command]
+pub fn get_assets_server_addr(state: tauri::State<'_, AssetServer>) -> Result<String, String> {
+  Ok(format!("http://{}", state.addr))
+}
+
+#[tauri::command]
 pub async fn download_and_extract_tapp(
   tapplet_id: i32,
   db_connection: State<'_, DatabaseConnection>,
@@ -143,7 +158,7 @@ pub async fn download_and_extract_tapp(
   // download tarball
   let url = tapp_version.registry_url.clone();
   let download_path = tapplet_path.clone();
-  let handle = tauri::async_runtime::spawn(async move { download_file(&url, download_path).await });
+  let handle = tauri::async_runtime::spawn(async move { download_file_and_archive(&url, download_path).await });
   handle.await?.map_err(|_| Error::RequestError(FailedToDownload { url: tapp_version.registry_url }))?;
 
   //extract tarball
@@ -196,10 +211,8 @@ pub fn read_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Re
  *  REGISTERED TAPPLETS - FETCH DATA FROM MANIFEST JSON
  */
 #[tauri::command]
-pub async fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Result<(), Error> {
-  let manifest_endpoint = String::from(
-    "https://raw.githubusercontent.com/karczuRF/tapp-registry/main/dist/tapplets-registry.manifest.json"
-  );
+pub async fn fetch_tapplets(app_handle: AppHandle, db_connection: State<'_, DatabaseConnection>) -> Result<(), Error> {
+  let manifest_endpoint = format!("{}/dist/tapplets-registry.manifest.json", REGISTRY_URL);
   let manifest_res = reqwest
     ::get(&manifest_endpoint).await
     .map_err(|_| RequestError(FetchManifestError { endpoint: manifest_endpoint.clone() }))?
@@ -212,12 +225,11 @@ pub async fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Res
 
   for tapplet_manifest in tapplets.registered_tapplets.values() {
     let inserted_tapplet = store.create(&CreateTapplet::from(tapplet_manifest))?;
-    let tapplet_db_id = inserted_tapplet.id;
 
     // for audit_data in tapplet_manifest.metadata.audits.iter() {
     //   store.create(
     //     &(CreateTappletAudit {
-    //       tapplet_id: tapplet_db_id,
+    //       tapplet_id: inserted_tapplet.id,
     //       auditor: &audit_data.auditor,
     //       report_url: &audit_data.report_url,
     //     })
@@ -227,12 +239,26 @@ pub async fn fetch_tapplets(db_connection: State<'_, DatabaseConnection>) -> Res
     for (version, version_data) in tapplet_manifest.versions.iter() {
       store.create(
         &(CreateTappletVersion {
-          tapplet_id: tapplet_db_id,
+          tapplet_id: inserted_tapplet.id,
           version: &version,
           integrity: &version_data.integrity,
           registry_url: &version_data.registry_url,
         })
       )?;
+    }
+
+    match store.get_tapplet_assets_by_tapplet_id(inserted_tapplet.id.unwrap())? {
+      Some(_) => {}
+      None => {
+        let tapplet_assets = download_asset(app_handle.clone(), inserted_tapplet.registry_id).await?;
+        store.create(
+          &(CreateTappletAsset {
+            tapplet_id: inserted_tapplet.id,
+            icon_url: &tapplet_assets.icon_url,
+            background_url: &tapplet_assets.background_url,
+          })
+        )?;
+      }
     }
   }
   Ok(())
