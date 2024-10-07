@@ -1,7 +1,10 @@
 use constants::TAPPLETS_ASSETS_DIR;
 use diesel::SqliteConnection;
 use fs::{ get_config_file, get_data_dir, get_log_dir };
+use log4rs::config::RawConfig;
+use log::info;
 use tapplet_server::start;
+use utils::logging_utils::setup_logging;
 use std::{ collections::HashMap, sync::{ Arc, Mutex }, thread::sleep, time::Duration };
 use tauri::{ self, Manager };
 use tokio_util::sync::CancellationToken;
@@ -17,6 +20,7 @@ mod interface;
 mod error;
 mod constants;
 mod fs;
+mod utils;
 
 use commands::{
   call_wallet,
@@ -45,6 +49,7 @@ use commands::{
 
 use crate::{ rpc::permission_token, wallet_daemon::start_wallet_daemon };
 
+const LOG_TARGET: &str = "tari::universe::main";
 pub struct Tokens {
   auth: Mutex<String>,
   permission: Mutex<String>,
@@ -75,10 +80,19 @@ fn setup_tari_universe(app: &mut tauri::App) -> Result<(), Box<dyn std::error::E
   let data_dir_path = get_data_dir(app)?;
   let log_path = get_log_dir(app)?;
   let wallet_daemon_config_file = get_config_file(app, "wallet_daemon.config.toml")?;
-  let log_config_file = get_config_file(app, "wallet_daemon.log.yml")?;
+  // let log_config_file = get_config_file(app, "../log4rs/wallet_daemon.log.yml")?;
+
+  // setup universe logging
+  let log_config_file = &log_path.join("universe").join("configs").join("log4rs_config_universe.yml");
+  let contents = setup_logging(&log_config_file.clone(), &log_path, include_str!("../log4rs/universe_sample.yml"))?;
+
+  let config: RawConfig = serde_yaml
+    ::from_str(&contents)
+    .expect("Could not parse the contents of the log file as yaml");
+  log4rs::init_raw_config(config).expect("Could not initialize logging");
 
   tauri::async_runtime::spawn(async move {
-    start_wallet_daemon(log_path, data_dir_path, wallet_daemon_config_file, log_config_file).await.unwrap();
+    start_wallet_daemon(log_path, data_dir_path, wallet_daemon_config_file).await.unwrap();
   });
   let db_path = app.path().app_data_dir()?.to_path_buf().join(constants::DB_FILE_NAME);
   app.manage(DatabaseConnection(Arc::new(Mutex::new(database::establish_connection(db_path.to_str().unwrap())))));
