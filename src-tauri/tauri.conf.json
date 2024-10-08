@@ -39,9 +39,6 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": [
-      "wallet_daemon.config.toml",
-      "./log4rs/wallet_daemon_sample.yml"
-    ]
+    "resources": ["wallet_daemon.config.toml", "./log4rs/universe_sample.yml"]
   }
 }

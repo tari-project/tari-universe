@@ -89,6 +89,7 @@ fn setup_tari_universe(app: &mut tauri::App) -> Result<(), Box<dyn std::error::E
   let config: RawConfig = serde_yaml
     ::from_str(&contents)
     .expect("Could not parse the contents of the log file as yaml");
+  // global logger init
   log4rs::init_raw_config(config).expect("Could not initialize logging");
 
   tauri::async_runtime::spawn(async move {

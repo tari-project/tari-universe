@@ -1,8 +1,7 @@
 use std::{ fs, panic, path::PathBuf, process, net::SocketAddr, str::FromStr };
 
 use log::info;
-use log4rs::config::RawConfig;
-use tari_common::{ configuration::Network };
+use tari_common::configuration::Network;
 use tari_dan_app_utilities::configuration::load_configuration;
 use tari_dan_wallet_daemon::{ cli::Cli, config::ApplicationConfig, run_tari_dan_wallet_daemon };
 use tari_shutdown::Shutdown;
@@ -24,15 +23,11 @@ pub async fn start_wallet_daemon(
   );
   let wallet_daemon_config_file = wallet_daemon_config_file.to_str().unwrap().to_owned();
   let log_config_file = &log_dir.join("wallet_daemon").join("configs").join("log4rs_config_wallet.yml");
-  let contents = setup_logging(
+  let _contents = setup_logging(
     &log_config_file.clone(),
     &log_dir.clone(),
-    include_str!("../log4rs/wallet_daemon_sample.yml")
+    include_str!("../log4rs/universe_sample.yml")
   )?;
-  let config: RawConfig = serde_yaml
-    ::from_str(&contents)
-    .expect("Could not parse the contents of the log file as yaml");
-  // log4rs::init_raw_config(config).expect("Could not initialize logging");
 
   let mut cli = Cli::init();
   cli.common.network = Some(Network::LocalNet);
