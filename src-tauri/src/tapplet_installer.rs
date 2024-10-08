@@ -5,11 +5,14 @@ use flate2::read::GzDecoder;
 use tar::Archive;
 use crate::{
   constants::{ REGISTRY_URL, TAPPLETS_ASSETS_DIR },
+  database::schema::{ tapplet::background_url, tapplet_asset::icon_url },
   error::{ Error::{ self, IOError, RequestError }, IOError::*, RequestError::* },
   interface::TappletAssets,
 };
-
+use log::error;
 use crate::constants::TAPPLETS_INSTALLED_DIR;
+use crate::constants::TAPPLET_ARCHIVE;
+const LOG_TARGET: &str = "tari::universe";
 
 pub fn delete_tapplet(tapplet_path: PathBuf) -> Result<(), Error> {
   let path = tapplet_path
@@ -39,7 +42,7 @@ pub async fn download_file_and_archive(url: &str, tapplet_path: PathBuf) -> Resu
     fs::create_dir_all(&tapplet_path).map_err(|_| IOError(FailedToCreateDir { path }))?;
 
     // Open a file to write the stream to
-    let tapplet_tarball = tapplet_path.join("tapplet.tar.gz");
+    let tapplet_tarball = tapplet_path.join(TAPPLET_ARCHIVE);
     let tarball_path = tapplet_tarball
       .clone()
       .into_os_string()
@@ -80,8 +83,7 @@ pub fn extract_tar(tapplet_path: PathBuf) -> Result<(), Error> {
 }
 
 pub fn check_extracted_files(tapplet_path: PathBuf) -> Result<bool, Error> {
-  let package_dir = tapplet_path.join("package");
-  let pkg_json_file_path = package_dir.join("package.json");
+  let pkg_json_file_path = tapplet_path.join("package").join("package.json");
   let path = tapplet_path
     .into_os_string()
     .into_string()
@@ -98,11 +100,17 @@ pub fn get_tapp_download_path(
   registry_id: String,
   version: String,
   app_handle: tauri::AppHandle
-) -> Result<PathBuf, ()> {
+) -> Result<PathBuf, Error> {
   // app_path = /home/user/.local/share/universe.tari
-  let app_path = app_handle.path().app_data_dir().unwrap().to_path_buf();
-  let tapp_dir_path = format!("{}/{}/{}", TAPPLETS_INSTALLED_DIR, registry_id, version);
-  let tapplet_path = app_path.join(tapp_dir_path);
+  let app_path = app_handle
+    .path()
+    .app_data_dir()
+    .unwrap_or_else(|e| {
+      error!(target: LOG_TARGET, "Failed to get app dir: {}", e);
+      PathBuf::from("")
+    })
+    .to_path_buf();
+  let tapplet_path = app_path.join(TAPPLETS_INSTALLED_DIR).join(registry_id).join(version);
 
   Ok(tapplet_path)
 }
@@ -155,17 +163,22 @@ fn get_or_create_tapp_asset_dir(tapp_root_dir: PathBuf, tapplet_name: &str) -> R
 pub async fn download_asset(app_handle: tauri::AppHandle, tapplet_name: String) -> Result<TappletAssets, Error> {
   let tapp_root_dir: PathBuf = app_handle.path().app_data_dir().unwrap().to_path_buf();
   let tapp_asset_dir = get_or_create_tapp_asset_dir(tapp_root_dir, &tapplet_name)?;
-  let icon_url = format!("{}/src/{}/images/logo.svg", REGISTRY_URL, tapplet_name);
-  let background_url = format!("{}/src/{}/images/background.svg", REGISTRY_URL, tapplet_name);
+  let assets = get_asset_urls(tapplet_name)?;
 
   let icon_dest = tapp_asset_dir.join("logo.svg");
   let background_dest = tapp_asset_dir.join("background.svg");
 
-  download_file(&icon_url, icon_dest.clone()).await?;
-  download_file(&background_url, background_dest.clone()).await?;
+  download_file(&assets.icon_url, icon_dest.clone()).await?;
+  download_file(&assets.background_url, background_dest.clone()).await?;
 
   Ok(TappletAssets {
     icon_url: icon_dest.into_os_string().into_string().unwrap(),
     background_url: background_dest.into_os_string().into_string().unwrap(),
   })
+}
+
+pub fn get_asset_urls(tapplet_name: String) -> Result<TappletAssets, Error> {
+  let icon_url = format!("{}/src/{}/images/logo.svg", REGISTRY_URL, tapplet_name);
+  let background_url = format!("{}/src/{}/images/background.svg", REGISTRY_URL, tapplet_name);
+  Ok(TappletAssets { icon_url, background_url })
 }
