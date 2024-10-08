@@ -1,10 +1,17 @@
 # A sample log configuration file for running in release mode. By default, this configuration splits up log messages to
-# three destinations:
+# the following destinations:
 #    * Console: For log messages with level INFO and higher
-#    * log/base-node/network.log: INFO-level logs related to the comms crate. This file will be quite busy since there
-#      are lots of P2P debug messages, and so this traffic is segregated from the application log messages
-#    * log/base-node/base_layer.log: Non-comms related INFO-level messages and higher are logged into this file
-#    * log/base-node/other.log: Third-party crates' messages will be logged here at an ERROR level
+#    * logs/universe: INFO-level logs related to the Tari Universe. This file will be quite busy, so logs are splited:
+#        logs/universe/universe.log
+#        logs/universe/universe-web.log
+#        logs/universe/other.log
+#    * logs/wallet_daemon: INFO-level logs related to the wallet daemon. This file will be quite busy, so logs are splited:
+#        logs/wallet_daemon/wallet_daemon.log
+#        logs/wallet_daemon/dan-layer.log
+#        logs/wallet_daemon/jason-rpc.log
+#    * logs/tapplet: INFO-level logs related to the active tapplet. At the moment only single file is created:
+#        logs/tapplet/tapplet.log
+#
 #
 #  See https://docs.rs/log4rs/0.8.3/log4rs/encode/pattern/index.html for deciphering the log pattern. The log format
 #  used in this sample configuration prints messages as:
@@ -20,10 +27,27 @@ appenders:
       - kind: threshold
         level: info
 
+  # An appender named "default" that writes to a file with a custom pattern encoder
+  default:
+    kind: rolling_file
+    path: "{{log_dir}}/universe/universe.log"
+    policy:
+      kind: compound
+      trigger:
+        kind: size
+        limit: 2mb
+      roller:
+        kind: fixed_window
+        base: 1
+        count: 5
+        pattern: "{{log_dir}}/universe/universe.{}.log"
+    encoder:
+      pattern: "{d(%Y-%m-%d %H:%M:%S.%f)} {l:5} {m} // {f}:{L}{n}"
+
   # An appender named "web" that writes to a file with a custom pattern encoder
   web:
     kind: rolling_file
-    path: "{{log_dir}}/universe/log/universe-web.log"
+    path: "{{log_dir}}/universe/universe-web.log"
     policy:
       kind: compound
       trigger:
@@ -33,31 +57,14 @@ appenders:
         kind: fixed_window
         base: 1
         count: 5
-        pattern: "{{log_dir}}/universe/log/universe-web.{}.log"
+        pattern: "{{log_dir}}/universe/universe-web.{}.log"
     encoder:
       pattern: "{d(%Y-%m-%d %H:%M:%S.%f)} {l:5} {m}{n} "
-
-  # An appender named "base_layer" that writes to a file with a custom pattern encoder
-  default:
-    kind: rolling_file
-    path: "{{log_dir}}/universe/log/universe.log"
-    policy:
-      kind: compound
-      trigger:
-        kind: size
-        limit: 2mb
-      roller:
-        kind: fixed_window
-        base: 1
-        count: 5
-        pattern: "{{log_dir}}/universe/log/universe.{}.log"
-    encoder:
-      pattern: "{d(%Y-%m-%d %H:%M:%S.%f)} {l:5} {m} // {f}:{L}{n}"
 
   # An appender named "other" that writes to a file with a custom pattern encoder
   other:
     kind: rolling_file
-    path: "{{log_dir}}/universe/log/other.log"
+    path: "{{log_dir}}/universe/other.log"
     policy:
       kind: compound
       trigger:
@@ -67,9 +74,77 @@ appenders:
         kind: fixed_window
         base: 1
         count: 5
-        pattern: "{{log_dir}}/universe/log/other.{}.log"
+        pattern: "{{log_dir}}/universe/other.{}.log"
     encoder:
       pattern: "{d(%Y-%m-%d %H:%M:%S.%f)} {l:5} {m}{n} // {f}:{L} "
+
+  # An appender named "dan_layer" that writes to a file with a custom pattern encoder
+  dan_layer:
+    kind: rolling_file
+    path: "{{log_dir}}/wallet_daemon/dan_layer.log"
+    policy:
+      kind: compound
+      trigger:
+        kind: size
+        limit: 2mb
+      roller:
+        kind: fixed_window
+        base: 1
+        count: 5
+        pattern: "{{log_dir}}/wallet_daemon/dan_layer.{}.log"
+    encoder:
+      pattern: "{d(%Y-%m-%d %H:%M:%S.%f)} [{t}] [{X(node-public-key)},{X(node-id)}] {l:5} {m} // {f}:{L}{n}"
+
+    # An appender named "dan_layer" that writes to a file with a custom pattern encoder
+  wallet_daemon:
+    kind: rolling_file
+    path: "{{log_dir}}/wallet_daemon/wallet_daemon.log"
+    policy:
+      kind: compound
+      trigger:
+        kind: size
+        limit: 2mb
+      roller:
+        kind: fixed_window
+        base: 1
+        count: 5
+        pattern: "{{log_dir}}/wallet_daemon/wallet_daemon.{}.log"
+    encoder:
+      pattern: "{d(%Y-%m-%d %H:%M:%S.%f)} [{t}] [{X(node-public-key)},{X(node-id)}] {l:5} {m} // {f}:{L}{n}"
+
+  # An appender named "json_rpc" that writes to a file with a custom pattern encoder
+  json_rpc:
+    kind: rolling_file
+    path: "{{log_dir}}/wallet_daemon/json_rpc.log"
+    policy:
+      kind: compound
+      trigger:
+        kind: size
+        limit: 2mb
+      roller:
+        kind: fixed_window
+        base: 1
+        count: 5
+        pattern: "{{log_dir}}/wallet_daemon/json_rpc.{}.log"
+    encoder:
+      pattern: "{d(%Y-%m-%d %H:%M:%S.%f)} [{t}] [{X(node-public-key)},{X(node-id)}] {l:5} {m} // {f}:{L}{n}"
+
+  # An appender named "tapplet" that writes to a file with a custom pattern encoder
+  tapplet:
+    kind: rolling_file
+    path: "{{log_dir}}/tapplet/tapplet.log"
+    policy:
+      kind: compound
+      trigger:
+        kind: size
+        limit: 2mb
+      roller:
+        kind: fixed_window
+        base: 1
+        count: 5
+        pattern: "{{log_dir}}/tapplet/tapplet.{}.log"
+    encoder:
+      pattern: "{d(%Y-%m-%d %H:%M:%S.%f)} {l:5} {m} // {f}:{L}{n}"
 
 # Set the default logging level to "info"
 root:
@@ -91,4 +166,30 @@ loggers:
     level: info
     appenders:
       - web
+    additive: false
+
+  tari::dan:
+    level: info
+    appenders:
+      - dan_layer
+      - stdout
+    additive: false
+
+  tari::dan::wallet_daemon:
+    level: info
+    appenders:
+      - wallet_daemon
+      - stdout
+    additive: false
+
+  tari::dan::wallet_daemon::json_rpc:
+    level: debug
+    appenders:
+      - json_rpc
+    additive: false
+
+  tari::tapplet:
+    level: info
+    appenders:
+      - stdout
     additive: false

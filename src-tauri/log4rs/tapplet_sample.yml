@@ -1,7 +1,7 @@
 # A sample log configuration file for running in release mode. By default, this configuration splits up log messages to
 # three destinations:
 #    * Console: For log messages with level INFO and higher
-#    * log/base-node/network.log: INFO-level logs related to the comms crate. This file will be quite busy since there
+#    * log/network.log: INFO-level logs related to the comms crate. This file will be quite busy since there
 #      are lots of P2P debug messages, and so this traffic is segregated from the application log messages
 #    * log/base-node/base_layer.log: Non-comms related INFO-level messages and higher are logged into this file
 #    * log/base-node/other.log: Third-party crates' messages will be logged here at an ERROR level
@@ -20,8 +20,8 @@ appenders:
       - kind: threshold
         level: info
 
-  # An appender named "base_layer" that writes to a file with a custom pattern encoder
-  default:
+  # An appender named "tapplet" that writes to a file with a custom pattern encoder
+  tapplet:
     kind: rolling_file
     path: "{{log_dir}}/tapplet/log/tapplet.log"
     policy:
@@ -67,5 +67,4 @@ loggers:
     level: debug
     appenders:
       - stdout
-      - default
     additive: false
