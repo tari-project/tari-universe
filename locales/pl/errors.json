@@ -33,5 +33,6 @@
   "failed-to-get-file-path": "Nie udało się uzyskać ścieżki pliku",
   "fetch-manifest-error": "Nie udało się pobrać manifestu z {{ endpoint }}",
   "manifest-response-error": "Nie udało się odebrać manifestu {{ endpoint }}",
-  "failed-to-download": "Nie udało się pobrać z {{ url }}"
+  "failed-to-download": "Nie udało się pobrać z {{ url }}",
+  "tapplet-invalid-checksum": "Niepoprawna suma kontrolna dla wersji {{ version }}"
 }

@@ -33,5 +33,6 @@
   "failed-to-get-file-path": "Failed to get file path",
   "fetch-manifest-error": "Failed to fetch manifest from {{ endpoint }}",
   "manifest-response-error": "Failed to receive manifest {{ endpoint }}",
-  "failed-to-download": "Failed to download from {{ url }}"
+  "failed-to-download": "Failed to download from {{ url }}",
+  "tapplet-invalid-checksum": "Failed to validate checksum for tapplet version {{ version }}"
 }

@@ -1,3 +1,4 @@
+use log::{ error, info };
 use tari_wallet_daemon_client::types::AccountsGetBalancesResponse;
 use tauri::{ self, AppHandle, State };
 use std::path::PathBuf;
@@ -10,7 +11,6 @@ use crate::{
       CreateInstalledTapplet,
       CreateTapplet,
       CreateTappletAsset,
-      CreateTappletAudit,
       CreateTappletVersion,
       DevTapplet,
       InstalledTapplet,
@@ -43,6 +43,7 @@ use crate::{
   Tokens,
 };
 use tauri_plugin_http::reqwest::{ self };
+pub const LOG_TARGET: &str = "tari::universe";
 
 #[tauri::command]
 pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), Error> {
@@ -153,7 +154,11 @@ pub async fn download_and_extract_tapp(
   let (tapp, tapp_version) = tapplet_store.get_registered_tapplet_with_version(tapplet_id)?;
 
   // get download path
-  let tapplet_path = get_tapp_download_path(tapp.registry_id, tapp_version.version, app_handle).unwrap();
+  let tapplet_path = get_tapp_download_path(
+    tapp.registry_id.clone(),
+    tapp_version.version.clone(),
+    app_handle.clone()
+  ).unwrap();
 
   // download tarball
   let url = tapp_version.registry_url.clone();
@@ -164,8 +169,30 @@ pub async fn download_and_extract_tapp(
   //extract tarball
   let extract_path: PathBuf = tapplet_path.clone();
   extract_tar(extract_path)?;
-  check_extracted_files(tapplet_path)?;
-  Ok(())
+  check_extracted_files(tapplet_path.clone())?;
+  match calculate_and_validate_tapp_checksum(tapplet_id, db_connection, app_handle) {
+    Ok(is_valid) => {
+      info!(target: LOG_TARGET,"Checksum validated for version: {:?}", tapp_version.version.clone());
+      if is_valid {
+        return Ok(());
+      } else {
+        return Err(Error::InvalidChecksum { version: tapp_version.version.clone() });
+      }
+    }
+    Err(e) => {
+      error!(target: LOG_TARGET,"Error validating checksum for version: {:?}. Error: {:?}", tapp_version.version, e);
+      match delete_tapplet(tapplet_path) {
+        Ok(_) => {
+          info!(target: LOG_TARGET,"Directory removed successfully");
+        }
+        Err(e) => {
+          error!(target: LOG_TARGET,"Error while removing newly created directory: {:?}", e);
+          return Err(e.into());
+        }
+      }
+      return Err(e.into());
+    }
+  }
 }
 
 #[tauri::command]
@@ -177,15 +204,11 @@ pub fn calculate_and_validate_tapp_checksum(
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id)?;
 
-  // get download path
   let tapplet_path = get_tapp_download_path(tapp.registry_id, version_data.version, app_handle).unwrap();
-
   // calculate `integrity` from downloaded tarball file
   let integrity = calculate_checksum(tapplet_path)?;
   // check if the calculated chechsum is equal to the value stored in the registry
-  let validity: bool = integrity == version_data.integrity;
-
-  Ok(validity)
+  Ok(integrity == version_data.integrity)
 }
 
 /**
@@ -273,7 +296,6 @@ pub async fn update_tapp(
 ) -> Result<Vec<InstalledTappletWithName>, Error> {
   delete_installed_tapp(installed_tapplet_id, db_connection.clone(), app_handle.clone())?;
   download_and_extract_tapp(tapplet_id, db_connection.clone(), app_handle.clone()).await?;
-  calculate_and_validate_tapp_checksum(tapplet_id, db_connection.clone(), app_handle.clone())?;
   insert_installed_tapp_db(tapplet_id, db_connection.clone())?;
 
   let mut store = SqliteStore::new(db_connection.0.clone());

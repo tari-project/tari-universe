@@ -1,4 +1,4 @@
-use std::{io, num::ParseIntError};
+use std::num::ParseIntError;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -16,6 +16,9 @@ pub enum Error {
   #[error("provider-call-failed-for-method | method-{method} & params-{params}")] ProviderError {
     method: String,
     params: String,
+  },
+  #[error("tapplet-invalid-checksum | version-{version}")] InvalidChecksum {
+    version: String,
   },
 }
 
@@ -38,7 +41,7 @@ pub enum TappletServerError {
 
 #[derive(Debug, Error)]
 pub enum DatabaseError {
-  #[error("already-exists | entity_name-{entity_name} & field_name-{field_name}")] AlreadyExists{
+  #[error("already-exists | entity_name-{entity_name} & field_name-{field_name}")] AlreadyExists {
     entity_name: String,
     field_name: String,
   },
@@ -55,7 +58,6 @@ pub enum DatabaseError {
     entity_name: String,
   },
 }
-
 
 #[derive(Debug, Error)]
 pub enum IOError {
@@ -76,7 +78,7 @@ pub enum IOError {
     path: String,
   },
   #[error("failed-to-write-file | path-{path}")] FailedToWriteFile {
-    path: String
+    path: String,
   },
   #[error("failed-to-parse-int")] ParseIntError(#[from] ParseIntError),
   #[error("failed-to-unpack-file | path-{path}")] FailedToUnpackFile {
@@ -93,13 +95,13 @@ pub enum IOError {
 
 #[derive(Debug, Error)]
 pub enum RequestError {
-  #[error("fetch-manifest-error | endpoint-{endpoint}")] FetchManifestError{
+  #[error("fetch-manifest-error | endpoint-{endpoint}")] FetchManifestError {
     endpoint: String,
   },
-  #[error("manifest-response-error | endpoint-{endpoint}")] ManifestResponseError{
+  #[error("manifest-response-error | endpoint-{endpoint}")] ManifestResponseError {
     endpoint: String,
   },
-  #[error("failed-to-download | url-{url}")] FailedToDownload{
+  #[error("failed-to-download | url-{url}")] FailedToDownload {
     url: String,
-  }
+  },
 }

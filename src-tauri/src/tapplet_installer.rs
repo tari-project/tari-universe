@@ -4,15 +4,13 @@ use std::{ fs, io::Write, path::PathBuf };
 use flate2::read::GzDecoder;
 use tar::Archive;
 use crate::{
-  constants::{ REGISTRY_URL, TAPPLETS_ASSETS_DIR },
-  database::schema::{ tapplet::background_url, tapplet_asset::icon_url },
+  constants::{ REGISTRY_URL, TAPPLETS_ASSETS_DIR, TAPPLET_ARCHIVE },
   error::{ Error::{ self, IOError, RequestError }, IOError::*, RequestError::* },
   interface::TappletAssets,
 };
 use log::error;
 use crate::constants::TAPPLETS_INSTALLED_DIR;
-use crate::constants::TAPPLET_ARCHIVE;
-const LOG_TARGET: &str = "tari::universe";
+pub const LOG_TARGET: &str = "tari::universe";
 
 pub fn delete_tapplet(tapplet_path: PathBuf) -> Result<(), Error> {
   let path = tapplet_path
@@ -68,7 +66,7 @@ pub async fn download_file_and_archive(url: &str, tapplet_path: PathBuf) -> Resu
 
 pub fn extract_tar(tapplet_path: PathBuf) -> Result<(), Error> {
   // Extract the file to the tapplet directory
-  let tapplet_tarball = tapplet_path.join("tapplet.tar.gz");
+  let tapplet_tarball = tapplet_path.join(TAPPLET_ARCHIVE);
   let path = tapplet_path
     .clone()
     .into_os_string()
@@ -178,7 +176,7 @@ pub async fn download_asset(app_handle: tauri::AppHandle, tapplet_name: String) 
 }
 
 pub fn get_asset_urls(tapplet_name: String) -> Result<TappletAssets, Error> {
-  let icon_url = format!("{}/src/{}/images/logo.svg", REGISTRY_URL, tapplet_name);
-  let background_url = format!("{}/src/{}/images/background.svg", REGISTRY_URL, tapplet_name);
-  Ok(TappletAssets { icon_url, background_url })
+  let icon = format!("{}/src/{}/images/logo.svg", REGISTRY_URL, tapplet_name);
+  let background = format!("{}/src/{}/images/background.svg", REGISTRY_URL, tapplet_name);
+  Ok(TappletAssets { icon_url: icon, background_url: background })
 }
