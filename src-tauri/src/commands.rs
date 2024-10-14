@@ -159,7 +159,6 @@ pub async fn download_and_extract_tapp(
     tapp_version.version.clone(),
     app_handle.clone()
   ).unwrap();
-
   // download tarball
   let url = tapp_version.registry_url.clone();
   let download_path = tapplet_path.clone();
@@ -173,26 +172,18 @@ pub async fn download_and_extract_tapp(
   match calculate_and_validate_tapp_checksum(tapplet_id, db_connection, app_handle) {
     Ok(is_valid) => {
       info!(target: LOG_TARGET,"Checksum validated for version: {:?}", tapp_version.version.clone());
-      if is_valid {
-        return Ok(());
-      } else {
+      if !is_valid {
+        delete_tapplet(tapplet_path)?;
         return Err(Error::InvalidChecksum { version: tapp_version.version.clone() });
       }
     }
     Err(e) => {
       error!(target: LOG_TARGET,"Error validating checksum for version: {:?}. Error: {:?}", tapp_version.version, e);
-      match delete_tapplet(tapplet_path) {
-        Ok(_) => {
-          info!(target: LOG_TARGET,"Directory removed successfully");
-        }
-        Err(e) => {
-          error!(target: LOG_TARGET,"Error while removing newly created directory: {:?}", e);
-          return Err(e.into());
-        }
-      }
+      delete_tapplet(tapplet_path)?;
       return Err(e.into());
     }
   }
+  Ok(())
 }
 
 #[tauri::command]
@@ -204,7 +195,7 @@ pub fn calculate_and_validate_tapp_checksum(
   let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
   let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id)?;
 
-  let tapplet_path = get_tapp_download_path(tapp.registry_id, version_data.version, app_handle).unwrap();
+  let tapplet_path = get_tapp_download_path(tapp.registry_id, version_data.version, app_handle)?;
   // calculate `integrity` from downloaded tarball file
   let integrity = calculate_checksum(tapplet_path)?;
   // check if the calculated chechsum is equal to the value stored in the registry
@@ -236,6 +227,7 @@ pub fn read_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Re
 #[tauri::command]
 pub async fn fetch_tapplets(app_handle: AppHandle, db_connection: State<'_, DatabaseConnection>) -> Result<(), Error> {
   let manifest_endpoint = format!("{}/dist/tapplets-registry.manifest.json", REGISTRY_URL);
+
   let manifest_res = reqwest
     ::get(&manifest_endpoint).await
     .map_err(|_| RequestError(FetchManifestError { endpoint: manifest_endpoint.clone() }))?
@@ -243,11 +235,14 @@ pub async fn fetch_tapplets(app_handle: AppHandle, db_connection: State<'_, Data
     .map_err(|_| RequestError(ManifestResponseError { endpoint: manifest_endpoint.clone() }))?;
 
   let tapplets: RegisteredTapplets = serde_json::from_str(&manifest_res).map_err(|e| JsonParsingError(e))?;
+  println!("=== fetching ver {:?}", tapplets.manifest_version);
+  println!("=== fetching tapp {:?}", tapplets.registered_tapplets.len());
 
   let mut store = SqliteStore::new(db_connection.0.clone());
 
   for tapplet_manifest in tapplets.registered_tapplets.values() {
     let inserted_tapplet = store.create(&CreateTapplet::from(tapplet_manifest))?;
+    println!("=== fetched tapp {:?}", inserted_tapplet.package_name);
 
     // for audit_data in tapplet_manifest.metadata.audits.iter() {
     //   store.create(
@@ -269,10 +264,11 @@ pub async fn fetch_tapplets(app_handle: AppHandle, db_connection: State<'_, Data
         })
       )?;
     }
-
+    println!("=== fetched tapp created store versions {:?}", tapplet_manifest.versions.len());
     match store.get_tapplet_assets_by_tapplet_id(inserted_tapplet.id.unwrap())? {
       Some(_) => {}
       None => {
+        println!("=== fetched tapp none");
         let tapplet_assets = download_asset(app_handle.clone(), inserted_tapplet.registry_id).await?;
         store.create(
           &(CreateTappletAsset {
