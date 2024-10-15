@@ -17,6 +17,8 @@ mod interface;
 mod error;
 mod constants;
 mod fs;
+mod download_utils;
+mod progress_tracker;
 
 use commands::{
   call_wallet,

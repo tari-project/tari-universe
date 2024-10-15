@@ -1,10 +1,10 @@
-use log::{ error, info };
+use log::{ error, info, warn };
 use tari_wallet_daemon_client::types::AccountsGetBalancesResponse;
-use tauri::{ self, AppHandle, State };
+use tauri::{ self, AppHandle, Manager, State };
 use std::path::PathBuf;
 
 use crate::{
-  constants::REGISTRY_URL,
+  constants::{ REGISTRY_URL, TAPPLET_ARCHIVE, TAPPLET_DIST_DIR },
   database::{
     models::{
       CreateDevTapplet,
@@ -18,22 +18,24 @@ use crate::{
       UpdateInstalledTapplet,
       UpdateTapplet,
     },
+    schema::tapplet,
     store::{ SqliteStore, Store },
   },
+  download_utils::{ download_file_with_retries, extract },
   error::{
     Error::{ self, FailedToObtainPermissionTokenLock, JsonParsingError, RequestError, TappletServerError },
     RequestError::*,
     TappletServerError::*,
   },
   hash_calculator::calculate_checksum,
-  interface::{ DevTappletResponse, InstalledTappletWithName, RegisteredTappletWithVersion, RegisteredTapplets },
+  interface::{ DevTappletResponse, InstalledTappletWithName, RegisteredTappletWithVersion },
+  progress_tracker::ProgressTracker,
   rpc::{ balances, free_coins, make_request },
   tapplet_installer::{
     check_extracted_files,
     delete_tapplet,
     download_asset,
-    download_file_and_archive,
-    extract_tar,
+    fetch_tapp_registry_manifest,
     get_tapp_download_path,
   },
   tapplet_server::start,
@@ -106,11 +108,33 @@ pub async fn launch_tapplet(
   let mut store = SqliteStore::new(db_connection.0.clone());
 
   let (_installed_tapp, registered_tapp, tapp_version) = store.get_installed_tapplet_full_by_id(installed_tapplet_id)?;
-
   // get download path
-  let tapplet_path = get_tapp_download_path(registered_tapp.registry_id, tapp_version.version, app_handle).unwrap();
-  let dist_path = tapplet_path.join("package/dist");
+  let tapplet_path = get_tapp_download_path(
+    registered_tapp.registry_id,
+    tapp_version.version.clone(),
+    app_handle.clone()
+  ).unwrap();
+  let file_path = tapplet_path.join(TAPPLET_ARCHIVE);
 
+  // Extract the tapplet archieve each time before launching
+  // This way make sure that local files have not been replaced and are not malicious
+  let _ = extract(&file_path, &tapplet_path.clone()).await;
+  check_extracted_files(tapplet_path.clone())?;
+  //TODO should compare integrity field with the one stored in db or from github manifest?
+  match calculate_and_validate_tapp_checksum(installed_tapplet_id, db_connection, app_handle) {
+    Ok(is_valid) => {
+      info!(target: LOG_TARGET,"Checksum validated for version: {:?}", tapp_version.version.clone());
+      if !is_valid {
+        return Err(Error::InvalidChecksum { version: tapp_version.version.clone() });
+      }
+    }
+    Err(e) => {
+      error!(target: LOG_TARGET,"Error validating checksum for version: {:?}. Error: {:?}", tapp_version.version, e);
+      return Err(e.into());
+    }
+  }
+
+  let dist_path = tapplet_path.join(TAPPLET_DIST_DIR);
   let handle_start = tauri::async_runtime::spawn(async move { start(dist_path).await });
 
   let (addr, cancel_token) = handle_start.await??;
@@ -158,16 +182,24 @@ pub async fn download_and_extract_tapp(
     tapp.registry_id.clone(),
     tapp_version.version.clone(),
     app_handle.clone()
-  ).unwrap();
+  ).unwrap_or_default();
   // download tarball
   let url = tapp_version.registry_url.clone();
-  let download_path = tapplet_path.clone();
-  let handle = tauri::async_runtime::spawn(async move { download_file_and_archive(&url, download_path).await });
+  let file_path = tapplet_path.join(TAPPLET_ARCHIVE);
+  let destination_dir = file_path.clone();
+  let progress_tracker = ProgressTracker::new(
+    app_handle.get_window("main").expect("Could not get main window").clone()
+  );
+  let handle = tauri::async_runtime::spawn(async move {
+    download_file_with_retries(&url, &destination_dir, progress_tracker).await
+  });
   handle.await?.map_err(|_| Error::RequestError(FailedToDownload { url: tapp_version.registry_url }))?;
 
+  // let _ = download_file(&url, &download_path, None).await; //TODO
   //extract tarball
-  let extract_path: PathBuf = tapplet_path.clone();
-  extract_tar(extract_path)?;
+  // let file_path: PathBuf = tapplet_path.join(TAPPLET_ARCHIVE);
+  // extract_tar(extract_path)?; //TODO checked - can be removed
+  let _ = extract(&file_path, &tapplet_path.clone()).await;
   check_extracted_files(tapplet_path.clone())?;
   match calculate_and_validate_tapp_checksum(tapplet_id, db_connection, app_handle) {
     Ok(is_valid) => {
@@ -199,6 +231,8 @@ pub fn calculate_and_validate_tapp_checksum(
   // calculate `integrity` from downloaded tarball file
   let integrity = calculate_checksum(tapplet_path)?;
   // check if the calculated chechsum is equal to the value stored in the registry
+  info!(target: LOG_TARGET,"Checksum validation result for {:?}: {:?}", tapp.display_name, integrity == version_data.integrity);
+  println!("Checksum validation result for {:?}: {:?}", tapp.display_name, integrity == version_data.integrity);
   Ok(integrity == version_data.integrity)
 }
 
@@ -226,15 +260,16 @@ pub fn read_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Re
  */
 #[tauri::command]
 pub async fn fetch_tapplets(app_handle: AppHandle, db_connection: State<'_, DatabaseConnection>) -> Result<(), Error> {
-  let manifest_endpoint = format!("{}/dist/tapplets-registry.manifest.json", REGISTRY_URL);
+  // let manifest_endpoint = format!("{}/dist/tapplets-registry.manifest.json", REGISTRY_URL);
 
-  let manifest_res = reqwest
-    ::get(&manifest_endpoint).await
-    .map_err(|_| RequestError(FetchManifestError { endpoint: manifest_endpoint.clone() }))?
-    .text().await
-    .map_err(|_| RequestError(ManifestResponseError { endpoint: manifest_endpoint.clone() }))?;
+  // let manifest_res = reqwest
+  //   ::get(&manifest_endpoint).await
+  //   .map_err(|_| RequestError(FetchManifestError { endpoint: manifest_endpoint.clone() }))?
+  //   .text().await
+  //   .map_err(|_| RequestError(ManifestResponseError { endpoint: manifest_endpoint.clone() }))?;
 
-  let tapplets: RegisteredTapplets = serde_json::from_str(&manifest_res).map_err(|e| JsonParsingError(e))?;
+  // let tapplets: RegisteredTapplets = serde_json::from_str(&manifest_res).map_err(|e| JsonParsingError(e))?;
+  let tapplets = fetch_tapp_registry_manifest().await?;
   println!("=== fetching ver {:?}", tapplets.manifest_version);
   println!("=== fetching tapp {:?}", tapplets.registered_tapplets.len());
 

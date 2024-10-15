@@ -1,14 +1,15 @@
 use tauri::Manager;
 use tauri_plugin_http::reqwest::{ self };
-use std::{ fs, io::Write, path::PathBuf };
-use flate2::read::GzDecoder;
-use tar::Archive;
+use std::{ fs::{ self, File }, io::Write, path::{ Path, PathBuf } };
+use flate2::{ read::GzDecoder, write::GzEncoder, Compression };
+use tar::{ Archive, Builder };
 use crate::{
   constants::{ REGISTRY_URL, TAPPLETS_ASSETS_DIR, TAPPLET_ARCHIVE },
-  error::{ Error::{ self, IOError, RequestError }, IOError::*, RequestError::* },
-  interface::TappletAssets,
+  download_utils::extract,
+  error::{ Error::{ self, IOError, JsonParsingError, RequestError }, IOError::*, RequestError::* },
+  interface::{ RegisteredTapplets, TappletAssets },
 };
-use log::error;
+use log::{ error, info, warn };
 use crate::constants::TAPPLETS_INSTALLED_DIR;
 pub const LOG_TARGET: &str = "tari::universe";
 
@@ -21,66 +22,67 @@ pub fn delete_tapplet(tapplet_path: PathBuf) -> Result<(), Error> {
   fs::remove_dir_all(tapplet_path).map_err(|_| IOError(FailedToDeleteTapplet { path }))
 }
 
-pub async fn download_file_and_archive(url: &str, tapplet_path: PathBuf) -> Result<(), Error> {
-  // Download the file
-  let client = reqwest::Client::new();
-  let mut response = client
-    .get(url)
-    .send().await
-    .map_err(|_| RequestError(FailedToDownload { url: url.to_string() }))?;
+// pub async fn download_file_and_archive(url: &str, tapplet_path: PathBuf) -> Result<(), Error> {
+//   // Download the file
+//   let client = reqwest::Client::new();
+//   let mut response = client
+//     .get(url)
+//     .send().await
+//     .map_err(|_| RequestError(FailedToDownload { url: url.to_string() }))?;
 
-  // Ensure the request was successful
-  if response.status().is_success() {
-    // Extract the file to the tapplet directory
-    let path = tapplet_path
-      .clone()
-      .into_os_string()
-      .into_string()
-      .map_err(|_| IOError(FailedToGetFilePath))?;
-    fs::create_dir_all(&tapplet_path).map_err(|_| IOError(FailedToCreateDir { path }))?;
+//   // Ensure the request was successful
+//   if response.status().is_success() {
+//     // Extract the file to the tapplet directory
+//     let path = tapplet_path
+//       .clone()
+//       .into_os_string()
+//       .into_string()
+//       .map_err(|_| IOError(FailedToGetFilePath))?;
+//     fs::create_dir_all(&tapplet_path).map_err(|_| IOError(FailedToCreateDir { path }))?;
 
-    // Open a file to write the stream to
-    let tapplet_tarball = tapplet_path.join(TAPPLET_ARCHIVE);
-    let tarball_path = tapplet_tarball
-      .clone()
-      .into_os_string()
-      .into_string()
-      .map_err(|_| IOError(FailedToGetFilePath))?;
-    let mut file = fs::File
-      ::create(tapplet_tarball)
-      .map_err(|_| IOError(FailedToCreateFile { path: tarball_path.clone() }))?;
-    // Stream the response body and write it to the file chunk by chunk
-    while
-      let Some(chunk) = response.chunk().await.map_err(|_| RequestError(FailedToDownload { url: url.to_string() }))?
-    {
-      file.write_all(&chunk).map_err(|_| IOError(FailedToWriteFile { path: tarball_path.clone() }))?;
-    }
-  } else if response.status().is_server_error() {
-    println!("Download server error! Status: {:?}", response.status());
-  } else {
-    println!("Download failed. Something else happened. Status: {:?}", response.status());
-  }
+//     // Open a file to write the stream to
+//     let tapplet_tarball = tapplet_path.join(TAPPLET_ARCHIVE);
+//     let tarball_path = tapplet_tarball
+//       .clone()
+//       .into_os_string()
+//       .into_string()
+//       .map_err(|_| IOError(FailedToGetFilePath))?;
+//     let mut file = fs::File
+//       ::create(tapplet_tarball)
+//       .map_err(|_| IOError(FailedToCreateFile { path: tarball_path.clone() }))?;
+//     // Stream the response body and write it to the file chunk by chunk
+//     while
+//       let Some(chunk) = response.chunk().await.map_err(|_| RequestError(FailedToDownload { url: url.to_string() }))?
+//     {
+//       file.write_all(&chunk).map_err(|_| IOError(FailedToWriteFile { path: tarball_path.clone() }))?;
+//     }
+//   } else if response.status().is_server_error() {
+//     println!("Download server error! Status: {:?}", response.status());
+//   } else {
+//     println!("Download failed. Something else happened. Status: {:?}", response.status());
+//   }
 
-  Ok(())
-}
+//   Ok(())
+// }
 
-pub fn extract_tar(tapplet_path: PathBuf) -> Result<(), Error> {
-  // Extract the file to the tapplet directory
-  let tapplet_tarball = tapplet_path.join(TAPPLET_ARCHIVE);
-  let path = tapplet_path
-    .clone()
-    .into_os_string()
-    .into_string()
-    .map_err(|_| IOError(FailedToGetFilePath))?;
-  let tar_gz = fs::File::open(tapplet_tarball).map_err(|_| IOError(FailedToReadFile { path: path.clone() }))?;
-  let tar = GzDecoder::new(tar_gz);
-  let mut archive = Archive::new(tar);
-  archive.unpack(tapplet_path).map_err(|_| IOError(FailedToUnpackFile { path }))?;
+// pub fn extract_tar(tapplet_path: PathBuf) -> Result<(), Error> {
+//   // Extract the file to the tapplet directory
+//   let tapplet_tarball = tapplet_path.join(TAPPLET_ARCHIVE);
+//   let path = tapplet_path
+//     .clone()
+//     .into_os_string()
+//     .into_string()
+//     .map_err(|_| IOError(FailedToGetFilePath))?;
+//   let tar_gz = fs::File::open(tapplet_tarball).map_err(|_| IOError(FailedToReadFile { path: path.clone() }))?;
+//   let tar = GzDecoder::new(tar_gz);
+//   let mut archive = Archive::new(tar);
+//   archive.unpack(tapplet_path).map_err(|_| IOError(FailedToUnpackFile { path }))?;
 
-  Ok(())
-}
+//   Ok(())
+// }
 
 pub fn check_extracted_files(tapplet_path: PathBuf) -> Result<bool, Error> {
+  // TODO define all needed files
   let pkg_json_file_path = tapplet_path.join("package").join("package.json");
   let path = tapplet_path
     .into_os_string()
@@ -179,4 +181,17 @@ pub fn get_asset_urls(tapplet_name: String) -> Result<TappletAssets, Error> {
   let icon = format!("{}/src/{}/images/logo.svg", REGISTRY_URL, tapplet_name);
   let background = format!("{}/src/{}/images/background.svg", REGISTRY_URL, tapplet_name);
   Ok(TappletAssets { icon_url: icon, background_url: background })
+}
+
+pub async fn fetch_tapp_registry_manifest() -> Result<RegisteredTapplets, Error> {
+  let manifest_endpoint = format!("{}/dist/tapplets-registry.manifest.json", REGISTRY_URL);
+
+  let manifest_res = reqwest
+    ::get(&manifest_endpoint).await
+    .map_err(|_| RequestError(FetchManifestError { endpoint: manifest_endpoint.clone() }))?
+    .text().await
+    .map_err(|_| RequestError(ManifestResponseError { endpoint: manifest_endpoint.clone() }))?;
+
+  let tapplets: RegisteredTapplets = serde_json::from_str(&manifest_res).map_err(|e| JsonParsingError(e))?;
+  Ok(tapplets)
 }
