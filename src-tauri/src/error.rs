@@ -20,6 +20,9 @@ pub enum Error {
   #[error("tapplet-invalid-checksum | version-{version}")] InvalidChecksum {
     version: String,
   },
+  #[error("tapplet-package-incomplete | version-{version}")] TappletIncomplete {
+    version: String,
+  },
 }
 
 impl serde::Serialize for Error {

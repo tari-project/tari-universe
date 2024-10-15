@@ -22,7 +22,6 @@ mod progress_tracker;
 
 use commands::{
   call_wallet,
-  calculate_and_validate_tapp_checksum,
   launch_tapplet,
   close_tapplet,
   get_assets_server_addr,
@@ -141,7 +140,6 @@ pub fn run() {
         read_tapp_registry_db,
         update_tapp_registry_db,
         download_and_extract_tapp,
-        calculate_and_validate_tapp_checksum,
         fetch_tapplets,
         get_by_id_tapp_registry_db,
         delete_installed_tapp,

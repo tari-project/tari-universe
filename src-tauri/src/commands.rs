@@ -1,4 +1,5 @@
 use log::{ error, info, warn };
+use log4rs::append::console;
 use tari_wallet_daemon_client::types::AccountsGetBalancesResponse;
 use tauri::{ self, AppHandle, Manager, State };
 use std::path::PathBuf;
@@ -15,6 +16,7 @@ use crate::{
       DevTapplet,
       InstalledTapplet,
       Tapplet,
+      TappletVersion,
       UpdateInstalledTapplet,
       UpdateTapplet,
     },
@@ -33,6 +35,7 @@ use crate::{
   rpc::{ balances, free_coins, make_request },
   tapplet_installer::{
     check_extracted_files,
+    check_files_and_validate_checksum,
     delete_tapplet,
     download_asset,
     fetch_tapp_registry_manifest,
@@ -119,17 +122,13 @@ pub async fn launch_tapplet(
   // Extract the tapplet archieve each time before launching
   // This way make sure that local files have not been replaced and are not malicious
   let _ = extract(&file_path, &tapplet_path.clone()).await;
-  check_extracted_files(tapplet_path.clone())?;
   //TODO should compare integrity field with the one stored in db or from github manifest?
-  match calculate_and_validate_tapp_checksum(installed_tapplet_id, db_connection, app_handle) {
+  match check_files_and_validate_checksum(tapp_version, tapplet_path.clone()) {
     Ok(is_valid) => {
-      info!(target: LOG_TARGET,"Checksum validated for version: {:?}", tapp_version.version.clone());
-      if !is_valid {
-        return Err(Error::InvalidChecksum { version: tapp_version.version.clone() });
-      }
+      info!(target: LOG_TARGET,"Checksum validated without error. Is valid?: {:?}", is_valid);
     }
     Err(e) => {
-      error!(target: LOG_TARGET,"Error validating checksum for version: {:?}. Error: {:?}", tapp_version.version, e);
+      error!(target: LOG_TARGET,"Error validating checksum: {:?}", e);
       return Err(e.into());
     }
   }
@@ -193,47 +192,20 @@ pub async fn download_and_extract_tapp(
   let handle = tauri::async_runtime::spawn(async move {
     download_file_with_retries(&url, &destination_dir, progress_tracker).await
   });
-  handle.await?.map_err(|_| Error::RequestError(FailedToDownload { url: tapp_version.registry_url }))?;
+  handle.await?.map_err(|_| Error::RequestError(FailedToDownload { url: tapp_version.registry_url.clone() }))?;
 
-  // let _ = download_file(&url, &download_path, None).await; //TODO
-  //extract tarball
-  // let file_path: PathBuf = tapplet_path.join(TAPPLET_ARCHIVE);
-  // extract_tar(extract_path)?; //TODO checked - can be removed
   let _ = extract(&file_path, &tapplet_path.clone()).await;
-  check_extracted_files(tapplet_path.clone())?;
-  match calculate_and_validate_tapp_checksum(tapplet_id, db_connection, app_handle) {
+  //TODO should compare integrity field with the one stored in db or from github manifest?
+  match check_files_and_validate_checksum(tapp_version, tapplet_path.clone()) {
     Ok(is_valid) => {
-      info!(target: LOG_TARGET,"Checksum validated for version: {:?}", tapp_version.version.clone());
-      if !is_valid {
-        delete_tapplet(tapplet_path)?;
-        return Err(Error::InvalidChecksum { version: tapp_version.version.clone() });
-      }
+      info!(target: LOG_TARGET,"Checksum validated without error. Is valid?: {:?}", is_valid);
     }
     Err(e) => {
-      error!(target: LOG_TARGET,"Error validating checksum for version: {:?}. Error: {:?}", tapp_version.version, e);
-      delete_tapplet(tapplet_path)?;
+      error!(target: LOG_TARGET,"Error validating checksum: {:?}", e);
       return Err(e.into());
     }
   }
   Ok(())
-}
-
-#[tauri::command]
-pub fn calculate_and_validate_tapp_checksum(
-  tapplet_id: i32,
-  db_connection: State<'_, DatabaseConnection>,
-  app_handle: tauri::AppHandle
-) -> Result<bool, Error> {
-  let mut tapplet_store = SqliteStore::new(db_connection.0.clone());
-  let (tapp, version_data) = tapplet_store.get_registered_tapplet_with_version(tapplet_id)?;
-
-  let tapplet_path = get_tapp_download_path(tapp.registry_id, version_data.version, app_handle)?;
-  // calculate `integrity` from downloaded tarball file
-  let integrity = calculate_checksum(tapplet_path)?;
-  // check if the calculated chechsum is equal to the value stored in the registry
-  info!(target: LOG_TARGET,"Checksum validation result for {:?}: {:?}", tapp.display_name, integrity == version_data.integrity);
-  println!("Checksum validation result for {:?}: {:?}", tapp.display_name, integrity == version_data.integrity);
-  Ok(integrity == version_data.integrity)
 }
 
 /**
@@ -260,24 +232,11 @@ pub fn read_tapp_registry_db(db_connection: State<'_, DatabaseConnection>) -> Re
  */
 #[tauri::command]
 pub async fn fetch_tapplets(app_handle: AppHandle, db_connection: State<'_, DatabaseConnection>) -> Result<(), Error> {
-  // let manifest_endpoint = format!("{}/dist/tapplets-registry.manifest.json", REGISTRY_URL);
-
-  // let manifest_res = reqwest
-  //   ::get(&manifest_endpoint).await
-  //   .map_err(|_| RequestError(FetchManifestError { endpoint: manifest_endpoint.clone() }))?
-  //   .text().await
-  //   .map_err(|_| RequestError(ManifestResponseError { endpoint: manifest_endpoint.clone() }))?;
-
-  // let tapplets: RegisteredTapplets = serde_json::from_str(&manifest_res).map_err(|e| JsonParsingError(e))?;
   let tapplets = fetch_tapp_registry_manifest().await?;
-  println!("=== fetching ver {:?}", tapplets.manifest_version);
-  println!("=== fetching tapp {:?}", tapplets.registered_tapplets.len());
-
   let mut store = SqliteStore::new(db_connection.0.clone());
 
   for tapplet_manifest in tapplets.registered_tapplets.values() {
     let inserted_tapplet = store.create(&CreateTapplet::from(tapplet_manifest))?;
-    println!("=== fetched tapp {:?}", inserted_tapplet.package_name);
 
     // for audit_data in tapplet_manifest.metadata.audits.iter() {
     //   store.create(

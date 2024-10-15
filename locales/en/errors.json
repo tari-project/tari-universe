@@ -34,5 +34,6 @@
   "fetch-manifest-error": "Failed to fetch manifest from {{ endpoint }}",
   "manifest-response-error": "Failed to receive manifest {{ endpoint }}",
   "failed-to-download": "Failed to download from {{ url }}",
-  "tapplet-invalid-checksum": "Failed to validate checksum for tapplet version {{ version }}"
+  "tapplet-invalid-checksum": "Failed to validate checksum for version {{ version }}",
+  "tapplet-package-incomplete": "Incomplete tapplet package version {{ version }} - not all required files found"
 }

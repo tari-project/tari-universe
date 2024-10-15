@@ -34,5 +34,6 @@
   "fetch-manifest-error": "Nie udało się pobrać manifestu z {{ endpoint }}",
   "manifest-response-error": "Nie udało się odebrać manifestu {{ endpoint }}",
   "failed-to-download": "Nie udało się pobrać z {{ url }}",
-  "tapplet-invalid-checksum": "Niepoprawna suma kontrolna dla wersji {{ version }}"
+  "tapplet-invalid-checksum": "Niepoprawna suma kontrolna wersji {{ version }}",
+  "tapplet-package-incomplete": "Niekompletna paczka w wersji {{ version }} - nie znaleziono wszystkich wymaganych plików"
 }
