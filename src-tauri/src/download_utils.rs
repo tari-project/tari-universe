@@ -47,7 +47,6 @@ async fn download_file(url: &str, destination: &Path, progress_tracker: Progress
   if let Some(parent) = destination.parent() {
     fs::create_dir_all(parent).await?;
   }
-  println!("Download at {:?}", destination);
   // Open a file for writing
   let mut dest = File::create(destination).await?;
 
@@ -57,16 +56,12 @@ async fn download_file(url: &str, destination: &Path, progress_tracker: Progress
     let _ = progress_tracker.update("downloading".to_string(), None, 10).await;
     dest.write_all(&item?).await?;
   }
-  println!("Download finished at {:?}", destination);
   progress_tracker.update("download-completed".to_string(), None, 100).await;
   info!(target: LOG_TARGET, "Finished downloading: {}", url);
-  println!("Finished downloading: {}", url);
-
   Ok(())
 }
 
 pub async fn extract(file_path: &Path, dest_dir: &Path) -> Result<(), anyhow::Error> {
-  println!("Extracting file {:?} at {:?}", file_path, dest_dir);
   match file_path.extension() {
     Some(ext) =>
       match ext.to_str() {
@@ -89,15 +84,11 @@ pub async fn extract(file_path: &Path, dest_dir: &Path) -> Result<(), anyhow::Er
 
 pub async fn extract_gz(gz_path: &Path, dest_dir: &Path) -> std::io::Result<()> {
   let gz_file = std::fs::File::open(gz_path)?;
-  println!("Extracting file at {:?}", gz_path);
   let decoder = GzDecoder::new(std::io::BufReader::new(gz_file));
   let mut archive = Archive::new(decoder);
-  println!("Unpacking to {:?}", dest_dir);
   archive.unpack(dest_dir)?;
   Ok(())
 }
-
-// Taken from async_zip example
 
 fn sanitize_file_path(path: &str) -> PathBuf {
   // Replaces backwards slashes

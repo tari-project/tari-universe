@@ -258,11 +258,9 @@ pub async fn fetch_tapplets(app_handle: AppHandle, db_connection: State<'_, Data
         })
       )?;
     }
-    println!("=== fetched tapp created store versions {:?}", tapplet_manifest.versions.len());
     match store.get_tapplet_assets_by_tapplet_id(inserted_tapplet.id.unwrap())? {
       Some(_) => {}
       None => {
-        println!("=== fetched tapp none");
         let tapplet_assets = download_asset(app_handle.clone(), inserted_tapplet.registry_id).await?;
         store.create(
           &(CreateTappletAsset {

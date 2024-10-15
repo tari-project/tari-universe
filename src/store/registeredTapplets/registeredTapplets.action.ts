@@ -10,9 +10,7 @@ export const initializeAction = () => ({
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
     try {
-      console.log("=== dupa")
       await invoke("fetch_tapplets")
-      console.log("===")
       const registeredTapplets = await invoke("read_tapp_registry_db")
       const assetsServerAddr = await invoke("get_assets_server_addr")
       const tappletsWithAssets = registeredTapplets.map((tapp) => ({
@@ -22,7 +20,6 @@ export const initializeAction = () => ({
       }))
       listenerApi.dispatch(registeredTappletsActions.initializeSuccess({ registeredTapplets: tappletsWithAssets }))
     } catch (error) {
-      console.log("error", error)
       listenerApi.dispatch(registeredTappletsActions.initializeFailure({ errorMsg: error as string }))
     }
   },
