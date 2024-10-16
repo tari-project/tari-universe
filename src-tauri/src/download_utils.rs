@@ -50,15 +50,43 @@ async fn download_file(url: &str, destination: &Path, progress_tracker: Progress
   // Open a file for writing
   let mut dest = File::create(destination).await?;
 
+  // Get the total size of the response
+  let total_size = response.content_length().unwrap_or(0);
+  let mut downloaded_size = 0;
+
   // Stream the response body directly to the file
   let mut stream = response.bytes_stream();
   while let Some(item) = stream.next().await {
-    let _ = progress_tracker.update("downloading".to_string(), None, 10).await;
-    dest.write_all(&item?).await?;
+    let chunk = item?.clone();
+    dest.write_all(&chunk).await?;
+    // let _ = progress_tracker.update("downloading".to_string(), None, 10).await;
+    update_progress(&mut downloaded_size, total_size, progress_tracker.clone(), chunk.len() as u64).await?;
   }
   progress_tracker.update("download-completed".to_string(), None, 100).await;
   info!(target: LOG_TARGET, "Finished downloading: {}", url);
   Ok(())
+}
+
+async fn update_progress(
+  downloaded_size: &mut u64,
+  total_size: u64,
+  progress_tracker: ProgressTracker,
+  chunk_size: u64
+) -> Result<(), anyhow::Error> {
+  // Update the downloaded size
+  *downloaded_size += chunk_size;
+
+  // Calculate and update the progress
+  let progress_percent = calculate_progress(*downloaded_size, total_size);
+  if progress_percent % 10 == 0 && progress_percent != 0 {
+    progress_tracker.update("downloading".to_string(), None, progress_percent).await;
+  }
+
+  Ok(())
+}
+
+fn calculate_progress(downloaded_size: u64, total_size: u64) -> u64 {
+  (((downloaded_size as f64) / (total_size as f64)) * 100.0).round() as u64
 }
 
 pub async fn extract(file_path: &Path, dest_dir: &Path) -> Result<(), anyhow::Error> {

@@ -189,6 +189,7 @@ pub async fn download_and_extract_tapp(
   let progress_tracker = ProgressTracker::new(
     app_handle.get_window("main").expect("Could not get main window").clone()
   );
+  progress_tracker.set_max(100).await;
   let handle = tauri::async_runtime::spawn(async move {
     download_file_with_retries(&url, &destination_dir, progress_tracker).await
   });
