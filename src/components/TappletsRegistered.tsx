@@ -16,11 +16,15 @@ import { registeredTappletsSelectors } from "../store/registeredTapplets/registe
 import { registeredTappletsActions } from "../store/registeredTapplets/registeredTapplets.slice"
 import { installedTappletsActions } from "../store/installedTapplets/installedTapplets.slice"
 import { useTranslation } from "react-i18next"
+import { TauriEvent } from "../types"
+import { listen } from "@tauri-apps/api/event"
+import { useEffect, useState } from "react"
 
 export const TappletsRegistered: React.FC = () => {
   const { t } = useTranslation("components")
   const registeredTapplets = useSelector(registeredTappletsSelectors.selectAll)
   const dispatch = useDispatch()
+  const [downloadProgress, setDownloadProgress] = useState(0) //TODO show download dialog
 
   const handleInstall = async (tappletId: string) => {
     dispatch(installedTappletsActions.addInstalledTappletRequest({ tappletId }))
@@ -31,11 +35,29 @@ export const TappletsRegistered: React.FC = () => {
     dispatch(installedTappletsActions.initializeRequest({}))
   }
 
+  // TODO just temporary usage of listener
+  useEffect(() => {
+    const unlistenPromise = listen("message", ({ event: e, payload: p }: TauriEvent) => {
+      switch (p.event_type) {
+        case "download_status":
+          setDownloadProgress(p.progress)
+          break
+        default:
+          console.warn("Unknown tauri event: ", { e, p })
+          break
+      }
+    })
+    return () => {
+      unlistenPromise.then((unlisten) => unlisten())
+    }
+  }, [])
+
   return (
     <Box marginX="auto" mt={4}>
       <Typography variant="h4" textAlign="center" pt={6}>
         {t("registered-taplets")}
       </Typography>
+      <Typography>{`Downloading progress: ${downloadProgress}`}</Typography>
       {registeredTapplets.length ?? 0 > 0 ? (
         <List sx={{ width: "100%", minWidth: 500 }}>
           {registeredTapplets.map((item) => (
