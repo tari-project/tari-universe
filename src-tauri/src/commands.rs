@@ -1,11 +1,9 @@
-use log::{ error, info, warn };
-use log4rs::append::console;
+use log::{ error, info };
 use tari_wallet_daemon_client::types::AccountsGetBalancesResponse;
 use tauri::{ self, AppHandle, Manager, State };
-use std::path::PathBuf;
 
 use crate::{
-  constants::{ REGISTRY_URL, TAPPLET_ARCHIVE, TAPPLET_DIST_DIR },
+  constants::{ TAPPLET_ARCHIVE, TAPPLET_DIST_DIR },
   database::{
     models::{
       CreateDevTapplet,
@@ -16,11 +14,9 @@ use crate::{
       DevTapplet,
       InstalledTapplet,
       Tapplet,
-      TappletVersion,
       UpdateInstalledTapplet,
       UpdateTapplet,
     },
-    schema::tapplet,
     store::{ SqliteStore, Store },
   },
   download_utils::{ download_file_with_retries, extract },
@@ -29,12 +25,10 @@ use crate::{
     RequestError::*,
     TappletServerError::*,
   },
-  hash_calculator::calculate_checksum,
   interface::{ DevTappletResponse, InstalledTappletWithName, RegisteredTappletWithVersion },
   progress_tracker::ProgressTracker,
   rpc::{ balances, free_coins, make_request },
   tapplet_installer::{
-    check_extracted_files,
     check_files_and_validate_checksum,
     delete_tapplet,
     download_asset,
@@ -189,7 +183,6 @@ pub async fn download_and_extract_tapp(
   let progress_tracker = ProgressTracker::new(
     app_handle.get_window("main").expect("Could not get main window").clone()
   );
-  progress_tracker.set_max(100).await;
   let handle = tauri::async_runtime::spawn(async move {
     download_file_with_retries(&url, &destination_dir, progress_tracker).await
   });

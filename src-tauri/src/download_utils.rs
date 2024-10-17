@@ -59,7 +59,6 @@ async fn download_file(url: &str, destination: &Path, progress_tracker: Progress
   while let Some(item) = stream.next().await {
     let chunk = item?.clone();
     dest.write_all(&chunk).await?;
-    // let _ = progress_tracker.update("downloading".to_string(), None, 10).await;
     update_progress(&mut downloaded_size, total_size, progress_tracker.clone(), chunk.len() as u64).await?;
   }
   progress_tracker.update("download-completed".to_string(), None, 100).await;
