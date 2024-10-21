@@ -50,10 +50,6 @@ export const addInstalledTappletAction = () => ({
     const tappletId = action.payload.tappletId
     try {
       await invoke("download_and_extract_tapp", { tappletId })
-      const isCheckumValid = await invoke("calculate_and_validate_tapp_checksum", {
-        tappletId: tappletId,
-      })
-      console.log("Checksum validation result: ", isCheckumValid) // unused variable causes build failure
       await invoke("insert_installed_tapp_db", { tappletId })
       listenerApi.dispatch(installedTappletsActions.addInstalledTappletSuccess({}))
       listenerApi.dispatch(installedTappletsActions.initializeRequest({}))
