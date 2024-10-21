@@ -1,7 +1,10 @@
 use constants::TAPPLETS_ASSETS_DIR;
 use diesel::SqliteConnection;
 use fs::{ get_config_file, get_data_dir, get_log_dir };
-use tapplet_server::start;
+use log4rs::config::RawConfig;
+use log::info;
+use tapplet_server::{ setup_log, start };
+use utils::logging_utils::setup_logging;
 use std::{ collections::HashMap, sync::{ Arc, Mutex }, thread::sleep, time::Duration };
 use tauri::{ self, Manager };
 use tokio_util::sync::CancellationToken;
@@ -19,6 +22,7 @@ mod constants;
 mod fs;
 mod download_utils;
 mod progress_tracker;
+mod utils;
 
 use commands::{
   call_wallet,
@@ -46,6 +50,7 @@ use commands::{
 
 use crate::{ rpc::permission_token, wallet_daemon::start_wallet_daemon };
 
+const LOG_TARGET: &str = "tari::universe::main";
 pub struct Tokens {
   auth: Mutex<String>,
   permission: Mutex<String>,
@@ -75,11 +80,20 @@ async fn try_get_tokens() -> (String, String) {
 fn setup_tari_universe(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
   let data_dir_path = get_data_dir(app)?;
   let log_path = get_log_dir(app)?;
+  let log_tapp_dir = log_path.clone();
   let wallet_daemon_config_file = get_config_file(app, "wallet_daemon.config.toml")?;
-  let log_config_file = get_config_file(app, "wallet_daemon.log.yml")?;
+
+  // setup universe logging
+  let log_config_file = &log_path.join("universe").join("configs").join("log4rs_config_universe.yml");
+  let contents = setup_logging(&log_config_file, &log_path, include_str!("../log4rs/universe_sample.yml"))?;
+  let config: RawConfig = serde_yaml
+    ::from_str(&contents)
+    .expect("Could not parse the contents of the log file as yaml");
+  // global logger init
+  log4rs::init_raw_config(config).expect("Could not initialize logging");
 
   tauri::async_runtime::spawn(async move {
-    start_wallet_daemon(log_path, data_dir_path, wallet_daemon_config_file, log_config_file).await.unwrap();
+    start_wallet_daemon(log_path, data_dir_path, wallet_daemon_config_file).await.unwrap();
   });
   let db_path = app.path().app_data_dir()?.to_path_buf().join(constants::DB_FILE_NAME);
   app.manage(DatabaseConnection(Arc::new(Mutex::new(database::establish_connection(db_path.to_str().unwrap())))));
@@ -98,9 +112,11 @@ fn setup_tari_universe(app: &mut tauri::App) -> Result<(), Box<dyn std::error::E
 
   let app_path = app.path().app_data_dir().unwrap().to_path_buf();
   let tapplet_assets_path = app_path.join(TAPPLETS_ASSETS_DIR);
+  let _handle_setup_log = tauri::async_runtime::spawn(async move { setup_log(log_tapp_dir).await });
   let handle_start = tauri::async_runtime::spawn(async move { start(tapplet_assets_path).await });
   let (addr, cancel_token) = tauri::async_runtime::block_on(handle_start)?.unwrap();
   app.manage(AssetServer { addr, cancel_token });
+  info!(target: LOG_TARGET, "Tari Universe setup completed successfully");
 
   Ok(())
 }

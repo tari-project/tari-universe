@@ -1,15 +1,18 @@
 use std::{ fs, panic, path::PathBuf, process, net::SocketAddr, str::FromStr };
 
-use tari_common::{ initialize_logging, configuration::Network };
+use log::info;
+use tari_common::configuration::Network;
 use tari_dan_app_utilities::configuration::load_configuration;
 use tari_dan_wallet_daemon::{ cli::Cli, config::ApplicationConfig, run_tari_dan_wallet_daemon };
 use tari_shutdown::Shutdown;
+use crate::utils::logging_utils::setup_logging;
+
+const LOG_TARGET: &str = "tari::dan::wallet_daemon";
 
 pub async fn start_wallet_daemon(
-  log_path: PathBuf,
+  log_dir: PathBuf,
   data_dir_path: PathBuf,
-  wallet_daemon_config_file: PathBuf,
-  log_config_file: PathBuf
+  wallet_daemon_config_file: PathBuf
 ) -> Result<(), anyhow::Error> {
   let default_hook = panic::take_hook();
   panic::set_hook(
@@ -19,6 +22,12 @@ pub async fn start_wallet_daemon(
     })
   );
   let wallet_daemon_config_file = wallet_daemon_config_file.to_str().unwrap().to_owned();
+  let log_config_file = &log_dir.join("wallet_daemon").join("configs").join("log4rs_config_wallet.yml");
+  let _contents = setup_logging(
+    &log_config_file.clone(),
+    &log_dir.clone(),
+    include_str!("../log4rs/universe_sample.yml")
+  )?;
 
   let mut cli = Cli::init();
   cli.common.network = Some(Network::LocalNet);
@@ -38,10 +47,7 @@ pub async fn start_wallet_daemon(
   let shutdown = Shutdown::new();
   let shutdown_signal = shutdown.to_signal();
 
-  if let Err(e) = initialize_logging(&log_config_file, &log_path, include_str!("../log4rs_sample.yml")) {
-    eprintln!("{}", e);
-    return Err(e.into());
-  }
+  info!(target: LOG_TARGET, "Wallet daemon configuration completed successfully");
 
   run_tari_dan_wallet_daemon(config, shutdown_signal).await
 }

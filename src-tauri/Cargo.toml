@@ -30,13 +30,7 @@ axum = "0.7.5"
 axum-jrpc = "0.3.2"
 diesel = { version = "2.1.6", features = ["sqlite", "returning_clauses_for_sqlite_3_35"] }
 diesel_migrations = { version = "2.1.0", features = ["sqlite"] }
-log4rs = { version = "1.3", features = [
-    "rolling_file_appender",
-    "compound_policy",
-    "size_trigger",
-    "fixed_window_roller",
-    "console_appender",
-] }
+log4rs = { version = "1.3", features = ["rolling_file_appender", "compound_policy", "size_trigger", "fixed_window_roller", "console_appender"] }
 tower-http = { version = "0.5.2", features = ["fs", "trace"] }
 tari_crypto = "0.20.0"
 flate2 = "1.0.28"
@@ -62,3 +56,4 @@ regex = "1.11.0"
 futures-util = "0.3.31"
 sanitize-filename = "0.5.0"
 futures-lite = "2.3.0"
+serde_yaml = "0.9.34"
