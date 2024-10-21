@@ -81,7 +81,6 @@ fn setup_tari_universe(app: &mut tauri::App) -> Result<(), Box<dyn std::error::E
   let log_path = get_log_dir(app)?;
   let log_tapp_dir = log_path.clone();
   let wallet_daemon_config_file = get_config_file(app, "wallet_daemon.config.toml")?;
-  // let log_config_file = get_config_file(app, "../log4rs/wallet_daemon.log.yml")?;
 
   // setup universe logging
   let log_config_file = &log_path.join("universe").join("configs").join("log4rs_config_universe.yml");

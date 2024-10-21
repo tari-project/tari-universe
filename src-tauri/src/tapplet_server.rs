@@ -47,7 +47,7 @@ async fn shutdown_signal(cancel_token: CancellationToken) {
 
 pub async fn setup_log(log_dir: PathBuf) -> Result<(), anyhow::Error> {
   // setup tapplet logging
-  // TODO create separate dirs for different tapplets
+  // TODO create separate dirs for different tapplets: https://github.com/tari-project/tari-universe/issues/138
   let log_config_file = &log_dir.join("tapplet").join("configs").join("log4rs_config_tapplet.yml");
   let _contents = setup_logging(&log_config_file, &log_dir, include_str!("../log4rs/universe_sample.yml"))?;
   Ok(())
