@@ -14,5 +14,7 @@
   "tari-wallet-daemon": "Demon portfela Tari",
   "get-free-coins": "Odbierz darmowe monety",
   "get-balances": "Pobierz balanse",
-  "balance-updates": "Zmiana balansów"
+  "balance-updates": "Zmiana balansów",
+  "create-account": "Dodaj nowe konto",
+  "open-logs-directory": "Logi"
 }

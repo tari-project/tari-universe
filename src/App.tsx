@@ -18,9 +18,12 @@ import { changeLanguage } from "i18next"
 import { Language, LanguageList } from "./i18initializer"
 import { useTranslation } from "react-i18next"
 import { metadataActions } from "./store/metadata/metadata.slice"
+import { invoke } from "@tauri-apps/api/core"
+import { errorActions } from "./store/error/error.slice"
+import { ErrorSource } from "./store/error/error.types"
 
 function App() {
-  const { t } = useTranslation("navigation")
+  const { t } = useTranslation(["navigation", "components"])
   const dispatch = useDispatch()
   useEffect(() => {
     dispatch(providerActions.initializeRequest({}))
@@ -39,6 +42,18 @@ function App() {
     []
   )
 
+  async function openLogsDirectory() {
+    try {
+      await invoke("open_log_dir", {})
+      console.info("Opening logs directory")
+    } catch (error) {
+      if (typeof error === "string") {
+        console.error("Error opening logs directory: ", error)
+        dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.FRONTEND }))
+      }
+    }
+  }
+
   return (
     <Stack height="100%">
       <BrowserRouter>
@@ -55,6 +70,9 @@ function App() {
             </Link>
           </Stack>
           <Stack direction="row" justifyContent="flex-end" gap={2} gridArea="1 / 5 / 2 / 6">
+            <Button sx={{ alignSelf: "center" }} onClick={openLogsDirectory}>
+              {t("open-logs-directory", { ns: "components" })}
+            </Button>
             {LanguageList.map((langauge) => (
               <Button sx={{ alignSelf: "center" }} onClick={(event) => handleLanguageChange(event, langauge)}>
                 {langauge}

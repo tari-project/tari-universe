@@ -1,20 +1,27 @@
-import { invoke } from "@tauri-apps/api/core"
 import { useState } from "react"
 
 import { Box, Button, Typography } from "@mui/material"
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
 import { useTranslation } from "react-i18next"
 import { ErrorSource } from "../store/error/error.types"
+import { providerSelector } from "../store/provider/provider.selector"
 
 export const Wallet: React.FC = () => {
   const { t } = useTranslation(["components", "common"])
   const [balances, setBalances] = useState({})
   const dispatch = useDispatch()
+  const provider = useSelector(providerSelector.selectProvider)
+  const [account, setAccount] = useState("")
 
-  async function get_free_coins() {
+  async function create_account() {
     try {
-      await invoke("get_free_coins", {})
+      // await invoke("create_account", {})
+      // const cli = await provider.getClient()
+      // await provider.authenticateClient(cli)
+      console.log("provider authenticated")
+      const acc = await provider.createAccount("batat")
+      console.log("GET ACCOUNT", acc)
     } catch (error) {
       if (typeof error === "string") {
         dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND }))
@@ -22,9 +29,33 @@ export const Wallet: React.FC = () => {
     }
   }
 
+  async function get_free_coins() {
+    try {
+      // await invoke("get_free_coins", {})
+      console.log("==================================================")
+      // const cli = await provider.getClient()
+      // await provider.authenticateClient(cli)
+      console.log("provider authenticated")
+      const acc = await provider.createFreeTestCoins("banan")
+      setAccount(acc.address)
+      console.log("GET ACCOUNT", acc)
+    } catch (error) {
+      console.log("GET ACCOUNT ERROR", error)
+      if (typeof error === "string") {
+        console.log(error)
+        dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND }))
+      }
+    }
+  }
+
   async function get_balances() {
     try {
-      setBalances(await invoke("get_balances", {}))
+      console.log("==================================================")
+      console.log("get balances acc", account)
+      // setBalances(await invoke("get_balances", {}))
+      const resp = await provider.getAccountBalances(account)
+      console.log("get balances resp", resp)
+      setBalances(resp.balances)
     } catch (error) {
       if (typeof error === "string") {
         dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND }))
@@ -38,6 +69,9 @@ export const Wallet: React.FC = () => {
         {t("tari-wallet-daemon", { ns: "components" })}
       </Typography>
       <Box display="flex" flexDirection="column" gap={2} alignItems="center" py={4}>
+        <Button onClick={create_account} variant="contained" sx={{ width: 200 }}>
+          {t("create-account", { ns: "components" })}
+        </Button>
         <Button onClick={get_free_coins} variant="contained" sx={{ width: 200 }}>
           {t("get-free-coins", { ns: "components" })}
         </Button>

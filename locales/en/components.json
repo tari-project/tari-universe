@@ -14,5 +14,7 @@
   "tari-wallet-daemon": "Tari wallet daemon",
   "get-free-coins": " Get free coins",
   "get-balances": "Get balances",
-  "balance-updates": "Balance updates"
+  "balance-updates": "Balance updates",
+  "create-account": "New account",
+  "open-logs-directory": "Logs"
 }

@@ -27,7 +27,7 @@ use crate::{
   },
   interface::{ DevTappletResponse, InstalledTappletWithName, RegisteredTappletWithVersion },
   progress_tracker::ProgressTracker,
-  rpc::{ balances, free_coins, make_request },
+  rpc::{ account_create, balances, free_coins, make_request },
   tapplet_installer::{
     check_files_and_validate_checksum,
     delete_tapplet,
@@ -45,18 +45,29 @@ use tauri_plugin_http::reqwest::{ self };
 pub const LOG_TARGET: &str = "tari::universe";
 
 #[tauri::command]
-pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), Error> {
+pub async fn create_account(tokens: State<'_, Tokens>) -> Result<(), Error> {
   // Use default account
   let account_name = "default".to_string();
   let permission_token = tokens.permission
     .lock()
     .map_err(|_| FailedToObtainPermissionTokenLock)?
     .clone();
+  let handle = tauri::async_runtime::spawn(async move { account_create(Some(account_name), permission_token).await });
+  let _response = handle.await?.map_err(|e| Error::RequestFailed { message: e.to_string() })?;
+  Ok(())
+}
 
-  let handle = tauri::async_runtime::spawn(async move {
-    free_coins(Some(account_name), permission_token).await.unwrap()
-  });
-  handle.await.unwrap();
+#[tauri::command]
+pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), Error> {
+  println!("=============> get free coins");
+  // Use default account
+  let account_name = "tester".to_string();
+  let permission_token = tokens.permission
+    .lock()
+    .map_err(|_| FailedToObtainPermissionTokenLock)?
+    .clone();
+  let handle = tauri::async_runtime::spawn(async move { free_coins(Some(account_name), permission_token).await });
+  let _response = handle.await?.map_err(|e| Error::RequestFailed { message: e.to_string() })?;
   Ok(())
 }
 
@@ -81,6 +92,7 @@ pub async fn call_wallet(
   params: String,
   tokens: State<'_, Tokens>
 ) -> Result<serde_json::Value, Error> {
+  println!("======== HELLO THERE CALL WALLET {:?}", method);
   let permission_token = tokens.permission
     .lock()
     .map_err(|_| FailedToObtainPermissionTokenLock)?
@@ -414,4 +426,12 @@ pub fn delete_dev_tapplet(dev_tapplet_id: i32, db_connection: State<'_, Database
   let mut store = SqliteStore::new(db_connection.0.clone());
   let dev_tapplet: DevTapplet = store.get_by_id(dev_tapplet_id)?;
   store.delete(dev_tapplet)
+}
+
+#[tauri::command]
+pub fn open_log_dir(app_handle: tauri::AppHandle) {
+  let log_dir = app_handle.path().app_log_dir().expect("Could not get log dir");
+  if let Err(e) = open::that(log_dir) {
+    error!(target: LOG_TARGET, "Could not open log dir: {:?}", e);
+  }
 }

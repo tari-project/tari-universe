@@ -1,7 +1,7 @@
 import { permissions as walletPermissions, TariPermissions } from "@tari-project/tarijs"
 import { createSelector } from "@reduxjs/toolkit"
 import { RootState } from "../store"
-import { WalletDaemonParameters, WalletDaemonTariProvider } from "@provider/TariUniverseProvider"
+import { WalletDaemonParameters, TariUniverseProvider } from "@provider/TariUniverseProvider"
 
 const { TariPermissionAccountInfo, TariPermissionKeyList, TariPermissionSubstatesRead, TariPermissionTransactionSend } =
   walletPermissions
@@ -21,7 +21,7 @@ const selectProvider = createSelector([providerStateSelector], (_) => {
     permissions,
     optionalPermissions,
   }
-  return WalletDaemonTariProvider.build(params)
+  return TariUniverseProvider.build(params)
 })
 
 export const providerSelector = {

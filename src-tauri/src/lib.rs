@@ -2,7 +2,7 @@ use constants::TAPPLETS_ASSETS_DIR;
 use diesel::SqliteConnection;
 use fs::{ get_config_file, get_data_dir, get_log_dir };
 use log4rs::config::RawConfig;
-use log::info;
+use log::{ info, warn };
 use tapplet_server::{ setup_log, start };
 use utils::logging_utils::setup_logging;
 use std::{ collections::HashMap, sync::{ Arc, Mutex }, thread::sleep, time::Duration };
@@ -46,6 +46,8 @@ use commands::{
   read_dev_tapplets,
   delete_dev_tapplet,
   update_tapp,
+  create_account,
+  open_log_dir,
 };
 
 use crate::{ rpc::permission_token, wallet_daemon::start_wallet_daemon };
@@ -67,9 +69,13 @@ async fn try_get_tokens() -> (String, String) {
   loop {
     match permission_token().await {
       Ok(tokens) => {
+        println!("permission token ok {:?}", tokens);
+        info!(target: LOG_TARGET, "permission token ok {:?}", tokens);
         return tokens;
       }
-      Err(_) => {
+      Err(e) => {
+        println!("permission token ERR {:?}", e);
+        warn!(target: LOG_TARGET, "permission token ERR {:?}", e);
         sleep(Duration::from_millis(500));
         continue;
       }
@@ -101,6 +107,7 @@ fn setup_tari_universe(app: &mut tauri::App) -> Result<(), Box<dyn std::error::E
   let tokens = app.state::<Tokens>();
   let handle = tauri::async_runtime::spawn(try_get_tokens());
   let (permission_token, auth_token) = tauri::async_runtime::block_on(handle)?;
+  info!(target: LOG_TARGET, "permission token found {:?}", permission_token);
   tokens.permission
     .lock()
     .map_err(|_| error::Error::FailedToObtainPermissionTokenLock)?
@@ -163,7 +170,9 @@ pub fn run() {
         add_dev_tapplet,
         read_dev_tapplets,
         delete_dev_tapplet,
-        update_tapp
+        update_tapp,
+        create_account,
+        open_log_dir
       ]
     )
     .setup(|app| {
