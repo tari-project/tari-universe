@@ -21,7 +21,13 @@ import {
   VaultBalances,
 } from "@tari-project/tarijs"
 import { ListSubstatesResponse } from "@tari-project/tarijs/dist/providers"
-import { accountsCreate, accountsCreateFreeTestCoins, client, setClientInstance } from "./json_rpc"
+import {
+  accountsCreate,
+  accountsCreateFreeTestCoins,
+  authenticateClient,
+  DEFAULT_WALLET_ADDRESS,
+  setClientInstance,
+} from "./json_rpc"
 import { TUProviderMethod } from "../store/transaction/transaction.types"
 
 export type WalletDaemonParameters = {
@@ -34,27 +40,6 @@ export type WalletDaemonParameters = {
 export type WindowSize = {
   width: number
   height: number
-}
-// let clientInstance: WalletDaemonClient | null = null
-// let pendingClientInstance: Promise<WalletDaemonClient> | null = null
-// let outerAddress: URL | null = null
-const DEFAULT_WALLET_ADDRESS = new URL(
-  import.meta.env.VITE_DAEMON_JRPC_ADDRESS ||
-    import.meta.env.VITE_JSON_RPC_ADDRESS ||
-    import.meta.env.VITE_JRPC_ADDRESS ||
-    "http://127.0.0.1:18010/"
-)
-export async function getClientAddress(): Promise<URL> {
-  try {
-    let resp = await fetch("/json_rpc_address")
-    if (resp.status === 200) {
-      return new URL(await resp.text())
-    }
-  } catch (e) {
-    console.warn(e)
-  }
-
-  return DEFAULT_WALLET_ADDRESS
 }
 
 export class TariUniverseProvider implements TariProvider {
@@ -77,22 +62,7 @@ export class TariUniverseProvider implements TariProvider {
   }
 
   public async getClient(): Promise<WalletDaemonClient> {
-    // const getAddress = Promise.resolve(getClientAddress())
-    // const client = getAddress.then(async (addr) => {
-    //   const client = WalletDaemonClient.usingFetchTransport(addr.toString())
-    //   await this.authenticateClient(client)
-    //   outerAddress = addr
-    //   clientInstance = client
-    //   pendingClientInstance = null
-    //   return client
-    // })
-    // return client
     return this.client
-  }
-
-  public async authenticateClient(client: WalletDaemonClient) {
-    const auth_token = await client.authRequest(["Admin"])
-    await client.authAccept(auth_token, auth_token)
   }
 
   static build(params: WalletDaemonParameters): TariUniverseProvider {
@@ -100,7 +70,6 @@ export class TariUniverseProvider implements TariProvider {
     allPermissions.addPermissions(params.permissions)
     allPermissions.addPermissions(params.optionalPermissions)
     const walletDaemonClient = WalletDaemonClient.usingFetchTransport(DEFAULT_WALLET_ADDRESS.toString())
-    // const walletDaemonClient = client().then((c) => c).finally(())
     setClientInstance(walletDaemonClient)
     return new TariUniverseProvider(params, walletDaemonClient)
   }
@@ -115,15 +84,10 @@ export class TariUniverseProvider implements TariProvider {
   }
 
   async runOne(method: TUProviderMethod, args: any[]): Promise<any> {
-    const isConnected = this.isConnected()
     const isAuth = this.client.isAuthenticated()
-    console.log(">>>>>>>>", isConnected, isAuth)
     if (!isAuth) {
-      const auth_token = await this.client.authRequest(["Admin"])
-      await this.client.authAccept(auth_token, auth_token)
-      console.log(">>>>>>>> auth token", auth_token)
+      await authenticateClient(this.client)
     }
-    console.log(">>>>>>>>", isConnected, isAuth)
     let res = (this[method] as (...args: any) => Promise<any>)(...args)
     return res
   }
@@ -138,12 +102,6 @@ export class TariUniverseProvider implements TariProvider {
       key_id: null,
     })
     console.log("create coins res", res)
-    // const res = await this.client.createFreeTestCoins({
-    //   account: { Name: "jogabonito" },
-    //   amount,
-    //   max_fee: null,
-    //   key_id: 0,
-    // })
     return {
       account_id: res.account.key_index,
       address: (res.account.address as { Component: string }).Component,
@@ -152,22 +110,16 @@ export class TariUniverseProvider implements TariProvider {
     }
   }
 
-  public async createAccount(accountName?: string, amount = 1_000_000, fee?: number): Promise<Account> {
+  public async createAccount(accountName?: string, fee?: number): Promise<Account> {
     console.log("create coins")
     const res = await accountsCreate({
       account_name: accountName ?? null,
       custom_access_rules: null,
       is_default: true,
       key_id: null,
-      max_fee: null,
+      max_fee: fee ?? null,
     })
     console.log("create coins res", res)
-    // const res = await this.client.createFreeTestCoins({
-    //   account: { Name: "jogabonito" },
-    //   amount,
-    //   max_fee: null,
-    //   key_id: 0,
-    // })
     return {
       account_id: 0,
       address: (res.address as { Component: string }).Component,
@@ -230,8 +182,6 @@ export class TariUniverseProvider implements TariProvider {
     // }
     // satisfies TransactionSubmitRequest
 
-    console.log("============> TU PROVIDER")
-
     const txParams: TransactionSubmitRequest = {
       transaction: {
         fee_instructions: req.fee_instructions as Instruction[],
@@ -249,9 +199,7 @@ export class TariUniverseProvider implements TariProvider {
       proof_ids: [],
       signing_key_index: null,
     }
-    console.log("============> TU PROVIDER TX", txParams)
     const res = await this.client.submitTransaction(txParams)
-    console.log("============> TU PROVIDER RESPONSE", res)
 
     return { transaction_id: res.transaction_id }
   }
