@@ -211,7 +211,7 @@ export class TariUniverseProvider implements TariProvider {
       autofill_inputs: [],
       detect_inputs: false, //TODO
       proof_ids: [],
-    } as unknown as TransactionSubmitRequest
+    } as TransactionSubmitRequest
     console.log("!!!!!!!!!!!!!!!!!!!!!!!!! submit tx TU Provider", params)
 
     const res = await this.client.submitTransaction(params)

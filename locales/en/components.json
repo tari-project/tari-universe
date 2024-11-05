@@ -16,5 +16,7 @@
   "get-balances": "Get balances",
   "balance-updates": "Balance updates",
   "create-account": "New account",
-  "open-logs-directory": "Logs"
+  "open-logs-directory": "Logs",
+  "simulation-status": "Simulation status",
+  "simulation-error-msg": "Simulation error"
 }

@@ -47,21 +47,24 @@ export const TransactionConfirmationModal: React.FC = () => {
   }
 
   interface InstructionWithArgs {
-    instructionName: string,
+    instructionName: string
     args: number[]
   }
   // Function to get function or method fields
-  function getFunctionOrMethod(instructions: object[]): string[] {
-    let functionNames: string[] = []
+  function getFunctionOrMethod(instructions: object[]): InstructionWithArgs[] {
+    let functionNames: InstructionWithArgs[] = []
     instructions.forEach((instruction) => {
       // Check if the instruction is an object and not a string
       if (typeof instruction === "object" && instruction !== null) {
         if ("CallFunction" in instruction) {
           const callFunction = instruction as CallFunction
-          functionNames.push(callFunction.CallFunction.function)
+          functionNames.push({
+            instructionName: callFunction.CallFunction.function,
+            args: callFunction.CallFunction.args,
+          })
         } else if ("CallMethod" in instruction) {
           const callMethod = instruction as CallMethod
-          functionNames.push(callMethod.CallMethod.method)
+          functionNames.push({ instructionName: callMethod.CallMethod.method, args: callMethod.CallMethod.args })
         }
       }
     })
@@ -77,12 +80,18 @@ export const TransactionConfirmationModal: React.FC = () => {
         </DialogContentText>
         {transaction?.args?.map((arg) => (
           <DialogContentText>
-            {t("instructions", { ns: "components" })}: {getFunctionOrMethod(arg.instructions)}
+            {t("instructions", { ns: "components" })}:{" "}
+            {getFunctionOrMethod(arg.instructions).flatMap((i) => i.instructionName + " with args: " + i.args)}
           </DialogContentText>
         ))}
         <DialogContentText>
           {t("simulation-status", { ns: "components" })}: {simulation?.status}
         </DialogContentText>
+        {simulation?.status == "failure" && (
+          <DialogContentText>
+            {t("simulation-error-msg", { ns: "components" })}: {simulation?.errorMsg}
+          </DialogContentText>
+        )}
         <DialogContentText>
           {t("balance-updates", { ns: "components" })}:
           {simulation?.balanceUpdates?.map((update) => (

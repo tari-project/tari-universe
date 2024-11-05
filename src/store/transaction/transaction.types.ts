@@ -1,12 +1,14 @@
 import { TariUniverseProvider } from "@provider/TariUniverseProvider"
 import { BalanceUpdate } from "../simulation/simulation.types"
+import { SubmitTransactionRequest } from "@tari-project/tarijs"
 
 export type TransactionStatus = "pending" | "success" | "failure" | "cancelled"
 export type TUProviderMethod = Exclude<keyof TariUniverseProvider, "runOne">
 
 export type Transaction = {
   methodName: TUProviderMethod
-  args: any[]
+  // args: any[]
+  args: SubmitTransactionRequest[]
   id: number
   submit: () => void
   cancel: () => void

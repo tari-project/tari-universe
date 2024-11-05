@@ -16,5 +16,7 @@
   "get-balances": "Pobierz balanse",
   "balance-updates": "Zmiana balansów",
   "create-account": "Dodaj nowe konto",
-  "open-logs-directory": "Logi"
+  "open-logs-directory": "Logi",
+  "simulation-status": "Status symulacji",
+  "simulation-error-msg": "Błąd symulacji"
 }

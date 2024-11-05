@@ -22,6 +22,7 @@ const simulationSlice = createSlice({
         transactionId: action.payload.transactionId,
         status: "pending",
         balanceUpdates: [],
+        errorMsg: "",
       })
     },
     runSimulationSuccess: (state, action: PayloadAction<SimulationSuccessPayload>) => {
@@ -33,7 +34,7 @@ const simulationSlice = createSlice({
     runSimulationFailure: (state, action: PayloadAction<SimulationFailurePayload>) => {
       simulationAdapter.updateOne(state, {
         id: action.payload.transactionId,
-        changes: { status: "failure" },
+        changes: { status: "failure", errorMsg: action.payload.errorMsg },
       })
     },
   },
