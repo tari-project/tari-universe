@@ -21,6 +21,7 @@ import { metadataActions } from "./store/metadata/metadata.slice"
 import { invoke } from "@tauri-apps/api/core"
 import { errorActions } from "./store/error/error.slice"
 import { ErrorSource } from "./store/error/error.types"
+import { Account } from "./components/Account"
 
 function App() {
   const { t } = useTranslation(["navigation", "components"])
@@ -58,6 +59,10 @@ function App() {
     <Stack height="100%">
       <BrowserRouter>
         <Grid gridTemplateColumns="repeat(5, 1fr)" gridTemplateRows="1fr" columnGap={0} rowGap={0} display="grid">
+          <Stack direction="row" gap={4} width="100%" justifyContent="flex-start">
+            <Account />
+          </Stack>
+
           <Stack direction="row" gap={4} gridArea="1 / 2 / 2 / 5" width="100%" justifyContent="center">
             <Link to={TabKey.WALLET} className="nav-item">
               {t("wallet")}

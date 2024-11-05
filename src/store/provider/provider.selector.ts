@@ -11,6 +11,7 @@ const providerStateSelector = (state: RootState) => state.provider
 const isInitialized = createSelector([providerStateSelector], (state) => state.isInitialized)
 
 const selectProvider = createSelector([providerStateSelector], (_) => {
+  // TODO read permissions from tapplet manifest
   let permissions = new TariPermissions()
   permissions.addPermission(new TariPermissionKeyList())
   permissions.addPermission(new TariPermissionAccountInfo())

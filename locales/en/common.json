@@ -2,5 +2,6 @@
   "add": "Add",
   "cancel": "Cancel",
   "submit": "Submit",
-  "balances": "Balances"
+  "balances": "Balances",
+  "refresh": "Refresh"
 }

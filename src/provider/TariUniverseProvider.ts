@@ -1,15 +1,15 @@
 import {
   WalletDaemonClient,
   stringToSubstateId,
-  Instruction,
   SubstateType,
   substateIdToString,
   KeyBranch,
-  TransactionSubmitRequest,
   AccountsGetBalancesResponse,
+  TransactionSubmitRequest,
 } from "@tari-project/wallet_jrpc_client"
 import {
   Account,
+  Instruction,
   SubmitTransactionRequest,
   SubmitTransactionResponse,
   Substate,
@@ -46,6 +46,7 @@ export class TariUniverseProvider implements TariProvider {
   public providerName = "TariUniverseProvider"
   params: WalletDaemonParameters
   client: WalletDaemonClient
+  isProviderConnected: boolean
 
   private constructor(
     params: WalletDaemonParameters,
@@ -55,10 +56,11 @@ export class TariUniverseProvider implements TariProvider {
   ) {
     this.params = params
     this.client = connection
+    this.isProviderConnected = true
   }
 
   public isConnected(): boolean {
-    return true
+    return this.isProviderConnected //TODO tmp solution shoule be better one
   }
 
   public async getClient(): Promise<WalletDaemonClient> {
@@ -84,11 +86,14 @@ export class TariUniverseProvider implements TariProvider {
   }
 
   async runOne(method: TUProviderMethod, args: any[]): Promise<any> {
+    console.log(">>> runOne", method, args)
     const isAuth = this.client.isAuthenticated()
+    console.log(">>> runOne isAuth", isAuth)
     if (!isAuth) {
       await authenticateClient(this.client)
     }
     let res = (this[method] as (...args: any) => Promise<any>)(...args)
+    console.log(">>> runOne", res)
     return res
   }
 
@@ -164,6 +169,8 @@ export class TariUniverseProvider implements TariProvider {
   }
 
   public async submitTransaction(req: SubmitTransactionRequest): Promise<SubmitTransactionResponse> {
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    console.log(" submit tx TU Provider", req)
     // const txParams = {
     //   transaction: null, // TODO figure out what this is
     //   signing_key_index: req.account_id,
@@ -182,24 +189,26 @@ export class TariUniverseProvider implements TariProvider {
     // }
     // satisfies TransactionSubmitRequest
 
-    const txParams: TransactionSubmitRequest = {
+    const params = {
       transaction: {
-        fee_instructions: req.fee_instructions as Instruction[],
         instructions: req.instructions as Instruction[],
+        fee_instructions: req.fee_instructions as Instruction[],
         inputs: req.required_substates.map((s) => ({
           // TODO: Hmm The bindings want a SubstateId object, but the wallet only wants a string. Any is used to skip type checking here
           substate_id: s.substate_id as any,
-          version: s.version || null,
+          version: null,
         })),
         min_epoch: null,
         max_epoch: null,
       },
+      signing_key_index: req.account_id,
       autofill_inputs: [],
-      detect_inputs: false,
+      detect_inputs: true,
       proof_ids: [],
-      signing_key_index: null,
-    }
-    const res = await this.client.submitTransaction(txParams)
+    } as unknown as TransactionSubmitRequest
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!! submit tx TU Provider", params)
+
+    const res = await this.client.submitTransaction(params)
 
     return { transaction_id: res.transaction_id }
   }

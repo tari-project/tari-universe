@@ -103,9 +103,17 @@ export const initializeAction = () => ({
           return balanceUpdates
         }
         const submit = async () => {
-          const result = await provider.runOne(_method, args)
-          if (event.source) {
-            event.source.postMessage({ id, result, type: "provider-call" }, { targetOrigin: event.origin })
+          try {
+            const result = await provider.runOne(_method, args)
+            console.log(">>>>> submit result runOne", _method, result)
+            if (event.source) {
+              event.source.postMessage({ id, result, type: "provider-call" }, { targetOrigin: event.origin })
+            }
+          } catch (error) {
+            const e = typeof error === "string" ? error : "send req error"
+            dispatch(errorActions.showError({ message: e, errorSource: ErrorSource.FRONTEND }))
+
+            console.log(">>>>> submit runOne error", error)
           }
         }
         const cancel = async () => {

@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next"
 import { ErrorSource } from "../store/error/error.types"
 import { providerSelector } from "../store/provider/provider.selector"
 
+export const DEFAULT_ACCOUNT_NAME = "default"
+
 export const Wallet: React.FC = () => {
   const { t } = useTranslation(["components", "common"])
   const [balances, setBalances] = useState({})
@@ -36,7 +38,9 @@ export const Wallet: React.FC = () => {
       // const cli = await provider.getClient()
       // await provider.authenticateClient(cli)
       console.log("provider authenticated")
-      const acc = await provider.createFreeTestCoins("banan")
+
+      // needs to have account name - otherwise it throws error
+      const acc = await provider.createFreeTestCoins(DEFAULT_ACCOUNT_NAME)
       setAccount(acc.address)
       console.log("GET ACCOUNT", acc)
     } catch (error) {
