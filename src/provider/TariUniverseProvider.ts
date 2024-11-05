@@ -27,8 +27,11 @@ import {
   authenticateClient,
   DEFAULT_WALLET_ADDRESS,
   setClientInstance,
+  // DEFAULT_WALLET_ADDRESS,
+  // setClientInstance,
 } from "./json_rpc"
 import { TUProviderMethod } from "../store/transaction/transaction.types"
+import { IPCRpcTransport } from "./ipc_transport"
 
 export type WalletDaemonParameters = {
   permissions: TariPermissions
@@ -74,6 +77,8 @@ export class TariUniverseProvider implements TariProvider {
     const walletDaemonClient = WalletDaemonClient.usingFetchTransport(DEFAULT_WALLET_ADDRESS.toString())
     setClientInstance(walletDaemonClient)
     return new TariUniverseProvider(params, walletDaemonClient)
+    // const client = WalletDaemonClient.new(new IPCRpcTransport())
+    // return new TariUniverseProvider(params, client)
   }
 
   public setWindowSize(width: number, height: number): void {
@@ -99,7 +104,8 @@ export class TariUniverseProvider implements TariProvider {
 
   public async createFreeTestCoins(accountName?: string, amount = 1_000_000, fee?: number): Promise<Account> {
     //TODO tmp solution to debug rpc call problem
-    console.log("create coins")
+    console.log(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+    console.log("create coins - TARI UNIVERSE PROVIDER")
     const res = await accountsCreateFreeTestCoins({
       account: (accountName && { Name: accountName }) || null,
       amount,
@@ -203,7 +209,7 @@ export class TariUniverseProvider implements TariProvider {
       },
       signing_key_index: req.account_id,
       autofill_inputs: [],
-      detect_inputs: true,
+      detect_inputs: false, //TODO
       proof_ids: [],
     } as unknown as TransactionSubmitRequest
     console.log("!!!!!!!!!!!!!!!!!!!!!!!!! submit tx TU Provider", params)

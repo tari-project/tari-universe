@@ -22,7 +22,7 @@ export const Wallet: React.FC = () => {
       // const cli = await provider.getClient()
       // await provider.authenticateClient(cli)
       console.log("provider authenticated")
-      const acc = await provider.createAccount("batat")
+      const acc = await provider.createAccount()
       console.log("GET ACCOUNT", acc)
     } catch (error) {
       if (typeof error === "string") {

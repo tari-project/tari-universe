@@ -67,6 +67,7 @@ export const initializeAction = () => ({
         }
 
         const { methodName, args, id } = event.data
+        console.log("!!!!!! provider init action", methodName, args, id)
         const _method = methodName as TUProviderMethod
         const runSimulation = async () => {
           if (methodName !== "submitTransaction") {
@@ -107,7 +108,9 @@ export const initializeAction = () => ({
             const result = await provider.runOne(_method, args)
             console.log(">>>>> submit result runOne", _method, result)
             if (event.source) {
+              console.log(">>>>> submit event source", event.source)
               event.source.postMessage({ id, result, type: "provider-call" }, { targetOrigin: event.origin })
+              console.log(">>>>> submit event target", event.target)
             }
           } catch (error) {
             const e = typeof error === "string" ? error : "send req error"
