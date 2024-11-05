@@ -48,7 +48,7 @@ export const TransactionConfirmationModal: React.FC = () => {
 
   interface InstructionWithArgs {
     instructionName: string
-    args: number[]
+    args: any[]
   }
   // Function to get function or method fields
   function getFunctionOrMethod(instructions: object[]): InstructionWithArgs[] {
@@ -81,7 +81,11 @@ export const TransactionConfirmationModal: React.FC = () => {
         {transaction?.args?.map((arg) => (
           <DialogContentText>
             {t("instructions", { ns: "components" })}:{" "}
-            {getFunctionOrMethod(arg.instructions).flatMap((i) => i.instructionName + " with args: " + i.args)}
+            {getFunctionOrMethod(arg.instructions)
+              .flatMap((i) => i.instructionName + " with args: " + i.args)
+              .map((instruction, index) => (
+                <div key={index}>{instruction}</div> // Using <div> or <span> to wrap each instruction
+              ))}
           </DialogContentText>
         ))}
         <DialogContentText>

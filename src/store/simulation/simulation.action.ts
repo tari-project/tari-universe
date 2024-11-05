@@ -25,8 +25,7 @@ export const runTransactionSimulationAction = () => ({
       dispatch(simulationActions.runSimulationSuccess({ transactionId, balanceUpdates }))
     } catch (error) {
       console.log("?????? tx sim error", error)
-      const e = typeof error === "string" ? error : "Unknown error"
-      dispatch(simulationActions.runSimulationFailure({ transactionId, errorMsg: e }))
+      dispatch(simulationActions.runSimulationFailure({ transactionId, errorMsg: String(error) }))
     }
   },
 })
