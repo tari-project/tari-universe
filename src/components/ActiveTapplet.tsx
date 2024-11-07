@@ -16,9 +16,12 @@ export function ActiveTapplet() {
   const dispatch = useDispatch()
 
   useEffect(() => {
+    // TODO tu wyciagam permissiony
     invoke("launch_tapplet", { installedTappletId })
       .then((res: unknown) => {
-        setTappletAddress(res as string)
+        // setTappletAddress(res as string)
+        console.log("============")
+        console.log("LAUNCH TAPPLET RESPONSE", res)
       })
       .catch((error: string) => dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND })))
 

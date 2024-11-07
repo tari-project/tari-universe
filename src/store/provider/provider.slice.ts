@@ -6,11 +6,13 @@ import {
   InitProviderRequestPayload,
   InitProviderSuccessPayload,
   ProviderStoreState,
+  UpdatePermissionsSuccessPayload,
 } from "./provider.types"
 
 const initialState: ProviderStoreState = {
   isInitialized: false,
   provider: null,
+  permissions: null,
 }
 
 const providerSlice = createSlice({
@@ -23,6 +25,9 @@ const providerSlice = createSlice({
       state.isInitialized = true
     },
     initializeFailure: (_, _action: PayloadAction<InitProviderFailurePayload>) => {},
+    updatePermissions: (state, action: PayloadAction<UpdatePermissionsSuccessPayload>) => {
+      state.permissions = action.payload.permissions
+    },
   },
 })
 

@@ -16,11 +16,13 @@ const selectProvider = createSelector([providerStateSelector], (_) => {
   permissions.addPermission(new TariPermissionAccountInfo())
   permissions.addPermission(new TariPermissionTransactionSend())
   permissions.addPermission(new TariPermissionSubstatesRead())
+  // TU zbieram permissiony selectorem i jak się zmieni
   let optionalPermissions = new TariPermissions()
   const params: WalletDaemonParameters = {
     permissions,
     optionalPermissions,
   }
+  console.log("=======> provider selector ", params.permissions)
   return WalletDaemonTariProvider.build(params)
 })
 

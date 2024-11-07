@@ -17,7 +17,7 @@ use tauri_plugin_http::reqwest::{ self, header::{ AUTHORIZATION, CONTENT_TYPE } 
 
 use crate::error::Error;
 
-const JSON_CONNECT_ADDRESS: &str = "127.0.0.1:19000"; // TODO use db to get endpoint
+const JSON_CONNECT_ADDRESS: &str = "127.0.0.1:18010"; // TODO use db to get endpoint
 
 pub async fn permission_token() -> Result<(String, String), anyhow::Error> {
   let req_params = AuthLoginRequest {

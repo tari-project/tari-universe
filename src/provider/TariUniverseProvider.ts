@@ -58,6 +58,7 @@ export class WalletDaemonTariProvider implements TariProvider {
     allPermissions.addPermissions(params.permissions)
     allPermissions.addPermissions(params.optionalPermissions)
     const client = WalletDaemonClient.new(new IPCRpcTransport())
+    console.log("=======> provider build ", params.permissions)
     return new WalletDaemonTariProvider(params, client)
   }
 
