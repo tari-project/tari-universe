@@ -1,3 +1,5 @@
+import { TariPermission } from "@tari-project/tarijs/dist/providers/tari_universe"
+
 //TODO tauri commands cammelCase to snake
 export type RegisteredTapplet = {
   id: string
@@ -58,4 +60,9 @@ export interface TappletAudit {
   tapplet_id: string
   auditor: string
   report_url: string
+}
+
+export interface LaunchedTappResult {
+  endpoint: string
+  permissions: TariPermission[]
 }

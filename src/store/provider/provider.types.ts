@@ -1,10 +1,10 @@
 import { WalletDaemonTariProvider } from "@provider/TariUniverseProvider"
-import { TariPermissions } from "@tari-project/tarijs"
+import { TariPermission } from "@tari-project/tarijs/dist/providers/tari_universe"
 
 export type ProviderStoreState = {
   isInitialized: boolean
   provider: WalletDaemonTariProvider | null
-  permissions: TariPermissions | null
+  permissions: TariPermission[]
 }
 
 export type InitProviderRequestPayload = {}
@@ -16,5 +16,5 @@ export type InitProviderSuccessPayload = {
 }
 
 export type UpdatePermissionsSuccessPayload = {
-  permissions: TariPermissions
+  permissions: TariPermission[]
 }

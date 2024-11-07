@@ -12,7 +12,7 @@ import {
 const initialState: ProviderStoreState = {
   isInitialized: false,
   provider: null,
-  permissions: null,
+  permissions: [],
 }
 
 const providerSlice = createSlice({

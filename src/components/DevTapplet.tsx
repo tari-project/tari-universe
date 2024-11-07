@@ -15,7 +15,8 @@ export function ActiveDevTapplet() {
   useEffect(() => {
     const fetchTappletManifest = async () => {
       try {
-        const response = await fetch(`${state?.endpoint}/tapplet.manifest.json`)
+        // const response = await fetch(`${state?.endpoint}/tapplet.manifest.json`)
+        const response = await fetch(`${state?.endpoint}/src/tapplet.config.json`)
         const manifest = await response.json()
         if (manifest?.packageName === state?.package_name) {
           setIsVerified(true)
@@ -30,7 +31,7 @@ export function ActiveDevTapplet() {
       } catch (error) {
         dispatch(
           errorActions.showError({
-            message: `fetching-tapplet-manifest-failed | error-${error}`,
+            message: `failed-to-fetch-tapp-config | error-${error}`,
             errorSource: ErrorSource.FRONTEND,
           })
         )

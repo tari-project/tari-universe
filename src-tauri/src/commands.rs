@@ -133,8 +133,7 @@ pub async fn launch_tapplet(
       return Err(e.into());
     }
   }
-  //TODO get permissions from tapplet registry (so refactor all 'register tapp' process)
-  // tapp package doesnt contain manifest file so it's not extracted from tarball
+
   let permissions: Vec<TariPermission> = match get_tapp_permissions(tapplet_path.clone()) {
     Ok(p) => p,
     Err(e) => {
@@ -153,7 +152,7 @@ pub async fn launch_tapplet(
     }
     None => {}
   }
-  // Ok(format!("http://{}", addr))
+
   Ok(LaunchedTappResult {
     endpoint: format!("http://{}", addr),
     permissions,

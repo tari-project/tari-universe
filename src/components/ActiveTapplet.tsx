@@ -7,6 +7,8 @@ import { useDispatch } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
 import { useTranslation } from "react-i18next"
 import { ErrorSource } from "../store/error/error.types"
+import { providerActions } from "../store/provider/provider.slice"
+import { LaunchedTappResult } from "@type/tapplet"
 
 export function ActiveTapplet() {
   const { t } = useTranslation("components")
@@ -16,12 +18,11 @@ export function ActiveTapplet() {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    // TODO tu wyciagam permissiony
     invoke("launch_tapplet", { installedTappletId })
-      .then((res: unknown) => {
-        // setTappletAddress(res as string)
-        console.log("============")
-        console.log("LAUNCH TAPPLET RESPONSE", res)
+      .then((res: any) => {
+        const launchedTappParams: LaunchedTappResult = res
+        setTappletAddress(launchedTappParams.endpoint)
+        dispatch(providerActions.updatePermissions({ permissions: launchedTappParams.permissions }))
       })
       .catch((error: string) => dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND })))
 

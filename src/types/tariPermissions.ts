@@ -1,4 +1,5 @@
 import {
+  TariPermission,
   TariPermissionAccountBalance,
   TariPermissionAccountInfo,
   TariPermissionAccountList,
@@ -9,7 +10,7 @@ import {
   TariPermissionTransactionSend,
 } from "@tari-project/tarijs/dist/providers/wallet_daemon/tari_permissions"
 
-export function parse(permission: any) {
+export function toPermission(permission: any): TariPermission {
   if (permission.hasOwnProperty("AccountBalance")) {
     return new TariPermissionAccountBalance(permission.AccountBalance)
   } else if (permission === "AccountInfo") {
