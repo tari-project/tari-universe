@@ -1,6 +1,3 @@
-// TODO add new `IPCRpcTransport` implementation
-// commented as long as rpc request doesn't work
-
 import { transports } from "@tari-project/wallet_jrpc_client"
 import { invoke } from "@tauri-apps/api/core"
 

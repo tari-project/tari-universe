@@ -1,6 +1,6 @@
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
-import { Box, Button, Typography } from "@mui/material"
+import { Box, Button, TextField, Typography } from "@mui/material"
 import { useDispatch, useSelector } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
 import { useTranslation } from "react-i18next"
@@ -15,14 +15,29 @@ export const Wallet: React.FC = () => {
   const dispatch = useDispatch()
   const provider = useSelector(providerSelector.selectProvider)
   const [account, setAccount] = useState("")
+  const [accountName, setAccountName] = useState("")
+
+  useEffect(() => {
+    refreshAccount()
+  }, [provider])
+
+  const refreshAccount = useCallback(async () => {
+    console.log("fetch")
+    try {
+      const account = await provider.getAccount()
+      setAccount(account.address)
+    } catch (error) {
+      console.error(error)
+      if (typeof error === "string") {
+        dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND }))
+      }
+    }
+  }, [provider])
 
   async function create_account() {
     try {
-      // await invoke("create_account", {})
-      // const cli = await provider.getClient()
-      // await provider.authenticateClient(cli)
       console.log("provider authenticated")
-      const acc = await provider.createAccount()
+      const acc = await provider.createAccount(accountName)
       console.log("GET ACCOUNT", acc)
     } catch (error) {
       if (typeof error === "string") {
@@ -33,12 +48,7 @@ export const Wallet: React.FC = () => {
 
   async function get_free_coins() {
     try {
-      // await invoke("get_free_coins", {})
       console.log("==================================================")
-      // const cli = await provider.getClient()
-      // await provider.authenticateClient(cli)
-      console.log("provider authenticated")
-
       // needs to have account name - otherwise it throws error
       const acc = await provider.createFreeTestCoins(DEFAULT_ACCOUNT_NAME)
       setAccount(acc.address)
@@ -67,15 +77,28 @@ export const Wallet: React.FC = () => {
     }
   }
 
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAccountName(e.target.value)
+  }
+
   return (
     <Box mt={4}>
       <Typography variant="h4" textAlign="center" pt={6}>
         {t("tari-wallet-daemon", { ns: "components" })}
       </Typography>
       <Box display="flex" flexDirection="column" gap={2} alignItems="center" py={4}>
-        <Button onClick={create_account} variant="contained" sx={{ width: 200 }}>
-          {t("create-account", { ns: "components" })}
-        </Button>
+        <Box display="flex" flexDirection="row" gap={2} alignItems="center" py={4}>
+          <TextField
+            name="accountName"
+            label="Account Name"
+            value={accountName}
+            onChange={onChange}
+            style={{ flexGrow: 1 }}
+          />
+          <Button onClick={create_account} variant="contained" sx={{ width: 200 }}>
+            {t("create-account", { ns: "components" })}
+          </Button>
+        </Box>
         <Button onClick={get_free_coins} variant="contained" sx={{ width: 200 }}>
           {t("get-free-coins", { ns: "components" })}
         </Button>

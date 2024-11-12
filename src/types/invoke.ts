@@ -1,5 +1,5 @@
 import { DevTapplet, InstalledTappletWithName, RegisteredTapplet } from "@type/tapplet"
-import { WalletBalances } from "./wallet"
+import { AccountsGetBalancesResponse } from "@tari-project/typescript-bindings"
 
 declare module "@tauri-apps/api/core" {
   function invoke(param: "read_installed_tapp_db"): Promise<InstalledTappletWithName[]>
@@ -9,6 +9,6 @@ declare module "@tauri-apps/api/core" {
     param: "update_tapp",
     payload: { tappletId: string; installedTappletId: string }
   ): Promise<InstalledTappletWithName[]>
-  function invoke(param: "get_balances", payload: {}): Promise<WalletBalances> // TODO use AccountsGetBalancesResponse from typescript-bindings packages after it's fixed
+  function invoke(param: "get_balances", payload: {}): Promise<AccountsGetBalancesResponse> // TODO use AccountsGetBalancesResponse from typescript-bindings packages after it's fixed
   function invoke(param: "get_assets_server_addr"): Promise<string>
 }

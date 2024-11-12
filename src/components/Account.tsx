@@ -21,6 +21,7 @@ export const Account: React.FC = () => {
 
   const getAccount = useCallback(async () => {
     const account = await provider.getAccount()
+    console.log("ACCOUNT", account)
     if (!account) throw new Error("Account not initialized")
     return account
   }, [provider])

@@ -21,15 +21,6 @@ import {
   VaultBalances,
 } from "@tari-project/tarijs"
 import { ListSubstatesResponse } from "@tari-project/tarijs/dist/providers"
-import {
-  accountsCreate,
-  accountsCreateFreeTestCoins,
-  authenticateClient,
-  DEFAULT_WALLET_ADDRESS,
-  setClientInstance,
-  // DEFAULT_WALLET_ADDRESS,
-  // setClientInstance,
-} from "./json_rpc"
 import { TUProviderMethod } from "../store/transaction/transaction.types"
 import { IPCRpcTransport } from "./ipc_transport"
 
@@ -74,11 +65,8 @@ export class TariUniverseProvider implements TariProvider {
     const allPermissions = new TariPermissions()
     allPermissions.addPermissions(params.permissions)
     allPermissions.addPermissions(params.optionalPermissions)
-    const walletDaemonClient = WalletDaemonClient.usingFetchTransport(DEFAULT_WALLET_ADDRESS.toString())
-    setClientInstance(walletDaemonClient)
-    return new TariUniverseProvider(params, walletDaemonClient)
-    // const client = WalletDaemonClient.new(new IPCRpcTransport())
-    // return new TariUniverseProvider(params, client)
+    const client = WalletDaemonClient.new(new IPCRpcTransport())
+    return new TariUniverseProvider(params, client)
   }
 
   public setWindowSize(width: number, height: number): void {
@@ -94,9 +82,6 @@ export class TariUniverseProvider implements TariProvider {
     console.log(">>> runOne", method, args)
     const isAuth = this.client.isAuthenticated()
     console.log(">>> runOne isAuth", isAuth)
-    if (!isAuth) {
-      await authenticateClient(this.client)
-    }
     let res = (this[method] as (...args: any) => Promise<any>)(...args)
     console.log(">>> runOne", res)
     return res
@@ -106,8 +91,15 @@ export class TariUniverseProvider implements TariProvider {
     //TODO tmp solution to debug rpc call problem
     console.log(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
     console.log("create coins - TARI UNIVERSE PROVIDER")
-    const res = await accountsCreateFreeTestCoins({
-      account: (accountName && { Name: accountName }) || null,
+    // const res = await accountsCreateFreeTestCoins({
+    //   account: (accountName && { Name: accountName }) || null,
+    //   amount,
+    //   max_fee: fee ?? null,
+    //   key_id: null,
+    // })
+    const res = await this.client.createFreeTestCoins({
+      // account: (accountName && { Name: accountName }) || null,
+      account: { Name: accountName ?? "default" },
       amount,
       max_fee: fee ?? null,
       key_id: null,
@@ -122,15 +114,16 @@ export class TariUniverseProvider implements TariProvider {
   }
 
   public async createAccount(accountName?: string, fee?: number): Promise<Account> {
-    console.log("create coins")
-    const res = await accountsCreate({
+    console.log("create account")
+
+    const res = await this.client.accountsCreate({
       account_name: accountName ?? null,
       custom_access_rules: null,
       is_default: true,
       key_id: null,
       max_fee: fee ?? null,
     })
-    console.log("create coins res", res)
+    console.log("create account res", res)
     return {
       account_id: 0,
       address: (res.address as { Component: string }).Component,
@@ -177,23 +170,6 @@ export class TariUniverseProvider implements TariProvider {
   public async submitTransaction(req: SubmitTransactionRequest): Promise<SubmitTransactionResponse> {
     console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     console.log(" submit tx TU Provider", req)
-    // const txParams = {
-    //   transaction: null, // TODO figure out what this is
-    //   signing_key_index: req.account_id,
-    //   fee_instructions: req.fee_instructions as Instruction[],
-    //   instructions: req.instructions as Instruction[],
-    //   inputs: req.required_substates.map((s) => ({
-    //     // TODO: Hmm The bindings want a SubstateId object, but the wallet only wants a string. Any is used to skip type checking here
-    //     substate_id: s.substate_id as any,
-    //     version: s.version || null,
-    //   })),
-    //   override_inputs: false,
-    //   is_dry_run: req.is_dry_run,
-    //   proof_ids: [],
-    //   min_epoch: null,
-    //   max_epoch: null,
-    // }
-    // satisfies TransactionSubmitRequest
 
     const params = {
       transaction: {
@@ -209,7 +185,7 @@ export class TariUniverseProvider implements TariProvider {
       },
       signing_key_index: req.account_id,
       autofill_inputs: [],
-      detect_inputs: false, //TODO
+      detect_inputs: false, //TODO check if works for 'false'
       proof_ids: [],
     } as TransactionSubmitRequest
     console.log("!!!!!!!!!!!!!!!!!!!!!!!!! submit tx TU Provider", params)
