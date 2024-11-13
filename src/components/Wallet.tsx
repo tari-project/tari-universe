@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from "react"
 
-import { Box, Button, TextField, Typography } from "@mui/material"
+import { Box, Button, SelectChangeEvent, TextField, Typography } from "@mui/material"
 import { useDispatch, useSelector } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
 import { useTranslation } from "react-i18next"
 import { ErrorSource } from "../store/error/error.types"
 import { providerSelector } from "../store/provider/provider.selector"
+import SelectAccount from "./SelectAccount"
+import { AccountInfo } from "@tari-project/typescript-bindings"
 
 export const DEFAULT_ACCOUNT_NAME = "default"
 
@@ -14,8 +16,8 @@ export const Wallet: React.FC = () => {
   const [balances, setBalances] = useState({})
   const dispatch = useDispatch()
   const provider = useSelector(providerSelector.selectProvider)
-  const [account, setAccount] = useState("")
-  const [accountName, setAccountName] = useState("")
+  const [accountAddress, setAccountAddress] = useState("")
+  const [accountsList, setAccountsList] = useState<AccountInfo[]>([])
 
   useEffect(() => {
     refreshAccount()
@@ -24,8 +26,24 @@ export const Wallet: React.FC = () => {
   const refreshAccount = useCallback(async () => {
     console.log("fetch")
     try {
+      const { accounts } = await provider.getAccountsList() //TODO fix to get value not empty array
+      setAccountsList(accounts)
+      console.log(accountsList)
       const account = await provider.getAccount()
-      setAccount(account.address)
+      console.log(account)
+      setAccountAddress(account.address)
+      const public_key = account.public_key
+      setAccountsList([
+        {
+          account: {
+            address: account.address as any,
+            name: account.address,
+            is_default: true,
+            key_index: account.account_id,
+          },
+          public_key: public_key,
+        },
+      ])
     } catch (error) {
       console.error(error)
       if (typeof error === "string") {
@@ -34,9 +52,8 @@ export const Wallet: React.FC = () => {
     }
   }, [provider])
 
-  async function create_account() {
+  async function handleCreateAccount(accountName: string) {
     try {
-      console.log("provider authenticated")
       const acc = await provider.createAccount(accountName)
       console.log("GET ACCOUNT", acc)
     } catch (error) {
@@ -51,7 +68,7 @@ export const Wallet: React.FC = () => {
       console.log("==================================================")
       // needs to have account name - otherwise it throws error
       const acc = await provider.createFreeTestCoins(DEFAULT_ACCOUNT_NAME)
-      setAccount(acc.address)
+      setAccountAddress(acc.address)
       console.log("GET ACCOUNT", acc)
     } catch (error) {
       console.log("GET ACCOUNT ERROR", error)
@@ -65,9 +82,9 @@ export const Wallet: React.FC = () => {
   async function get_balances() {
     try {
       console.log("==================================================")
-      console.log("get balances acc", account)
+      console.log("get balances acc", accountAddress)
       // setBalances(await invoke("get_balances", {}))
-      const resp = await provider.getAccountBalances(account)
+      const resp = await provider.getAccountBalances(accountAddress)
       console.log("get balances resp", resp)
       setBalances(resp.balances)
     } catch (error) {
@@ -77,28 +94,13 @@ export const Wallet: React.FC = () => {
     }
   }
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAccountName(e.target.value)
-  }
-
   return (
     <Box mt={4}>
       <Typography variant="h4" textAlign="center" pt={6}>
         {t("tari-wallet-daemon", { ns: "components" })}
       </Typography>
       <Box display="flex" flexDirection="column" gap={2} alignItems="center" py={4}>
-        <Box display="flex" flexDirection="row" gap={2} alignItems="center" py={4}>
-          <TextField
-            name="accountName"
-            label="Account Name"
-            value={accountName}
-            onChange={onChange}
-            style={{ flexGrow: 1 }}
-          />
-          <Button onClick={create_account} variant="contained" sx={{ width: 200 }}>
-            {t("create-account", { ns: "components" })}
-          </Button>
-        </Box>
+        <SelectAccount onSubmit={handleCreateAccount} accountsList={accountsList} />
         <Button onClick={get_free_coins} variant="contained" sx={{ width: 200 }}>
           {t("get-free-coins", { ns: "components" })}
         </Button>

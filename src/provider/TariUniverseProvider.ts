@@ -6,6 +6,7 @@ import {
   KeyBranch,
   AccountsGetBalancesResponse,
   TransactionSubmitRequest,
+  AccountsListResponse,
 } from "@tari-project/wallet_jrpc_client"
 import {
   Account,
@@ -152,6 +153,13 @@ export class TariUniverseProvider implements TariProvider {
     return await this.client.accountsGetBalances({
       account: { ComponentAddress: componentAddress },
       refresh: true,
+    })
+  }
+
+  public async getAccountsList(limit = 0, offset = 10): Promise<AccountsListResponse> {
+    return await this.client.accountsList({
+      limit,
+      offset,
     })
   }
 
