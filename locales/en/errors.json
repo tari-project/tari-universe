@@ -36,5 +36,6 @@
   "failed-to-download": "Failed to download from {{ url }}",
   "tapplet-invalid-checksum": "Failed to validate checksum for version {{ version }}",
   "tapplet-package-incomplete": "Incomplete tapplet package version {{ version }} - not all required files found",
-  "failed-to-request": "Request failed: {{ message }}"
+  "failed-to-request": "Request failed: {{ message }}",
+  "failed-to-find-provider": "No pprovider found"
 }

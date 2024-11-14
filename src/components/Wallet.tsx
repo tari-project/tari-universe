@@ -8,6 +8,8 @@ import { ErrorSource } from "../store/error/error.types"
 import { providerSelector } from "../store/provider/provider.selector"
 import SelectAccount from "./SelectAccount"
 import { AccountInfo } from "@tari-project/typescript-bindings"
+import { accountActions } from "../store/account/account.slice"
+import { accountSelector } from "../store/account/account.selector"
 
 export const DEFAULT_ACCOUNT_NAME = "default"
 
@@ -16,7 +18,8 @@ export const Wallet: React.FC = () => {
   const [balances, setBalances] = useState({})
   const dispatch = useDispatch()
   const provider = useSelector(providerSelector.selectProvider)
-  const [accountAddress, setAccountAddress] = useState("")
+  const currentAccount = useSelector(accountSelector.selectAccount)
+  // const [accountAddress, setAccountAddress] = useState("")
   const [accountsList, setAccountsList] = useState<AccountInfo[]>([])
 
   useEffect(() => {
@@ -26,24 +29,26 @@ export const Wallet: React.FC = () => {
   const refreshAccount = useCallback(async () => {
     console.log("fetch")
     try {
-      const { accounts } = await provider.getAccountsList() //TODO fix to get value not empty array
+      const { accounts, total } = await provider.getAccountsList() //TODO fix to get value not empty array
       setAccountsList(accounts)
       console.log(accountsList)
-      const account = await provider.getAccount()
-      console.log(account)
-      setAccountAddress(account.address)
-      const public_key = account.public_key
-      setAccountsList([
-        {
-          account: {
-            address: account.address as any,
-            name: account.address,
-            is_default: true,
-            key_index: account.account_id,
-          },
-          public_key: public_key,
-        },
-      ])
+      // const account = await provider.selectAccount()
+      // console.log("get account list:", accounts, total)
+      // setAccountAddress(account.address)
+      // const public_key = account.public_key
+      // dispatch(
+      //   accountActions.changeCurrentAccount({
+      //     account: {
+      //       account: {
+      //         name: account.address,
+      //         address: account.address as any,
+      //         key_index: account.account_id,
+      //         is_default: true,
+      //       },
+      //       public_key: account.public_key,
+      //     },
+      //   })
+      // )
     } catch (error) {
       console.error(error)
       if (typeof error === "string") {
@@ -54,8 +59,21 @@ export const Wallet: React.FC = () => {
 
   async function handleCreateAccount(accountName: string) {
     try {
-      const acc = await provider.createAccount(accountName)
-      console.log("GET ACCOUNT", acc)
+      const account = await provider.createFreeTestCoins(accountName)
+      console.log("HANDLE CREATE ACCOUNT", account)
+      dispatch(
+        accountActions.changeCurrentAccount({
+          account: {
+            account: {
+              name: accountName,
+              address: account.address as any,
+              key_index: account.account_id,
+              is_default: true,
+            },
+            public_key: account.public_key,
+          },
+        })
+      )
     } catch (error) {
       if (typeof error === "string") {
         dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND }))
@@ -67,9 +85,26 @@ export const Wallet: React.FC = () => {
     try {
       console.log("==================================================")
       // needs to have account name - otherwise it throws error
-      const acc = await provider.createFreeTestCoins(DEFAULT_ACCOUNT_NAME)
-      setAccountAddress(acc.address)
-      console.log("GET ACCOUNT", acc)
+      const name = DEFAULT_ACCOUNT_NAME
+      if (!currentAccount) return
+      const currentAccountName = currentAccount?.account.name ?? undefined
+      console.log(currentAccountName)
+      const account = await provider.createFreeTestCoins(currentAccountName)
+      // setAccountAddress(acc.address)
+      // dispatch(
+      //   accountActions.changeCurrentAccount({
+      //     account: {
+      //       account: {
+      //         name: account.address,
+      //         address: account.address as any,
+      //         key_index: account.account_id,
+      //         is_default: true,
+      //       },
+      //       public_key: account.public_key,
+      //     },
+      //   })
+      // )
+      // console.log("GET ACCOUNT", acc)
     } catch (error) {
       console.log("GET ACCOUNT ERROR", error)
       if (typeof error === "string") {
@@ -82,9 +117,14 @@ export const Wallet: React.FC = () => {
   async function get_balances() {
     try {
       console.log("==================================================")
-      console.log("get balances acc", accountAddress)
+      // const addr = (currentAccount && currentAccount.account.address as { Component: string }).Component,
+      const addr = currentAccount?.account.address as any
+
+      console.log("get balances acc store", currentAccount)
+      console.log("get balances acc store", currentAccount?.account.address)
+      console.log("get balances acc store addr", addr)
       // setBalances(await invoke("get_balances", {}))
-      const resp = await provider.getAccountBalances(accountAddress)
+      const resp = await provider.getAccountBalances(addr)
       console.log("get balances resp", resp)
       setBalances(resp.balances)
     } catch (error) {

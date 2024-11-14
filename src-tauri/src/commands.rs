@@ -103,6 +103,7 @@ pub async fn call_wallet(
     make_request(Some(permission_token), method, req_params).await
   });
   let response = handle.await?.map_err(|_| Error::ProviderError { method: method_clone, params })?;
+  println!("======== HELLO THERE CALL WALLET RESPOSNE {:?}", response);
   Ok(response)
 }
 

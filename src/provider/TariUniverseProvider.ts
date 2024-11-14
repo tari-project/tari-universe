@@ -24,6 +24,7 @@ import {
 import { ListSubstatesResponse } from "@tari-project/tarijs/dist/providers"
 import { TUProviderMethod } from "../store/transaction/transaction.types"
 import { IPCRpcTransport } from "./ipc_transport"
+import { ComponentAccessRules } from "@tari-project/typescript-bindings"
 
 export type WalletDaemonParameters = {
   permissions: TariPermissions
@@ -99,8 +100,7 @@ export class TariUniverseProvider implements TariProvider {
     //   key_id: null,
     // })
     const res = await this.client.createFreeTestCoins({
-      // account: (accountName && { Name: accountName }) || null,
-      account: { Name: accountName ?? "default" },
+      account: (accountName && { Name: accountName }) || null,
       amount,
       max_fee: fee ?? null,
       key_id: null,
@@ -114,13 +114,18 @@ export class TariUniverseProvider implements TariProvider {
     }
   }
 
-  public async createAccount(accountName?: string, fee?: number): Promise<Account> {
+  public async createAccount(
+    accountName?: string,
+    fee?: number,
+    customAccessRules?: ComponentAccessRules,
+    isDefault = true
+  ): Promise<Account> {
     console.log("create account")
 
     const res = await this.client.accountsCreate({
       account_name: accountName ?? null,
-      custom_access_rules: null,
-      is_default: true,
+      custom_access_rules: customAccessRules ?? null,
+      is_default: isDefault,
       key_id: null,
       max_fee: fee ?? null,
     })
@@ -139,13 +144,23 @@ export class TariUniverseProvider implements TariProvider {
 
   public async getAccount(): Promise<Account> {
     const { account, public_key } = (await this.client.accountsGetDefault({})) as any
+    const { balances } = await this.client.accountsGetBalances({
+      account: { ComponentAddress: account.address.Component },
+      refresh: false,
+    })
 
     return {
       account_id: account.key_index,
       address: account.address.Component,
       public_key,
       // TODO
-      resources: [],
+      resources: balances.map((b: any) => ({
+        type: b.resource_type,
+        resource_address: b.resource_address,
+        balance: b.balance + b.confidential_balance,
+        vault_id: "Vault" in b.vault_address ? b.vault_address.Vault : b.vault_address,
+        token_symbol: b.token_symbol,
+      })),
     }
   }
 
@@ -157,10 +172,19 @@ export class TariUniverseProvider implements TariProvider {
   }
 
   public async getAccountsList(limit = 0, offset = 10): Promise<AccountsListResponse> {
-    return await this.client.accountsList({
+    const l = await this.client.accountsList({
       limit,
       offset,
     })
+    console.log("get list", l)
+    return l
+  }
+
+  public async getAccountsBalances(
+    accountName: string,
+    refresh: boolean = false
+  ): Promise<AccountsGetBalancesResponse> {
+    return await this.client.accountsGetBalances({ account: { Name: accountName }, refresh })
   }
 
   public async getSubstate(substate_id: string): Promise<Substate> {

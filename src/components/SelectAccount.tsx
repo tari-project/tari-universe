@@ -21,15 +21,15 @@ function SelectAccount({ onSubmit, accountsList }: SelectAccountProps) {
   const onSelectChange = () => {
     // TODO
     console.log("TODO: set active account from the list")
-    console.log(accountsList)
   }
 
   const handleSubmit = useCallback(async () => {
-    console.log("sub", newAccountName)
+    console.log("submit handle new account", newAccountName)
     return onSubmit(newAccountName)
   }, [newAccountName, onSubmit])
 
   const onAddAccountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(accountsList)
     setNewAccountName(e.target.value)
   }
 

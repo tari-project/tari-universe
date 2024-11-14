@@ -111,12 +111,10 @@ pub async fn make_request<T: Serialize>(
   if let Some(token) = token {
     builder = builder.header(AUTHORIZATION, format!("Bearer {token}"));
   }
-  println!("------- JSON BODY ");
+  println!("------- JSON REQ BODY ");
   println!("{:?}", &body);
-  let builder_req = builder.json(&body);
-  println!("------- JSON REQ ");
-  println!("{:?}", &builder_req);
-  let resp = builder_req.send().await?.json::<JsonRpcResponse>().await?;
+  let resp = builder.json(&body).send().await?.json::<JsonRpcResponse>().await?;
+  println!("------- JSON RESPONSE {:?} ", resp.result);
   match resp.result {
     JsonRpcAnswer::Result(result) => Ok(result),
     JsonRpcAnswer::Error(error) => Err(anyhow::Error::msg(error.to_string())),
