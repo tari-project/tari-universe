@@ -13,6 +13,12 @@ export type InitAccountSuccessPayload = {
   account: AccountInfo
 }
 
-export type ChangeCurrentAccountPayload = {
+export type SetAccountRequestPayload = {
+  accountName: string
+}
+export type SetAccountSuccessPayload = {
   account: AccountInfo
+}
+export type SetAccountFailurePayload = {
+  errorMsg: string
 }

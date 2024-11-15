@@ -4,10 +4,12 @@ import Box from "@mui/material/Box"
 import InputLabel from "@mui/material/InputLabel"
 import MenuItem from "@mui/material/MenuItem"
 import FormControl from "@mui/material/FormControl"
-import Select from "@mui/material/Select"
+import Select, { SelectChangeEvent } from "@mui/material/Select"
 import { AccountInfo } from "@tari-project/typescript-bindings"
 import { Button, DialogContent, TextField } from "@mui/material"
 import { useTranslation } from "react-i18next"
+import { accountActions } from "../store/account/account.slice"
+import { useDispatch } from "react-redux"
 
 interface SelectAccountProps {
   onSubmit: (name: string) => void
@@ -16,11 +18,16 @@ interface SelectAccountProps {
 
 function SelectAccount({ onSubmit, accountsList }: SelectAccountProps) {
   const { t } = useTranslation(["components", "common"])
+  const dispatch = useDispatch()
   const [newAccountName, setNewAccountName] = useState("")
 
-  const onSelectChange = () => {
-    // TODO
+  const handleChange = (event: SelectChangeEvent) => {
     console.log("TODO: set active account from the list")
+    dispatch(
+      accountActions.setAccountRequest({
+        accountName: event.target.value,
+      })
+    )
   }
 
   const handleSubmit = useCallback(async () => {
@@ -58,7 +65,7 @@ function SelectAccount({ onSubmit, accountsList }: SelectAccountProps) {
             accountsList.some((account: AccountInfo) => account.account.name == newAccountName) ? newAccountName : ""
           }
           label="Account"
-          onChange={onSelectChange}
+          onChange={handleChange}
         >
           {accountsList.map((account: AccountInfo) => {
             if (account.account.name === null) {

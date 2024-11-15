@@ -1,12 +1,14 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit"
 import { listenerMiddleware } from "../store.listener"
-import { initializeAction } from "./account.action"
+import { initializeAction, setAccountAction } from "./account.action"
 import {
   InitAccountFailurePayload,
   InitAccountRequestPayload,
   InitAccountSuccessPayload,
   AccountStoreState,
-  ChangeCurrentAccountPayload,
+  SetAccountRequestPayload,
+  SetAccountSuccessPayload,
+  SetAccountFailurePayload,
 } from "./account.types"
 
 const initialState: AccountStoreState = {
@@ -24,10 +26,12 @@ const accountSlice = createSlice({
       state.isInitialized = true
     },
     initializeFailure: (_, _action: PayloadAction<InitAccountFailurePayload>) => {},
-    changeCurrentAccount: (state, action: PayloadAction<ChangeCurrentAccountPayload>) => {
+    setAccountRequest: (_, _action: PayloadAction<SetAccountRequestPayload>) => {},
+    setAccountSuccess: (state, action: PayloadAction<SetAccountSuccessPayload>) => {
       state.account = action.payload.account
       state.isInitialized = true
     },
+    setAccountFailure: (_, _action: PayloadAction<SetAccountFailurePayload>) => {},
   },
 })
 
@@ -35,3 +39,4 @@ export const accountActions = accountSlice.actions
 export const accountReducer = accountSlice.reducer
 
 listenerMiddleware.startListening(initializeAction())
+listenerMiddleware.startListening(setAccountAction())

@@ -5,7 +5,7 @@ import { errorActions } from "../error/error.slice"
 import { RootState } from "../store"
 
 import { ErrorSource } from "../error/error.types"
-import { InitAccountRequestPayload } from "./account.types"
+import { InitAccountRequestPayload, SetAccountRequestPayload } from "./account.types"
 
 export const initializeAction = () => ({
   actionCreator: accountActions.initializeRequest,
@@ -22,23 +22,48 @@ export const initializeAction = () => ({
         dispatch(errorActions.showError({ message: "failed-to-find-provider", errorSource: ErrorSource.FRONTEND }))
         return
       }
-      const defaultAccount = await provider.selectAccount()
+      const defaultAccount = await provider.client.accountsGetDefault({})
 
       listenerApi.dispatch(
-        accountActions.changeCurrentAccount({
-          account: {
-            account: {
-              name: defaultAccount.address,
-              address: defaultAccount.address as any,
-              key_index: defaultAccount.account_id,
-              is_default: true,
-            },
-            public_key: defaultAccount.public_key,
-          },
+        accountActions.setAccountSuccess({
+          account: defaultAccount,
         })
       )
     } catch (error) {
       listenerApi.dispatch(accountActions.initializeFailure({ errorMsg: error as string }))
+    }
+  },
+})
+
+export const setAccountAction = () => ({
+  actionCreator: accountActions.setAccountRequest,
+  effect: async (
+    action: PayloadAction<SetAccountRequestPayload>,
+    listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
+  ) => {
+    try {
+      const dispatch = listenerApi.dispatch
+      const state = listenerApi.getState() as RootState
+      const provider = state.provider.provider
+
+      if (!provider) {
+        dispatch(errorActions.showError({ message: "failed-to-find-provider", errorSource: ErrorSource.FRONTEND }))
+        return
+      }
+      const _account = await provider.client.accountsGet({
+        name_or_address: { Name: action.payload.accountName },
+      })
+      console.log("set action ", _account)
+      const list = await provider.client.accountsList({ limit: 0, offset: 10 })
+      console.log("set action ", list)
+
+      listenerApi.dispatch(
+        accountActions.setAccountSuccess({
+          account: _account,
+        })
+      )
+    } catch (error) {
+      listenerApi.dispatch(accountActions.setAccountFailure({ errorMsg: error as string }))
     }
   },
 })

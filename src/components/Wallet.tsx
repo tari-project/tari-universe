@@ -1,17 +1,15 @@
 import { useCallback, useEffect, useState } from "react"
 
-import { Box, Button, SelectChangeEvent, TextField, Typography } from "@mui/material"
+import { Box, Button, Paper, Stack, Typography } from "@mui/material"
 import { useDispatch, useSelector } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
 import { useTranslation } from "react-i18next"
 import { ErrorSource } from "../store/error/error.types"
 import { providerSelector } from "../store/provider/provider.selector"
 import SelectAccount from "./SelectAccount"
-import { AccountInfo } from "@tari-project/typescript-bindings"
+import { AccountInfo, substateIdToString } from "@tari-project/typescript-bindings"
 import { accountActions } from "../store/account/account.slice"
 import { accountSelector } from "../store/account/account.selector"
-
-export const DEFAULT_ACCOUNT_NAME = "default"
 
 export const Wallet: React.FC = () => {
   const { t } = useTranslation(["components", "common"])
@@ -32,23 +30,6 @@ export const Wallet: React.FC = () => {
       const { accounts, total } = await provider.getAccountsList() //TODO fix to get value not empty array
       setAccountsList(accounts)
       console.log(accountsList)
-      // const account = await provider.selectAccount()
-      // console.log("get account list:", accounts, total)
-      // setAccountAddress(account.address)
-      // const public_key = account.public_key
-      // dispatch(
-      //   accountActions.changeCurrentAccount({
-      //     account: {
-      //       account: {
-      //         name: account.address,
-      //         address: account.address as any,
-      //         key_index: account.account_id,
-      //         is_default: true,
-      //       },
-      //       public_key: account.public_key,
-      //     },
-      //   })
-      // )
     } catch (error) {
       console.error(error)
       if (typeof error === "string") {
@@ -61,17 +42,15 @@ export const Wallet: React.FC = () => {
     try {
       const account = await provider.createFreeTestCoins(accountName)
       console.log("HANDLE CREATE ACCOUNT", account)
+      const tst = await provider.client.accountsSetDefault({
+        account: {
+          ComponentAddress: account.address,
+        },
+      })
+      console.log("HANDLE SET DEFAULT ACCOUNT", tst)
       dispatch(
-        accountActions.changeCurrentAccount({
-          account: {
-            account: {
-              name: accountName,
-              address: account.address as any,
-              key_index: account.account_id,
-              is_default: true,
-            },
-            public_key: account.public_key,
-          },
+        accountActions.setAccountRequest({
+          accountName,
         })
       )
     } catch (error) {
@@ -85,14 +64,13 @@ export const Wallet: React.FC = () => {
     try {
       console.log("==================================================")
       // needs to have account name - otherwise it throws error
-      const name = DEFAULT_ACCOUNT_NAME
       if (!currentAccount) return
       const currentAccountName = currentAccount?.account.name ?? undefined
       console.log(currentAccountName)
       const account = await provider.createFreeTestCoins(currentAccountName)
       // setAccountAddress(acc.address)
       // dispatch(
-      //   accountActions.changeCurrentAccount({
+      //   accountActions.setAccount({
       //     account: {
       //       account: {
       //         name: account.address,
@@ -141,6 +119,14 @@ export const Wallet: React.FC = () => {
       </Typography>
       <Box display="flex" flexDirection="column" gap={2} alignItems="center" py={4}>
         <SelectAccount onSubmit={handleCreateAccount} accountsList={accountsList} />
+        <Paper variant="outlined" elevation={0} sx={{ padding: 1, borderRadius: 2, width: "35%" }}>
+          <Stack direction="column" justifyContent="flex-end">
+            <Typography variant="caption" textAlign="left">{`Name: ${currentAccount?.account.name}`}</Typography>
+            <Typography variant="caption" textAlign="left">{`${t("address", {
+              ns: "common",
+            })}: ${substateIdToString(currentAccount?.account.address ?? null)}`}</Typography>
+          </Stack>
+        </Paper>
         <Button onClick={get_free_coins} variant="contained" sx={{ width: 200 }}>
           {t("get-free-coins", { ns: "components" })}
         </Button>
