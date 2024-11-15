@@ -9,7 +9,6 @@ type TappletProps = {
 export const Tapplet: React.FC<TappletProps> = ({ source }) => {
   const tappletRef = useRef<HTMLIFrameElement | null>(null)
   const provider = useSelector(providerSelector.selectProvider)
-  console.log(">>>>>>>>>>> PROVIDER", provider)
 
   function sendWindowSize() {
     if (tappletRef.current) {

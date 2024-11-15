@@ -24,7 +24,7 @@ export const runTransactionSimulationAction = () => ({
       const balanceUpdates = await runSimulation()
       dispatch(simulationActions.runSimulationSuccess({ transactionId, balanceUpdates }))
     } catch (error) {
-      console.log("?????? tx sim error", error)
+      console.error(error)
       dispatch(simulationActions.runSimulationFailure({ transactionId, errorMsg: String(error) }))
     }
   },

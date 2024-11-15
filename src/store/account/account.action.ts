@@ -50,21 +50,21 @@ export const setAccountAction = () => ({
         dispatch(errorActions.showError({ message: "failed-to-find-provider", errorSource: ErrorSource.FRONTEND }))
         return
       }
+
+      // if tapplet uses TU Provider it gets default account
+      // this is to make sure tapplet uses the account selected by the user
       await provider.client.accountsSetDefault({
         account: {
           Name: action.payload.accountName,
         },
       })
-      const _account = await provider.client.accountsGet({
+      const account = await provider.client.accountsGet({
         name_or_address: { Name: action.payload.accountName },
       })
-      console.log("set action ", _account)
-      const list = await provider.client.accountsList({ limit: 0, offset: 10 })
-      console.log("set action ", list)
 
       listenerApi.dispatch(
         accountActions.setAccountSuccess({
-          account: _account,
+          account,
         })
       )
     } catch (error) {

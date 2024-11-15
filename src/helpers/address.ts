@@ -4,7 +4,7 @@ export function shortenSubstateAddress(input: string, startChars = 5, endChars =
 
   // Check if the input has the expected format
   if (parts.length < 2) {
-    return input // Return the original string if it doesn't match the expected format
+    return input
   }
 
   const prefix = parts[0] // SubstateId
@@ -12,7 +12,7 @@ export function shortenSubstateAddress(input: string, startChars = 5, endChars =
 
   // Ensure the long string is long enough to shorten
   if (longString.length <= startChars + endChars) {
-    return input // Return the original string if it's too short to shorten
+    return input
   }
 
   const startPart = longString.substring(0, startChars)

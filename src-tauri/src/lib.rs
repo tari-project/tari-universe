@@ -69,12 +69,10 @@ async fn try_get_tokens() -> (String, String) {
   loop {
     match permission_token().await {
       Ok(tokens) => {
-        println!("permission token ok {:?}", tokens);
         info!(target: LOG_TARGET, "permission token ok {:?}", tokens);
         return tokens;
       }
       Err(e) => {
-        println!("permission token ERR {:?}", e);
         warn!(target: LOG_TARGET, "permission token ERR {:?}", e);
         sleep(Duration::from_millis(500));
         continue;

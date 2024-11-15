@@ -3,7 +3,6 @@ import { invoke } from "@tauri-apps/api/core"
 
 export class IPCRpcTransport implements transports.RpcTransport {
   async sendRequest<T>(request: transports.RpcRequest, _: transports.RpcTransportOptions): Promise<T> {
-    console.log("!!!!!!!!!!!!!!! IPC RPC send request", request)
     return await invoke("call_wallet", {
       method: request.method,
       params: JSON.stringify(request.params),

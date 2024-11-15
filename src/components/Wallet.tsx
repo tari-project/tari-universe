@@ -17,7 +17,6 @@ export const Wallet: React.FC = () => {
   const dispatch = useDispatch()
   const provider = useSelector(providerSelector.selectProvider)
   const currentAccount = useSelector(accountSelector.selectAccount)
-  // const [accountAddress, setAccountAddress] = useState("")
   const [accountsList, setAccountsList] = useState<AccountInfo[]>([])
 
   useEffect(() => {
@@ -25,11 +24,9 @@ export const Wallet: React.FC = () => {
   }, [provider])
 
   const refreshAccount = useCallback(async () => {
-    console.log("fetch")
     try {
-      const { accounts, total } = await provider.getAccountsList() //TODO fix to get value not empty array
+      const { accounts } = await provider.getAccountsList() //TODO fix to get value not empty array - https://github.com/tari-project/tari-universe/issues/141
       setAccountsList(accounts)
-      console.log(accountsList)
     } catch (error) {
       console.error(error)
       if (typeof error === "string") {
@@ -40,20 +37,14 @@ export const Wallet: React.FC = () => {
 
   async function handleCreateAccount(accountName: string) {
     try {
-      const account = await provider.createFreeTestCoins(accountName)
-      console.log("HANDLE CREATE ACCOUNT", account)
-      const tst = await provider.client.accountsSetDefault({
-        account: {
-          ComponentAddress: account.address,
-        },
-      })
-      console.log("HANDLE SET DEFAULT ACCOUNT", tst)
+      await provider.createFreeTestCoins(accountName)
       dispatch(
         accountActions.setAccountRequest({
           accountName,
         })
       )
     } catch (error) {
+      console.error(error)
       if (typeof error === "string") {
         dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND }))
       }
@@ -62,31 +53,11 @@ export const Wallet: React.FC = () => {
 
   async function get_free_coins() {
     try {
-      console.log("==================================================")
-      // needs to have account name - otherwise it throws error
-      if (!currentAccount) return
       const currentAccountName = currentAccount?.account.name ?? undefined
-      console.log(currentAccountName)
-      const account = await provider.createFreeTestCoins(currentAccountName)
-      // setAccountAddress(acc.address)
-      // dispatch(
-      //   accountActions.setAccount({
-      //     account: {
-      //       account: {
-      //         name: account.address,
-      //         address: account.address as any,
-      //         key_index: account.account_id,
-      //         is_default: true,
-      //       },
-      //       public_key: account.public_key,
-      //     },
-      //   })
-      // )
-      // console.log("GET ACCOUNT", acc)
+      await provider.createFreeTestCoins(currentAccountName)
     } catch (error) {
-      console.log("GET ACCOUNT ERROR", error)
+      console.error(error)
       if (typeof error === "string") {
-        console.log(error)
         dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND }))
       }
     }
@@ -94,18 +65,11 @@ export const Wallet: React.FC = () => {
 
   async function get_balances() {
     try {
-      console.log("==================================================")
-      // const addr = (currentAccount && currentAccount.account.address as { Component: string }).Component,
-      const addr = currentAccount?.account.address as any
-
-      console.log("get balances acc store", currentAccount)
-      console.log("get balances acc store", currentAccount?.account.address)
-      console.log("get balances acc store addr", addr)
-      // setBalances(await invoke("get_balances", {}))
-      const resp = await provider.getAccountBalances(addr)
-      console.log("get balances resp", resp)
+      const accountAddress = substateIdToString(currentAccount?.account.address ?? null)
+      const resp = await provider.getAccountBalances(accountAddress)
       setBalances(resp.balances)
     } catch (error) {
+      console.error(error)
       if (typeof error === "string") {
         dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND }))
       }
@@ -119,7 +83,7 @@ export const Wallet: React.FC = () => {
       </Typography>
       <Box display="flex" flexDirection="column" gap={2} alignItems="center" py={4}>
         <SelectAccount onSubmit={handleCreateAccount} accountsList={accountsList} />
-        <Paper variant="outlined" elevation={0} sx={{ padding: 1, borderRadius: 2, width: "35%" }}>
+        <Paper variant="outlined" elevation={0} sx={{ padding: 1, borderRadius: 2, width: "50%" }}>
           <Stack direction="column" justifyContent="flex-end">
             <Typography variant="caption" textAlign="left">{`Name: ${currentAccount?.account.name}`}</Typography>
             <Typography variant="caption" textAlign="left">{`${t("address", {

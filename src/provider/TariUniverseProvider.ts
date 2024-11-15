@@ -81,31 +81,17 @@ export class TariUniverseProvider implements TariProvider {
   }
 
   async runOne(method: TUProviderMethod, args: any[]): Promise<any> {
-    console.log(">>> runOne", method, args)
-    const isAuth = this.client.isAuthenticated()
-    console.log(">>> runOne isAuth", isAuth)
     let res = (this[method] as (...args: any) => Promise<any>)(...args)
-    console.log(">>> runOne", res)
     return res
   }
 
   public async createFreeTestCoins(accountName?: string, amount = 1_000_000, fee?: number): Promise<Account> {
-    //TODO tmp solution to debug rpc call problem
-    console.log(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
-    console.log("create coins - TARI UNIVERSE PROVIDER")
-    // const res = await accountsCreateFreeTestCoins({
-    //   account: (accountName && { Name: accountName }) || null,
-    //   amount,
-    //   max_fee: fee ?? null,
-    //   key_id: null,
-    // })
     const res = await this.client.createFreeTestCoins({
       account: (accountName && { Name: accountName }) || null,
       amount,
       max_fee: fee ?? null,
       key_id: null,
     })
-    console.log("create coins res", res)
     return {
       account_id: res.account.key_index,
       address: (res.account.address as { Component: string }).Component,
@@ -120,8 +106,6 @@ export class TariUniverseProvider implements TariProvider {
     customAccessRules?: ComponentAccessRules,
     isDefault = true
   ): Promise<Account> {
-    console.log("create account")
-
     const res = await this.client.accountsCreate({
       account_name: accountName ?? null,
       custom_access_rules: customAccessRules ?? null,
@@ -129,7 +113,6 @@ export class TariUniverseProvider implements TariProvider {
       key_id: null,
       max_fee: fee ?? null,
     })
-    console.log("create account res", res)
     return {
       account_id: 0,
       address: (res.address as { Component: string }).Component,
@@ -153,7 +136,6 @@ export class TariUniverseProvider implements TariProvider {
       account_id: account.key_index,
       address: account.address.Component,
       public_key,
-      // TODO
       resources: balances.map((b: any) => ({
         type: b.resource_type,
         resource_address: b.resource_address,
@@ -172,12 +154,12 @@ export class TariUniverseProvider implements TariProvider {
   }
 
   public async getAccountsList(limit = 0, offset = 10): Promise<AccountsListResponse> {
-    const l = await this.client.accountsList({
+    // TODO https://github.com/tari-project/tari-universe/issues/141
+    const res = await this.client.accountsList({
       limit,
       offset,
     })
-    console.log("get list", l)
-    return l
+    return res
   }
 
   public async getAccountsBalances(
@@ -200,9 +182,6 @@ export class TariUniverseProvider implements TariProvider {
   }
 
   public async submitTransaction(req: SubmitTransactionRequest): Promise<SubmitTransactionResponse> {
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    console.log(" submit tx TU Provider", req)
-
     const params = {
       transaction: {
         instructions: req.instructions as Instruction[],
@@ -220,10 +199,8 @@ export class TariUniverseProvider implements TariProvider {
       detect_inputs: false, //TODO check if works for 'false'
       proof_ids: [],
     } as TransactionSubmitRequest
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!! submit tx TU Provider", params)
 
     const res = await this.client.submitTransaction(params)
-
     return { transaction_id: res.transaction_id }
   }
 

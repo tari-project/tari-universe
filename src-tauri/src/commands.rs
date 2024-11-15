@@ -59,9 +59,8 @@ pub async fn create_account(tokens: State<'_, Tokens>) -> Result<(), Error> {
 
 #[tauri::command]
 pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), Error> {
-  println!("=============> get free coins");
   // Use default account
-  let account_name = "tester".to_string();
+  let account_name = "default".to_string();
   let permission_token = tokens.permission
     .lock()
     .map_err(|_| FailedToObtainPermissionTokenLock)?
@@ -92,7 +91,6 @@ pub async fn call_wallet(
   params: String,
   tokens: State<'_, Tokens>
 ) -> Result<serde_json::Value, Error> {
-  println!("======== HELLO THERE CALL WALLET {:?}", method);
   let permission_token = tokens.permission
     .lock()
     .map_err(|_| FailedToObtainPermissionTokenLock)?
@@ -103,7 +101,6 @@ pub async fn call_wallet(
     make_request(Some(permission_token), method, req_params).await
   });
   let response = handle.await?.map_err(|_| Error::ProviderError { method: method_clone, params })?;
-  println!("======== HELLO THERE CALL WALLET RESPOSNE {:?}", response);
   Ok(response)
 }
 

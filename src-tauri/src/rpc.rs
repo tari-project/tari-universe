@@ -42,15 +42,13 @@ pub async fn permission_token() -> Result<(String, String), anyhow::Error> {
 
 pub async fn account_create(account_name: Option<String>, permissions_token: String) -> Result<(), anyhow::Error> {
   let create_acc_params = AccountsCreateRequest {
-    account_name: Some("User".to_string()),
+    account_name,
     custom_access_rules: None,
     is_default: false,
     key_id: None,
     max_fee: None,
   };
-  println!("----------- REQEST {:?}", create_acc_params);
   let resp = make_request(Some(permissions_token), "accounts.create".to_string(), create_acc_params).await?;
-  println!("----------- REQEST resp {:?}", resp);
 
   Ok(())
 }
@@ -62,13 +60,11 @@ pub async fn free_coins(account_name: Option<String>, permissions_token: String)
     max_fee: None,
     key_id: None,
   };
-  println!("----------- REQEST free test coins {:?}", free_coins_params);
-  let resp = make_request(
+  let _resp = make_request(
     Some(permissions_token),
     "accounts.create_free_test_coins".to_string(),
     free_coins_params
   ).await?;
-  println!("----------- REQEST resp {:?}", resp);
   Ok(())
 }
 
@@ -111,10 +107,7 @@ pub async fn make_request<T: Serialize>(
   if let Some(token) = token {
     builder = builder.header(AUTHORIZATION, format!("Bearer {token}"));
   }
-  println!("------- JSON REQ BODY ");
-  println!("{:?}", &body);
   let resp = builder.json(&body).send().await?.json::<JsonRpcResponse>().await?;
-  println!("------- JSON RESPONSE {:?} ", resp.result);
   match resp.result {
     JsonRpcAnswer::Result(result) => Ok(result),
     JsonRpcAnswer::Error(error) => Err(anyhow::Error::msg(error.to_string())),

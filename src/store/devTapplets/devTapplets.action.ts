@@ -44,7 +44,6 @@ export const addDevTappletAction = () => ({
   ) => {
     const endpoint = action.payload.endpoint
     try {
-      console.log("ADD DEV TAPP")
       await invoke("add_dev_tapplet", { endpoint })
       listenerApi.dispatch(devTappletsActions.addDevTappletSuccess({}))
       listenerApi.dispatch(devTappletsActions.initializeRequest({}))
