@@ -50,6 +50,11 @@ export const setAccountAction = () => ({
         dispatch(errorActions.showError({ message: "failed-to-find-provider", errorSource: ErrorSource.FRONTEND }))
         return
       }
+      await provider.client.accountsSetDefault({
+        account: {
+          Name: action.payload.accountName,
+        },
+      })
       const _account = await provider.client.accountsGet({
         name_or_address: { Name: action.payload.accountName },
       })
