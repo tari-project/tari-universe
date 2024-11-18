@@ -47,7 +47,7 @@ pub fn get_tapp_download_path(
     .path()
     .app_data_dir()
     .unwrap_or_else(|e| {
-      error!(target: LOG_TARGET, "Failed to get app dir: {}", e);
+      error!(target: LOG_TARGET, "❌ Failed to get app dir: {}", e);
       PathBuf::from("")
     })
     .to_path_buf();

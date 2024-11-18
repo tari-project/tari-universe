@@ -34,7 +34,7 @@ pub async fn serve(app: Router, port: u16) -> Result<(String, CancellationToken)
       ::serve(listener, app)
       .with_graceful_shutdown(shutdown_signal(cancel_token_clone)).await
       .map_err(|_| TappletServerError(FailedToStart)) });
-  info!(target: LOG_TARGET, "Tapplet start process completed successfully");
+  info!(target: LOG_TARGET, "🚀 Tapplet start process completed successfully");
 
   Ok((address, cancel_token))
 }

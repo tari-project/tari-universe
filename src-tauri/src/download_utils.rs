@@ -12,6 +12,7 @@ use tokio::fs::{ File, OpenOptions };
 use tokio::io::{ AsyncWriteExt, BufReader };
 use tokio::time::sleep;
 use tokio_util::compat::{ TokioAsyncReadCompatExt, TokioAsyncWriteCompatExt };
+use log::error;
 
 use crate::progress_tracker::ProgressTracker;
 
@@ -99,10 +100,12 @@ pub async fn extract(file_path: &Path, dest_dir: &Path) -> Result<(), anyhow::Er
           extract_zip(file_path, dest_dir).await?;
         }
         _ => {
+          error!(target: LOG_TARGET, "❌ Extract file error: Unsupported file extension",);
           return Err(anyhow::anyhow!("Unsupported file extension"));
         }
       }
     None => {
+      error!(target: LOG_TARGET, "❌ Extract file error: File has no extension",);
       return Err(anyhow::anyhow!("File has no extension"));
     }
   }
