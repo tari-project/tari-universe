@@ -52,8 +52,12 @@ pub async fn create_account(tokens: State<'_, Tokens>) -> Result<(), Error> {
     .lock()
     .map_err(|_| FailedToObtainPermissionTokenLock)?
     .clone();
-  let handle = tauri::async_runtime::spawn(async move { account_create(Some(account_name), permission_token).await });
-  let _response = handle.await?.map_err(|e| Error::RequestFailed { message: e.to_string() })?;
+  match account_create(Some(account_name), permission_token).await {
+    Ok(_) => (),
+    Err(e) => {
+      return Err(Error::RequestFailed { message: e.to_string() });
+    }
+  }
   Ok(())
 }
 
@@ -65,8 +69,12 @@ pub async fn get_free_coins(tokens: State<'_, Tokens>) -> Result<(), Error> {
     .lock()
     .map_err(|_| FailedToObtainPermissionTokenLock)?
     .clone();
-  let handle = tauri::async_runtime::spawn(async move { free_coins(Some(account_name), permission_token).await });
-  let _response = handle.await?.map_err(|e| Error::RequestFailed { message: e.to_string() })?;
+  match free_coins(Some(account_name), permission_token).await {
+    Ok(_) => (),
+    Err(e) => {
+      return Err(Error::RequestFailed { message: e.to_string() });
+    }
+  }
   Ok(())
 }
 
@@ -79,10 +87,12 @@ pub async fn get_balances(tokens: State<'_, Tokens>) -> Result<AccountsGetBalanc
     .map_err(|_| FailedToObtainPermissionTokenLock)?
     .clone();
 
-  let handle = tauri::async_runtime::spawn(async move { balances(Some(account_name), permission_token).await });
-  let balances = handle.await??;
-
-  Ok(balances)
+  match balances(Some(account_name), permission_token).await {
+    Ok(res) => Ok(res),
+    Err(e) => {
+      return Err(Error::RequestFailed { message: e.to_string() });
+    }
+  }
 }
 
 #[tauri::command]
@@ -96,12 +106,13 @@ pub async fn call_wallet(
     .map_err(|_| FailedToObtainPermissionTokenLock)?
     .clone();
   let req_params: serde_json::Value = serde_json::from_str(&params).map_err(|e| JsonParsingError(e))?;
-  let method_clone = method.clone();
-  let handle = tauri::async_runtime::spawn(async move {
-    make_request(Some(permission_token), method, req_params).await
-  });
-  let response = handle.await?.map_err(|_| Error::ProviderError { method: method_clone, params })?;
-  Ok(response)
+
+  match make_request(Some(permission_token), method, req_params).await {
+    Ok(res) => Ok(res),
+    Err(e) => {
+      return Err(Error::RequestFailed { message: e.to_string() });
+    }
+  }
 }
 
 #[tauri::command]
