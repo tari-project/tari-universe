@@ -23,6 +23,9 @@ pub enum Error {
   #[error("tapplet-package-incomplete | version-{version}")] TappletIncomplete {
     version: String,
   },
+  #[error("failed-to-request | message-{message}")] RequestFailed {
+    message: String,
+  },
 }
 
 impl serde::Serialize for Error {

@@ -1,21 +1,62 @@
-import { invoke } from "@tauri-apps/api/core"
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
-import { Box, Button, Typography } from "@mui/material"
-import { useDispatch } from "react-redux"
+import { Box, Button, Paper, Stack, Typography } from "@mui/material"
+import { useDispatch, useSelector } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
 import { useTranslation } from "react-i18next"
 import { ErrorSource } from "../store/error/error.types"
+import { providerSelector } from "../store/provider/provider.selector"
+import SelectAccount from "./SelectAccount"
+import { AccountInfo, substateIdToString } from "@tari-project/typescript-bindings"
+import { accountActions } from "../store/account/account.slice"
+import { accountSelector } from "../store/account/account.selector"
 
 export const Wallet: React.FC = () => {
   const { t } = useTranslation(["components", "common"])
   const [balances, setBalances] = useState({})
   const dispatch = useDispatch()
+  const provider = useSelector(providerSelector.selectProvider)
+  const currentAccount = useSelector(accountSelector.selectAccount)
+  const [accountsList, setAccountsList] = useState<AccountInfo[]>([])
+
+  useEffect(() => {
+    refreshAccount()
+  }, [provider])
+
+  const refreshAccount = useCallback(async () => {
+    try {
+      const { accounts } = await provider.getAccountsList() //TODO fix to get value not empty array - https://github.com/tari-project/tari-universe/issues/141
+      setAccountsList(accounts)
+    } catch (error) {
+      console.error(error)
+      if (typeof error === "string") {
+        dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND }))
+      }
+    }
+  }, [provider])
+
+  async function handleCreateAccount(accountName: string) {
+    try {
+      await provider.createFreeTestCoins(accountName)
+      dispatch(
+        accountActions.setAccountRequest({
+          accountName,
+        })
+      )
+    } catch (error) {
+      console.error(error)
+      if (typeof error === "string") {
+        dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND }))
+      }
+    }
+  }
 
   async function get_free_coins() {
     try {
-      await invoke("get_free_coins", {})
+      const currentAccountName = currentAccount?.account.name ?? undefined
+      await provider.createFreeTestCoins(currentAccountName)
     } catch (error) {
+      console.error(error)
       if (typeof error === "string") {
         dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND }))
       }
@@ -24,8 +65,11 @@ export const Wallet: React.FC = () => {
 
   async function get_balances() {
     try {
-      setBalances(await invoke("get_balances", {}))
+      const accountAddress = substateIdToString(currentAccount?.account.address ?? null)
+      const resp = await provider.getAccountBalances(accountAddress)
+      setBalances(resp.balances)
     } catch (error) {
+      console.error(error)
       if (typeof error === "string") {
         dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND }))
       }
@@ -38,6 +82,15 @@ export const Wallet: React.FC = () => {
         {t("tari-wallet-daemon", { ns: "components" })}
       </Typography>
       <Box display="flex" flexDirection="column" gap={2} alignItems="center" py={4}>
+        <SelectAccount onSubmit={handleCreateAccount} accountsList={accountsList} />
+        <Paper variant="outlined" elevation={0} sx={{ padding: 1, borderRadius: 2, width: "50%" }}>
+          <Stack direction="column" justifyContent="flex-end">
+            <Typography variant="caption" textAlign="left">{`Name: ${currentAccount?.account.name}`}</Typography>
+            <Typography variant="caption" textAlign="left">{`${t("address", {
+              ns: "common",
+            })}: ${substateIdToString(currentAccount?.account.address ?? null)}`}</Typography>
+          </Stack>
+        </Paper>
         <Button onClick={get_free_coins} variant="contained" sx={{ width: 200 }}>
           {t("get-free-coins", { ns: "components" })}
         </Button>

@@ -4,6 +4,7 @@ use std::{ net::SocketAddr, str::FromStr };
 use tari_wallet_daemon_client::{
   types::{
     AccountsCreateFreeTestCoinsRequest,
+    AccountsCreateRequest,
     AccountsGetBalancesRequest,
     AccountsGetBalancesResponse,
     AuthLoginAcceptRequest,
@@ -17,7 +18,7 @@ use tauri_plugin_http::reqwest::{ self, header::{ AUTHORIZATION, CONTENT_TYPE } 
 
 use crate::error::Error;
 
-const JSON_CONNECT_ADDRESS: &str = "127.0.0.1:19000"; // TODO use db to get endpoint
+const JSON_CONNECT_ADDRESS: &str = "127.0.0.1:18010"; // TODO use db to get endpoint
 
 pub async fn permission_token() -> Result<(String, String), anyhow::Error> {
   let req_params = AuthLoginRequest {
@@ -39,6 +40,19 @@ pub async fn permission_token() -> Result<(String, String), anyhow::Error> {
   Ok((acc_res.permissions_token, auth_token))
 }
 
+pub async fn account_create(account_name: Option<String>, permissions_token: String) -> Result<(), anyhow::Error> {
+  let create_acc_params = AccountsCreateRequest {
+    account_name,
+    custom_access_rules: None,
+    is_default: false,
+    key_id: None,
+    max_fee: None,
+  };
+  let resp = make_request(Some(permissions_token), "accounts.create".to_string(), create_acc_params).await?;
+
+  Ok(())
+}
+
 pub async fn free_coins(account_name: Option<String>, permissions_token: String) -> Result<(), anyhow::Error> {
   let free_coins_params = AccountsCreateFreeTestCoinsRequest {
     account: account_name.map(|acc_name| ComponentAddressOrName::Name(acc_name)),
@@ -46,8 +60,11 @@ pub async fn free_coins(account_name: Option<String>, permissions_token: String)
     max_fee: None,
     key_id: None,
   };
-  make_request(Some(permissions_token), "accounts.create_free_test_coins".to_string(), free_coins_params).await?;
-
+  let _resp = make_request(
+    Some(permissions_token),
+    "accounts.create_free_test_coins".to_string(),
+    free_coins_params
+  ).await?;
   Ok(())
 }
 

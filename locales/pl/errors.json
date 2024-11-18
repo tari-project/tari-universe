@@ -35,5 +35,7 @@
   "manifest-response-error": "Nie udało się odebrać manifestu {{ endpoint }}",
   "failed-to-download": "Nie udało się pobrać z {{ url }}",
   "tapplet-invalid-checksum": "Niepoprawna suma kontrolna wersji {{ version }}",
-  "tapplet-package-incomplete": "Niekompletna paczka w wersji {{ version }} - nie znaleziono wszystkich wymaganych plików"
+  "tapplet-package-incomplete": "Niekompletna paczka w wersji {{ version }} - nie znaleziono wszystkich wymaganych plików",
+  "failed-to-request": "Błąd przesłania żądania: {{ message }}",
+  "failed-to-find-provider": "Nie znaleziono provider'a"
 }
