@@ -12,10 +12,10 @@ name = "wallet_daemon_test_lib"
 crate-type = ["lib", "cdylib", "staticlib"]
 
 [build-dependencies]
-tauri-build = { version = "2.0.0-beta", features = [] }
+tauri-build = { version = "2.0.0-beta", features = ["isolation"] }
 
 [dependencies]
-tauri = { version = "2.0.0-beta", features = ["unstable", "webview-data-url"] }
+tauri = { version = "2.0.0-beta", features = [ "isolation", "unstable", "webview-data-url"] }
 tauri-plugin-shell = "2.0.0-beta"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -57,3 +57,4 @@ futures-util = "0.3.31"
 sanitize-filename = "0.5.0"
 futures-lite = "2.3.0"
 serde_yaml = "0.9.34"
+open = "5.3.0"

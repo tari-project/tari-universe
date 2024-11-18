@@ -4,6 +4,7 @@ export type Simulation = {
   transactionId: number
   status: SimulationStatus
   balanceUpdates: BalanceUpdate[]
+  errorMsg: string
 }
 
 export type BalanceUpdate = {
@@ -22,4 +23,5 @@ export type SimulationSuccessPayload = {
 }
 export type SimulationFailurePayload = {
   transactionId: number
+  errorMsg: string
 }

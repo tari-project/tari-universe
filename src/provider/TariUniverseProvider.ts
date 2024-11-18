@@ -1,15 +1,16 @@
 import {
   WalletDaemonClient,
   stringToSubstateId,
-  Instruction,
-  TransactionSubmitRequest,
   SubstateType,
   substateIdToString,
   KeyBranch,
+  AccountsGetBalancesResponse,
+  TransactionSubmitRequest,
+  AccountsListResponse,
 } from "@tari-project/wallet_jrpc_client"
-import { IPCRpcTransport } from "./ipc_transport"
 import {
   Account,
+  Instruction,
   SubmitTransactionRequest,
   SubmitTransactionResponse,
   Substate,
@@ -21,6 +22,9 @@ import {
   VaultBalances,
 } from "@tari-project/tarijs"
 import { ListSubstatesResponse } from "@tari-project/tarijs/dist/providers"
+import { TUProviderMethod } from "../store/transaction/transaction.types"
+import { IPCRpcTransport } from "./ipc_transport"
+import { ComponentAccessRules } from "@tari-project/typescript-bindings"
 
 export type WalletDaemonParameters = {
   permissions: TariPermissions
@@ -34,10 +38,11 @@ export type WindowSize = {
   height: number
 }
 
-export class WalletDaemonTariProvider implements TariProvider {
-  public providerName = "WalletDaemon"
+export class TariUniverseProvider implements TariProvider {
+  public providerName = "TariUniverseProvider"
   params: WalletDaemonParameters
   client: WalletDaemonClient
+  isProviderConnected: boolean
 
   private constructor(
     params: WalletDaemonParameters,
@@ -47,18 +52,23 @@ export class WalletDaemonTariProvider implements TariProvider {
   ) {
     this.params = params
     this.client = connection
+    this.isProviderConnected = true
   }
 
   public isConnected(): boolean {
-    return true
+    return this.isProviderConnected //TODO tmp solution shoule be better one
   }
 
-  static build(params: WalletDaemonParameters): WalletDaemonTariProvider {
+  public async getClient(): Promise<WalletDaemonClient> {
+    return this.client
+  }
+
+  static build(params: WalletDaemonParameters): TariUniverseProvider {
     const allPermissions = new TariPermissions()
     allPermissions.addPermissions(params.permissions)
     allPermissions.addPermissions(params.optionalPermissions)
     const client = WalletDaemonClient.new(new IPCRpcTransport())
-    return new WalletDaemonTariProvider(params, client)
+    return new TariUniverseProvider(params, client)
   }
 
   public setWindowSize(width: number, height: number): void {
@@ -70,21 +80,42 @@ export class WalletDaemonTariProvider implements TariProvider {
     tappletWindow?.postMessage({ height: this.height, width: this.width, type: "resize" }, targetOrigin)
   }
 
-  async runOne(method: Exclude<keyof WalletDaemonTariProvider, "runOne">, args: any[]): Promise<any> {
+  async runOne(method: TUProviderMethod, args: any[]): Promise<any> {
     let res = (this[method] as (...args: any) => Promise<any>)(...args)
     return res
   }
 
-  public async createFreeTestCoins(amount = 1_000_000): Promise<Account> {
+  public async createFreeTestCoins(accountName?: string, amount = 1_000_000, fee?: number): Promise<Account> {
     const res = await this.client.createFreeTestCoins({
-      account: { Name: "template_web" },
+      account: (accountName && { Name: accountName }) || null,
       amount,
-      max_fee: null,
-      key_id: 0,
+      max_fee: fee ?? null,
+      key_id: null,
     })
     return {
       account_id: res.account.key_index,
       address: (res.account.address as { Component: string }).Component,
+      public_key: res.public_key,
+      resources: [],
+    }
+  }
+
+  public async createAccount(
+    accountName?: string,
+    fee?: number,
+    customAccessRules?: ComponentAccessRules,
+    isDefault = true
+  ): Promise<Account> {
+    const res = await this.client.accountsCreate({
+      account_name: accountName ?? null,
+      custom_access_rules: customAccessRules ?? null,
+      is_default: isDefault,
+      key_id: null,
+      max_fee: fee ?? null,
+    })
+    return {
+      account_id: 0,
+      address: (res.address as { Component: string }).Component,
       public_key: res.public_key,
       resources: [],
     }
@@ -96,21 +127,46 @@ export class WalletDaemonTariProvider implements TariProvider {
 
   public async getAccount(): Promise<Account> {
     const { account, public_key } = (await this.client.accountsGetDefault({})) as any
+    const { balances } = await this.client.accountsGetBalances({
+      account: { ComponentAddress: account.address.Component },
+      refresh: false,
+    })
 
     return {
       account_id: account.key_index,
       address: account.address.Component,
       public_key,
-      // TODO
-      resources: [],
+      resources: balances.map((b: any) => ({
+        type: b.resource_type,
+        resource_address: b.resource_address,
+        balance: b.balance + b.confidential_balance,
+        vault_id: "Vault" in b.vault_address ? b.vault_address.Vault : b.vault_address,
+        token_symbol: b.token_symbol,
+      })),
     }
   }
 
-  public async getAccountBalances(componentAddress: string): Promise<unknown> {
+  public async getAccountBalances(componentAddress: string): Promise<AccountsGetBalancesResponse> {
     return await this.client.accountsGetBalances({
       account: { ComponentAddress: componentAddress },
       refresh: true,
     })
+  }
+
+  public async getAccountsList(limit = 0, offset = 10): Promise<AccountsListResponse> {
+    // TODO https://github.com/tari-project/tari-universe/issues/141
+    const res = await this.client.accountsList({
+      limit,
+      offset,
+    })
+    return res
+  }
+
+  public async getAccountsBalances(
+    accountName: string,
+    refresh: boolean = false
+  ): Promise<AccountsGetBalancesResponse> {
+    return await this.client.accountsGetBalances({ account: { Name: accountName }, refresh })
   }
 
   public async getSubstate(substate_id: string): Promise<Substate> {
@@ -127,23 +183,24 @@ export class WalletDaemonTariProvider implements TariProvider {
 
   public async submitTransaction(req: SubmitTransactionRequest): Promise<SubmitTransactionResponse> {
     const params = {
-      transaction: null, // TODO figure out what this is
+      transaction: {
+        instructions: req.instructions as Instruction[],
+        fee_instructions: req.fee_instructions as Instruction[],
+        inputs: req.required_substates.map((s) => ({
+          // TODO: Hmm The bindings want a SubstateId object, but the wallet only wants a string. Any is used to skip type checking here
+          substate_id: s.substate_id as any,
+          version: null,
+        })),
+        min_epoch: null,
+        max_epoch: null,
+      },
       signing_key_index: req.account_id,
-      fee_instructions: req.fee_instructions as Instruction[],
-      instructions: req.instructions as Instruction[],
-      inputs: req.required_substates.map((s) => ({
-        // TODO: Hmm The bindings want a SubstateId object, but the wallet only wants a string. Any is used to skip type checking here
-        substate_id: s.substate_id as any,
-        version: s.version || null,
-      })),
-      override_inputs: false,
-      is_dry_run: req.is_dry_run,
+      autofill_inputs: [],
+      detect_inputs: false, //TODO check if works for 'false'
       proof_ids: [],
-      min_epoch: null,
-      max_epoch: null,
-    } satisfies TransactionSubmitRequest
-    const res = await this.client.submitTransaction(params)
+    } as TransactionSubmitRequest
 
+    const res = await this.client.submitTransaction(params)
     return { transaction_id: res.transaction_id }
   }
 
@@ -155,7 +212,7 @@ export class WalletDaemonTariProvider implements TariProvider {
     return {
       transaction_id: transactionId,
       status: convertStringToTransactionStatus(res.status),
-      result: res.result,
+      result: res.result as any,
     }
   }
 

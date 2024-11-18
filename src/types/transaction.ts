@@ -1,7 +1,7 @@
-import { WalletDaemonTariProvider } from "@provider/TariUniverseProvider"
+import { TariUniverseProvider } from "@provider/TariUniverseProvider"
 
 export type TransactionEvent = {
-  methodName: Exclude<keyof WalletDaemonTariProvider, "runOne">
+  methodName: Exclude<keyof TariUniverseProvider, "runOne">
   args: any[]
   id: number
 }

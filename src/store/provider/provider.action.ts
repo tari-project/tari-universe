@@ -3,7 +3,7 @@ import { TransactionEvent } from "@type/transaction"
 import { InitProviderRequestPayload } from "./provider.types"
 import { providerActions } from "./provider.slice"
 import { transactionActions } from "../transaction/transaction.slice"
-import { Transaction } from "../transaction/transaction.types"
+import { Transaction, TUProviderMethod } from "../transaction/transaction.types"
 import { errorActions } from "../error/error.slice"
 import { RootState } from "../store"
 import { providerSelector } from "./provider.selector"
@@ -67,12 +67,13 @@ export const initializeAction = () => ({
         }
 
         const { methodName, args, id } = event.data
+        const _method = methodName as TUProviderMethod
         const runSimulation = async () => {
           if (methodName !== "submitTransaction") {
             return []
           }
           const transactionReq: SubmitTransactionRequest = { ...args[0], is_dry_run: true }
-          const tx = await provider.runOne(methodName, [transactionReq])
+          const tx = await provider.runOne(_method, [transactionReq])
           const txReceipt = await provider.getTransactionResult(tx.transaction_id)
 
           const walletBalances: AccountsGetBalancesResponse = await invoke("get_balances", {})
@@ -102,9 +103,15 @@ export const initializeAction = () => ({
           return balanceUpdates
         }
         const submit = async () => {
-          const result = await provider.runOne(methodName, args)
-          if (event.source) {
-            event.source.postMessage({ id, result, type: "provider-call" }, { targetOrigin: event.origin })
+          try {
+            const result = await provider.runOne(_method, args)
+            if (event.source) {
+              event.source.postMessage({ id, result, type: "provider-call" }, { targetOrigin: event.origin })
+            }
+          } catch (error) {
+            console.error(error)
+            const e = typeof error === "string" ? error : "Provider send request error"
+            dispatch(errorActions.showError({ message: e, errorSource: ErrorSource.FRONTEND }))
           }
         }
         const cancel = async () => {
@@ -120,11 +127,11 @@ export const initializeAction = () => ({
           cancel,
           runSimulation,
           status: "pending",
-          methodName,
+          methodName: _method,
           args,
           id,
         }
-        if (methodName === "submitTransaction") {
+        if (_method === "submitTransaction") {
           dispatch(transactionActions.addTransaction({ transaction }))
         } else {
           dispatch(transactionActions.sendTransactionRequest({ transaction }))

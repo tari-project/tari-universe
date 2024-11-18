@@ -16,7 +16,7 @@ export const runTransactionSimulationAction = () => ({
     const { runSimulation } = state.transaction.entities[transactionId]
 
     if (!provider) {
-      dispatch(simulationActions.runSimulationFailure({ transactionId }))
+      dispatch(simulationActions.runSimulationFailure({ transactionId, errorMsg: "Provider not found" }))
       return
     }
 
@@ -24,7 +24,8 @@ export const runTransactionSimulationAction = () => ({
       const balanceUpdates = await runSimulation()
       dispatch(simulationActions.runSimulationSuccess({ transactionId, balanceUpdates }))
     } catch (error) {
-      dispatch(simulationActions.runSimulationFailure({ transactionId }))
+      console.error(error)
+      dispatch(simulationActions.runSimulationFailure({ transactionId, errorMsg: String(error) }))
     }
   },
 })
