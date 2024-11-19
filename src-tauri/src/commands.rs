@@ -104,12 +104,12 @@ pub async fn call_wallet(
 ) -> Result<serde_json::Value, Error> {
   let permission_token = tokens.permission
     .lock()
-    .inspect_err(|e| error!(target: LOG_TARGET, "🚨 Error at call_wallet: {:?}", e))
+    .inspect_err(|e| error!(target: LOG_TARGET, "❌ Error at call_wallet: {:?}", e))
     .map_err(|_| FailedToObtainPermissionTokenLock)?
     .clone();
   let req_params: serde_json::Value = serde_json
     ::from_str(&params)
-    .inspect_err(|e| error!(target: LOG_TARGET, "🚨 Error at call_wallet: {:?}", e))
+    .inspect_err(|e| error!(target: LOG_TARGET, "❌ Error at call_wallet: {:?}", e))
     .map_err(|e| JsonParsingError(e))?;
   match make_request(Some(permission_token), method, req_params).await {
     Ok(res) => Ok(res),
@@ -141,14 +141,13 @@ pub async fn launch_tapplet(
 
   // Extract the tapplet archieve each time before launching
   // This way make sure that local files have not been replaced and are not malicious
-  let _ = extract(&file_path, &tapplet_path.clone()).await.map_err(|e| {
-    error!(target: LOG_TARGET,"❌ Error extracting file: {:?}", e);
-    IOError(FailedToUnpackFile { path: tapplet_path.to_string_lossy().to_string() })
-  })?;
+  let _ = extract(&file_path, &tapplet_path.clone()).await
+    .inspect_err(|e| error!(target: LOG_TARGET, "❌ Error extracting file: {:?}", e))
+    .map_err(|_| { IOError(FailedToUnpackFile { path: tapplet_path.to_string_lossy().to_string() }) })?;
   //TODO should compare integrity field with the one stored in db or from github manifest?
   match check_files_and_validate_checksum(tapp_version, tapplet_path.clone()) {
     Ok(is_valid) => {
-      info!(target: LOG_TARGET,"Checksum validated without error. Is valid?: {:?}", is_valid);
+      info!(target: LOG_TARGET,"✅ Checksum validation successfully with test result: {:?}", is_valid);
     }
     Err(e) => {
       error!(target: LOG_TARGET,"❌ Error validating checksum: {:?}", e);
@@ -217,11 +216,13 @@ pub async fn download_and_extract_tapp(
   });
   handle.await?.map_err(|_| Error::RequestError(FailedToDownload { url: tapp_version.registry_url.clone() }))?;
 
-  let _ = extract(&file_path, &tapplet_path.clone()).await;
+  let _ = extract(&file_path, &tapplet_path.clone()).await.inspect_err(
+    |e| error!(target: LOG_TARGET, "❌ Error extracting file: {:?}", e)
+  );
   //TODO should compare integrity field with the one stored in db or from github manifest?
   match check_files_and_validate_checksum(tapp_version, tapplet_path.clone()) {
     Ok(is_valid) => {
-      info!(target: LOG_TARGET,"Checksum validated without error. Is valid?: {:?}", is_valid);
+      info!(target: LOG_TARGET,"✅ Checksum validation successfully with test result: {:?}", is_valid);
     }
     Err(e) => {
       error!(target: LOG_TARGET,"🚨 Error validating checksum: {:?}", e);

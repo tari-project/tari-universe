@@ -58,7 +58,6 @@ export const initializeAction = () => ({
 
       handleMessage = async (event: MessageEvent<TransactionEvent>) => {
         if (!event?.data?.args || !event?.data?.methodName) {
-          dispatch(errorActions.showError({ message: "no-data-in-event", errorSource: ErrorSource.FRONTEND }))
           return
         }
         if (!event.source) {

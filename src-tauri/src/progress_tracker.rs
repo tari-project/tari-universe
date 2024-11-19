@@ -64,7 +64,7 @@ impl ProgressTrackerInner {
   }
 
   pub fn update(&self, title: String, title_params: Option<HashMap<String, String>>, progress: u64) {
-    debug!(target: LOG_TARGET, "Progress: {}% {}", progress, title);
+    debug!(target: LOG_TARGET, "⏳️️ Progress: {}% {}", progress, title);
     self.window
       .emit("message", SetupStatusEvent {
         event_type: "download_status".to_string(),
@@ -72,12 +72,12 @@ impl ProgressTrackerInner {
         title_params,
         progress: progress as f64,
       })
-      .inspect_err(|e| error!(target: LOG_TARGET, "Could not emit event 'message': {:?}", e))
+      .inspect_err(|e| error!(target: LOG_TARGET, "❌ Could not emit event 'message': {:?}", e))
       .ok();
   }
 
   pub fn update_with_next_max(&self, title: String, title_params: Option<HashMap<String, String>>, progress: u64) {
-    debug!(target: LOG_TARGET, "Progress: {}% {}", progress, title);
+    debug!(target: LOG_TARGET, "⏳️️ Progress: {}% {}", progress, title);
     self.window
       .emit("message", SetupStatusEvent {
         event_type: "setup_status".to_string(),
@@ -85,7 +85,7 @@ impl ProgressTrackerInner {
         title_params,
         progress: ((self.min as f64) + ((self.next_max - self.min) as f64) * ((progress as f64) / 100.0)) / 100.0,
       })
-      .inspect_err(|e| error!(target: LOG_TARGET, "Could not emit event 'message': {:?}", e))
+      .inspect_err(|e| error!(target: LOG_TARGET, "❌ Could not emit event 'message': {:?}", e))
       .ok();
   }
 }

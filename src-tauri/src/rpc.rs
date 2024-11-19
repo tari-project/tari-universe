@@ -110,11 +110,11 @@ pub async fn make_request<T: Serialize>(
   let resp = builder.json(&body).send().await?.json::<JsonRpcResponse>().await?;
   match resp.result {
     JsonRpcAnswer::Result(result) => {
-      info!(target: LOG_TARGET, "👁️‍🗨️ CALL WALLET result: {:?}", result);
+      info!(target: LOG_TARGET, "👁️‍🗨️ JSON rpc request result: {:?}", result);
       Ok(result)
     }
     JsonRpcAnswer::Error(error) => {
-      error!(target: LOG_TARGET, "🚨 CALL WALLET error: {:?}", error);
+      error!(target: LOG_TARGET, "🚨 JSON rpc request error: {:?}", error);
       Err(anyhow::Error::msg(error.to_string()))
     }
   }

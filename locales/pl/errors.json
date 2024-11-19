@@ -1,6 +1,6 @@
 {
   "manifest-package-name-mismatch": "Manifest tapplet'u nie pasuje do nazwy pakietu. Oczekiwano: {{ expectedPackageName }} Otrzymano: {{ receivedPackageName }} z: {{- endpoint }}/tapplet.manifest.json",
-  "fetching-taplet-manifest-failed": "Błąd pobierania manifestu tapplet'u: {{ error }}",
+  "failed-to-fetch-tapp-manifest": "Błąd pobierania manifestu tapplet'u: {{ error }}",
   "no-pending-transaction-found": "Nie znaleziono oczekującej transakcji",
   "no-data-in-event": "Brak danych w zdarzeniu",
   "no-source-in-event": "Brak źródła w zdarzeniu",

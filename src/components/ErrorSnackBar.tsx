@@ -9,23 +9,35 @@ import React from "react"
 import { Language } from "../i18initializer"
 
 const ERROR_KEY_SEPARATOR = "|"
-const ERROR_CONTEXT_VAULE_SEPARATOR = "&"
 
 export const resolveBackendErrorMessage = (
   translator: TFunction<"errors", undefined>,
   error: string,
   lng: Language
-) => {
-  const [translationKey, context] = error.split(ERROR_KEY_SEPARATOR)
-  const contextValues: Record<string, string> = context
-    .split(ERROR_CONTEXT_VAULE_SEPARATOR)
-    .reduce<Record<string, string>>((acc, item) => {
-      const [key, value] = item.split("-")
-      acc[key.trim()] = value.trim()
-      return acc
-    }, {})
+): string => {
+  const parts = error.split(ERROR_KEY_SEPARATOR)
 
-  return translator(translationKey.trim(), { ...contextValues, lng })
+  if (parts.length < 2) {
+    return translator(error.trim(), { lng })
+  }
+
+  // Extract the nested error name
+  const nestedErrorPart = parts[1].trim() // Get the second part
+  const translationKey = nestedErrorPart.split("-").slice(1).join("-") // Extract everything after 'message-'
+
+  // Extract the method and params from the remaining part
+  const context = parts.slice(2).join(ERROR_KEY_SEPARATOR) // Join the remaining parts back
+  const methodMatch = context.match(/method-([a-zA-Z0-9._]+)/)
+  const paramsMatch = context.match(/params-(.*)/)
+
+  const method = methodMatch ? methodMatch[1] : "unknown method"
+  const params = paramsMatch ? JSON.parse(paramsMatch[1]) : {}
+
+  const formattedParams = JSON.stringify(params, null, 2)
+    .replace(/"([^"]+)":/g, "$1:") // Remove quotes from keys
+    .replace(/"([^"]+)"/g, "$1") // Remove quotes from string value
+
+  return translator(translationKey.trim(), { method, params: formattedParams, lng })
 }
 
 export const ErrorSnackBar = () => {
@@ -42,7 +54,7 @@ export const ErrorSnackBar = () => {
     if (message && message.includes(ERROR_KEY_SEPARATOR)) {
       return resolveBackendErrorMessage(t, message, currentLanguage)
     }
-    return message
+    return t(message)
   }, [message, currentLanguage])
 
   return (

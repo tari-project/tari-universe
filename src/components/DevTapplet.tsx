@@ -30,7 +30,7 @@ export function ActiveDevTapplet() {
       } catch (error) {
         dispatch(
           errorActions.showError({
-            message: `fetching-tapplet-manifest-failed | error-${error}`,
+            message: `failed-to-fetch-tapp-manifest | error-${error}`,
             errorSource: ErrorSource.FRONTEND,
           })
         )
