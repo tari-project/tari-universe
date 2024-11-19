@@ -13,8 +13,15 @@ export type InitProviderFailurePayload = {
 }
 export type InitProviderSuccessPayload = {
   provider: TariUniverseProvider
+  permissions: TariPermission[]
 }
 
+export type UpdatePermissionsRequestPayload = {
+  permissions: TariPermission[]
+}
 export type UpdatePermissionsSuccessPayload = {
   permissions: TariPermission[]
+}
+export type UpdatePermissionsFailurePayload = {
+  errorMsg: string
 }

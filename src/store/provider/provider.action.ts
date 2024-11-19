@@ -1,6 +1,6 @@
 import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
 import { TransactionEvent } from "@type/transaction"
-import { InitProviderRequestPayload } from "./provider.types"
+import { InitProviderRequestPayload, UpdatePermissionsRequestPayload } from "./provider.types"
 import { providerActions } from "./provider.slice"
 import { transactionActions } from "../transaction/transaction.slice"
 import { Transaction, TUProviderMethod } from "../transaction/transaction.types"
@@ -24,6 +24,14 @@ import {
 import { AccountsGetBalancesResponse } from "@tari-project/wallet_jrpc_client"
 import { BalanceUpdate } from "../simulation/simulation.types"
 import { ErrorSource } from "../error/error.types"
+import {
+  TariPermission,
+  TariPermissionAccountInfo,
+  TariPermissionKeyList,
+  TariPermissions,
+  TariPermissionSubstatesRead,
+  TariPermissionTransactionSend,
+} from "@tari-project/tarijs/dist/providers/wallet_daemon"
 
 let handleMessage: typeof window.postMessage
 
@@ -139,9 +147,32 @@ export const initializeAction = () => ({
       }
       window.addEventListener("message", handleMessage, false)
 
-      listenerApi.dispatch(providerActions.initializeSuccess({ provider }))
+      // set default permissions
+      let permissions: TariPermission[] = [
+        new TariPermissionKeyList(),
+        new TariPermissionAccountInfo(),
+        new TariPermissionTransactionSend(),
+        new TariPermissionSubstatesRead(),
+      ]
+
+      listenerApi.dispatch(providerActions.initializeSuccess({ provider, permissions }))
     } catch (error) {
       listenerApi.dispatch(providerActions.initializeFailure({ errorMsg: error as string }))
+    }
+  },
+})
+
+export const updatePermissionsAction = () => ({
+  actionCreator: providerActions.updatePermissionsRequest,
+  effect: async (
+    action: PayloadAction<UpdatePermissionsRequestPayload>,
+    listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
+  ) => {
+    const permissions = action.payload.permissions
+    try {
+      listenerApi.dispatch(providerActions.updatePermissionsSuccess({ permissions }))
+    } catch (error) {
+      listenerApi.dispatch(providerActions.updatePermissionsFailure({ errorMsg: error as string }))
     }
   },
 })

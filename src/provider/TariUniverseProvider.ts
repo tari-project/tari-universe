@@ -64,9 +64,6 @@ export class TariUniverseProvider implements TariProvider {
   }
 
   static build(params: WalletDaemonParameters): TariUniverseProvider {
-    const allPermissions = new TariPermissions()
-    allPermissions.addPermissions(params.permissions)
-    allPermissions.addPermissions(params.optionalPermissions)
     const client = WalletDaemonClient.new(new IPCRpcTransport())
     return new TariUniverseProvider(params, client)
   }

@@ -66,3 +66,12 @@ export interface LaunchedTappResult {
   endpoint: string
   permissions: TariPermission[]
 }
+
+export type SupportedChain = "MAINNET" | "STAGENET" | "NEXTNET" | ""
+export interface TappletConfig {
+  packageName: string
+  version: string
+  supportedChain: SupportedChain[]
+  requiredPermissions: TariPermission[]
+  optionalPermissions: TariPermission[]
+}

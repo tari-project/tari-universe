@@ -22,7 +22,16 @@ export function ActiveTapplet() {
       .then((res: any) => {
         const launchedTappParams: LaunchedTappResult = res
         setTappletAddress(launchedTappParams.endpoint)
-        dispatch(providerActions.updatePermissions({ permissions: launchedTappParams.permissions }))
+        if (launchedTappParams.permissions) {
+          dispatch(providerActions.updatePermissionsRequest({ permissions: launchedTappParams.permissions }))
+        } else {
+          dispatch(
+            errorActions.showError({
+              message: `failed-to-fetch-tapp-config | error-${"Tapplet permissions undefined"}`,
+              errorSource: ErrorSource.BACKEND,
+            })
+          )
+        }
       })
       .catch((error: string) => dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND })))
 
