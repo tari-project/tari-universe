@@ -12,10 +12,10 @@ name = "wallet_daemon_test_lib"
 crate-type = ["lib", "cdylib", "staticlib"]
 
 [build-dependencies]
-tauri-build = { version = "2.0.0-beta", features = [] }
+tauri-build = { version = "2.0.0-beta", features = ["isolation"] }
 
 [dependencies]
-tauri = { version = "2.0.0-beta", features = ["unstable", "webview-data-url"] }
+tauri = { version = "2.0.0-beta", features = [ "isolation", "unstable", "webview-data-url"] }
 tauri-plugin-shell = "2.0.0-beta"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

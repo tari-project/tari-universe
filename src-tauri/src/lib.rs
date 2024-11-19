@@ -69,7 +69,7 @@ async fn try_get_tokens() -> (String, String) {
   loop {
     match permission_token().await {
       Ok(tokens) => {
-        info!(target: LOG_TARGET, "permission token ok {:?}", tokens);
+        info!(target: LOG_TARGET, "WALLET DAEMON permission token ok {:?}", tokens);
         return tokens;
       }
       Err(e) => {
@@ -105,6 +105,7 @@ fn setup_tari_universe(app: &mut tauri::App) -> Result<(), Box<dyn std::error::E
   let tokens = app.state::<Tokens>();
   let handle = tauri::async_runtime::spawn(try_get_tokens());
   let (permission_token, auth_token) = tauri::async_runtime::block_on(handle)?;
+  info!(target: LOG_TARGET, "permission token found {:?}", permission_token);
   tokens.permission
     .lock()
     .map_err(|_| error::Error::FailedToObtainPermissionTokenLock)?
