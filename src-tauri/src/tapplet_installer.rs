@@ -6,7 +6,7 @@ use crate::{
   database::models::TappletVersion,
   error::{ Error::{ self, IOError, JsonParsingError, RequestError }, IOError::*, RequestError::* },
   hash_calculator::calculate_checksum,
-  interface::{ RegisteredTapplets, TappletAssets },
+  interface::{ RegisteredTapplets, TappletAssets, TappletConfig, TariPermission },
 };
 use log::error;
 use crate::constants::TAPPLETS_INSTALLED_DIR;
@@ -23,8 +23,10 @@ pub fn delete_tapplet(tapplet_path: PathBuf) -> Result<(), Error> {
 
 pub fn check_extracted_files(tapplet_path: PathBuf) -> Result<bool, Error> {
   // TODO define all needed files
+  // universe.tari/tapplets_installed/<tapplet_name>/<version>/package
   let tapp_dir: PathBuf = tapplet_path.join("package");
   let pkg_json_file = tapp_dir.join("package.json");
+  // let manifest_file = tapp_dir.join("dist").join("tapplet.manifest.json");
   let path = tapplet_path
     .into_os_string()
     .into_string()
@@ -149,4 +151,17 @@ pub fn check_files_and_validate_checksum(tapp: TappletVersion, tapp_dir: PathBuf
     return Err(Error::InvalidChecksum { version: tapp.version.clone() });
   }
   Ok(is_checksum_valid)
+}
+
+pub fn get_tapp_permissions(tapp_path: PathBuf) -> Result<Vec<TariPermission>, Error> {
+  // tapp_dir = universe.tari/tapplets_installed/<tapplet_name>/<version>/package
+  let tapp_dir: PathBuf = tapp_path.join("package");
+  let tapp_config = tapp_dir.join("dist").join("tapplet.config.json");
+  if !tapp_config.exists() {
+    return Err(IOError(FailedToGetFilePath));
+  }
+
+  let config = fs::read_to_string(tapp_config.clone()).unwrap_or_default();
+  let tapplet: TappletConfig = serde_json::from_str(&config).map_err(|e| JsonParsingError(e))?;
+  Ok(tapplet.permissions)
 }

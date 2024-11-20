@@ -65,7 +65,7 @@ export const TappletsRegistered: React.FC = () => {
               <ListItemAvatar>
                 <Avatar src={item.logoAddr} />
               </ListItemAvatar>
-              <ListItemText primary={item.package_name} />
+              <ListItemText primary={item.display_name} />
               <IconButton aria-label="install" onClick={() => handleInstall(item.id)} sx={{ marginLeft: 8 }}>
                 <InstallDesktop color="primary" />
               </IconButton>

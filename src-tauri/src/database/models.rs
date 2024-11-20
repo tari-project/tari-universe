@@ -1,5 +1,5 @@
 use crate::database::schema::*;
-use crate::interface::TappletManifest;
+use crate::interface::TappletRegistryManifest;
 use diesel::prelude::*;
 use serde::{ Deserialize, Serialize };
 
@@ -67,8 +67,8 @@ pub struct CreateTapplet<'a> {
   pub category: &'a str,
 }
 
-impl<'a> From<&'a TappletManifest> for CreateTapplet<'a> {
-  fn from(tapplet_manifest: &'a TappletManifest) -> Self {
+impl<'a> From<&'a TappletRegistryManifest> for CreateTapplet<'a> {
+  fn from(tapplet_manifest: &'a TappletRegistryManifest) -> Self {
     CreateTapplet {
       registry_id: &tapplet_manifest.id,
       package_name: &tapplet_manifest.id,

@@ -1,6 +1,6 @@
 import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
 import { TransactionEvent } from "@type/transaction"
-import { InitProviderRequestPayload } from "./provider.types"
+import { InitProviderRequestPayload, UpdatePermissionsRequestPayload } from "./provider.types"
 import { providerActions } from "./provider.slice"
 import { transactionActions } from "../transaction/transaction.slice"
 import { Transaction, TUProviderMethod } from "../transaction/transaction.types"
@@ -142,6 +142,21 @@ export const initializeAction = () => ({
       listenerApi.dispatch(providerActions.initializeSuccess({ provider }))
     } catch (error) {
       listenerApi.dispatch(providerActions.initializeFailure({ errorMsg: error as string }))
+    }
+  },
+})
+
+export const updatePermissionsAction = () => ({
+  actionCreator: providerActions.updatePermissionsRequest,
+  effect: async (
+    action: PayloadAction<UpdatePermissionsRequestPayload>,
+    listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
+  ) => {
+    const permissions = action.payload.permissions
+    try {
+      listenerApi.dispatch(providerActions.updatePermissionsSuccess({ permissions }))
+    } catch (error) {
+      listenerApi.dispatch(providerActions.updatePermissionsFailure({ errorMsg: error as string }))
     }
   },
 })

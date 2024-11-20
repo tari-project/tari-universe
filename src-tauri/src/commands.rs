@@ -25,7 +25,13 @@ use crate::{
     RequestError::*,
     TappletServerError::*,
   },
-  interface::{ DevTappletResponse, InstalledTappletWithName, RegisteredTappletWithVersion },
+  interface::{
+    DevTappletResponse,
+    InstalledTappletWithName,
+    LaunchedTappResult,
+    RegisteredTappletWithVersion,
+    TariPermission,
+  },
   progress_tracker::ProgressTracker,
   rpc::{ account_create, balances, free_coins, make_request },
   tapplet_installer::{
@@ -34,6 +40,7 @@ use crate::{
     download_asset,
     fetch_tapp_registry_manifest,
     get_tapp_download_path,
+    get_tapp_permissions,
   },
   tapplet_server::start,
   AssetServer,
@@ -121,7 +128,7 @@ pub async fn launch_tapplet(
   shutdown_tokens: State<'_, ShutdownTokens>,
   db_connection: State<'_, DatabaseConnection>,
   app_handle: tauri::AppHandle
-) -> Result<String, Error> {
+) -> Result<LaunchedTappResult, Error> {
   let mut locked_tokens = shutdown_tokens.0.lock().await;
   let mut store = SqliteStore::new(db_connection.0.clone());
 
@@ -148,6 +155,14 @@ pub async fn launch_tapplet(
     }
   }
 
+  let permissions: Vec<TariPermission> = match get_tapp_permissions(tapplet_path.clone()) {
+    Ok(p) => p,
+    Err(e) => {
+      error!(target: LOG_TARGET,"Error getting permissions: {:?}", e);
+      return Err(e.into());
+    }
+  };
+
   let dist_path = tapplet_path.join(TAPPLET_DIST_DIR);
   let handle_start = tauri::async_runtime::spawn(async move { start(dist_path).await });
 
@@ -158,7 +173,11 @@ pub async fn launch_tapplet(
     }
     None => {}
   }
-  Ok(format!("http://{}", addr))
+
+  Ok(LaunchedTappResult {
+    endpoint: format!("http://{}", addr),
+    permissions,
+  })
 }
 
 #[tauri::command]

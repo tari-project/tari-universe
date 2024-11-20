@@ -38,8 +38,8 @@ export type WindowSize = {
   height: number
 }
 
-export class TariUniverseProvider implements TariProvider {
-  public providerName = "TariUniverseProvider"
+export class TUInternalProvider implements TariProvider {
+  public providerName = "TUInternalProvider"
   params: WalletDaemonParameters
   client: WalletDaemonClient
   isProviderConnected: boolean
@@ -63,12 +63,9 @@ export class TariUniverseProvider implements TariProvider {
     return this.client
   }
 
-  static build(params: WalletDaemonParameters): TariUniverseProvider {
-    const allPermissions = new TariPermissions()
-    allPermissions.addPermissions(params.permissions)
-    allPermissions.addPermissions(params.optionalPermissions)
+  static build(params: WalletDaemonParameters): TUInternalProvider {
     const client = WalletDaemonClient.new(new IPCRpcTransport())
-    return new TariUniverseProvider(params, client)
+    return new TUInternalProvider(params, client)
   }
 
   public setWindowSize(width: number, height: number): void {

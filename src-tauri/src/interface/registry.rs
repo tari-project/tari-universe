@@ -5,11 +5,11 @@ pub struct RegisteredTapplets {
   #[serde(rename = "manifestVersion")]
   pub manifest_version: String,
   #[serde(rename = "registeredTapplets")]
-  pub registered_tapplets: HashMap<String, TappletManifest>,
+  pub registered_tapplets: HashMap<String, TappletRegistryManifest>,
 }
 
 #[derive(Debug, serde::Deserialize)]
-pub struct TappletManifest {
+pub struct TappletRegistryManifest {
   pub id: String,
   pub metadata: Metadata,
   pub versions: HashMap<String, Version>,
@@ -51,6 +51,36 @@ pub struct About {
 #[derive(Debug, serde::Deserialize, Clone)]
 pub struct Audit {
   pub auditor: String,
-  #[serde(rename = "report")]
+  #[serde(rename = "reportUrl")]
   pub report_url: String,
+}
+
+#[derive(Debug, serde::Deserialize)]
+pub struct TappletConfig {
+  #[serde(rename = "packageName")]
+  pub package_name: String,
+  pub version: String,
+  #[serde(rename = "supportedChain")]
+  pub supported_chain: Vec<String>,
+  pub permissions: Vec<TariPermission>,
+}
+
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+pub enum TariPermission {
+  TariPermissionNftGetOwnershipProof,
+  TariPermissionAccountBalance,
+  TariPermissionAccountInfo,
+  TariPermissionAccountList,
+  TariPermissionKeyList,
+  TariPermissionTransactionGet,
+  TariPermissionTransactionSend,
+  TariPermissionGetNft,
+  TariPermissionSubstatesRead,
+  TariPermissionTemplatesRead,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct LaunchedTappResult {
+  pub endpoint: String,
+  pub permissions: Vec<TariPermission>,
 }
