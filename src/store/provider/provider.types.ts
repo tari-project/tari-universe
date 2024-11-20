@@ -1,9 +1,9 @@
-import { TariUniverseProvider } from "@provider/TariUniverseProvider"
+import { TUInternalProvider } from "@provider/TUInternalProvider"
 import { TariPermission } from "@tari-project/tarijs/dist/providers/tari_universe"
 
 export type ProviderStoreState = {
   isInitialized: boolean
-  provider: TariUniverseProvider | null
+  provider: TUInternalProvider | null
   permissions: TariPermission[]
 }
 
@@ -12,7 +12,7 @@ export type InitProviderFailurePayload = {
   errorMsg: string
 }
 export type InitProviderSuccessPayload = {
-  provider: TariUniverseProvider
+  provider: TUInternalProvider
 }
 
 export type UpdatePermissionsRequestPayload = {
