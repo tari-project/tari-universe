@@ -9,7 +9,7 @@
   "failed-to-find-tapplet-version": "Nie udało się znaleźć wersji tapplet'u",
   "failed-to-obtain-permission-token-lock": "Nie udało się uzyskać blokady tokena uprawnień",
   "failed-to-obtain-auth-token-lock": "Nie udało się uzyskać blokady tokena autoryzacji",
-  "provider-call-failed-for-method": "Wywołanie provider'a nie powiodło się dla metody {{ method }} z parametrami {{ params }}",
+  "failed-to-call-provider": "Wywołanie provider'a nie powiodło się dla metody {{ method }} z parametrami {{ params }}",
   "failed-to-obtain-local-address": "Nie udało się uzyskać lokalnego adresu",
   "failed-to-start-tapplet-server": "Nie udało się uruchomić serwera tapplet'u",
   "tapplet-server-already-running": "Serwer tapplet'u już działa",

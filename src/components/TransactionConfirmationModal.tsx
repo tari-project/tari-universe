@@ -11,6 +11,8 @@ import { BalanceUpdateView } from "./BalanceUpdate"
 import { useTranslation } from "react-i18next"
 import { ErrorSource } from "../store/error/error.types"
 import { CallFunction, CallMethod } from "@tari-project/tarijs/dist/builders/types/Instruction"
+import { resolveBackendErrorMessage } from "./ErrorSnackBar"
+import { metadataSelector } from "../store/metadata/metadata.selector"
 
 const selectSimulationById = (state: RootState, id?: number) => (id ? simulationsSelectors.selectById(state, id) : null)
 
@@ -18,6 +20,8 @@ export const TransactionConfirmationModal: React.FC = () => {
   const { t } = useTranslation(["components", "common"])
   const transaction = useSelector(transactionSelector.getPendingTransaction)
   const simulation = useSelector((state: RootState) => selectSimulationById(state, transaction?.id))
+  const currentLanguage = useSelector(metadataSelector.selectCurrentLanguage)
+
   const dispatch = useDispatch()
 
   const handleClose = async () => {
@@ -93,7 +97,8 @@ export const TransactionConfirmationModal: React.FC = () => {
         </DialogContentText>
         {simulation?.status == "failure" && (
           <DialogContentText>
-            {t("simulation-error-msg", { ns: "components" })}: {simulation?.errorMsg}
+            {t("simulation-error-msg", { ns: "components" })}:{" "}
+            {resolveBackendErrorMessage(t, simulation?.errorMsg, currentLanguage)}
           </DialogContentText>
         )}
         <DialogContentText>

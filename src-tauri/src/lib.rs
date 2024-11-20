@@ -69,11 +69,11 @@ async fn try_get_tokens() -> (String, String) {
   loop {
     match permission_token().await {
       Ok(tokens) => {
-        info!(target: LOG_TARGET, "permission token ok {:?}", tokens);
+        info!(target: LOG_TARGET, "✅ WALLET DAEMON permission token found: {:?}", tokens);
         return tokens;
       }
       Err(e) => {
-        warn!(target: LOG_TARGET, "permission token ERR {:?}", e);
+        warn!(target: LOG_TARGET, "❌ Wallet Daemon permission token error: {:?}", e);
         sleep(Duration::from_millis(500));
         continue;
       }
@@ -105,7 +105,6 @@ fn setup_tari_universe(app: &mut tauri::App) -> Result<(), Box<dyn std::error::E
   let tokens = app.state::<Tokens>();
   let handle = tauri::async_runtime::spawn(try_get_tokens());
   let (permission_token, auth_token) = tauri::async_runtime::block_on(handle)?;
-  info!(target: LOG_TARGET, "permission token found {:?}", permission_token);
   tokens.permission
     .lock()
     .map_err(|_| error::Error::FailedToObtainPermissionTokenLock)?
@@ -121,7 +120,7 @@ fn setup_tari_universe(app: &mut tauri::App) -> Result<(), Box<dyn std::error::E
   let handle_start = tauri::async_runtime::spawn(async move { start(tapplet_assets_path).await });
   let (addr, cancel_token) = tauri::async_runtime::block_on(handle_start)?.unwrap();
   app.manage(AssetServer { addr, cancel_token });
-  info!(target: LOG_TARGET, "Tari Universe setup completed successfully");
+  info!(target: LOG_TARGET, "🚀 Tari Universe setup completed successfully");
 
   Ok(())
 }

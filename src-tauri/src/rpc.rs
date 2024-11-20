@@ -15,10 +15,11 @@ use tari_wallet_daemon_client::{
   ComponentAddressOrName,
 };
 use tauri_plugin_http::reqwest::{ self, header::{ AUTHORIZATION, CONTENT_TYPE } };
-
+use log::{ error, info };
 use crate::error::Error;
 
 const JSON_CONNECT_ADDRESS: &str = "127.0.0.1:18010"; // TODO use db to get endpoint
+const LOG_TARGET: &str = "tari::dan::wallet_daemon";
 
 pub async fn permission_token() -> Result<(String, String), anyhow::Error> {
   let req_params = AuthLoginRequest {
@@ -48,8 +49,7 @@ pub async fn account_create(account_name: Option<String>, permissions_token: Str
     key_id: None,
     max_fee: None,
   };
-  let resp = make_request(Some(permissions_token), "accounts.create".to_string(), create_acc_params).await?;
-
+  let _resp = make_request(Some(permissions_token), "accounts.create".to_string(), create_acc_params).await?;
   Ok(())
 }
 
@@ -109,7 +109,13 @@ pub async fn make_request<T: Serialize>(
   }
   let resp = builder.json(&body).send().await?.json::<JsonRpcResponse>().await?;
   match resp.result {
-    JsonRpcAnswer::Result(result) => Ok(result),
-    JsonRpcAnswer::Error(error) => Err(anyhow::Error::msg(error.to_string())),
+    JsonRpcAnswer::Result(result) => {
+      info!(target: LOG_TARGET, "👁️‍🗨️ JSON rpc request result: {:?}", result);
+      Ok(result)
+    }
+    JsonRpcAnswer::Error(error) => {
+      error!(target: LOG_TARGET, "🚨 JSON rpc request error: {:?}", error);
+      Err(anyhow::Error::msg(error.to_string()))
+    }
   }
 }

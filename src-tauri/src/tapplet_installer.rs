@@ -49,7 +49,7 @@ pub fn get_tapp_download_path(
     .path()
     .app_data_dir()
     .unwrap_or_else(|e| {
-      error!(target: LOG_TARGET, "Failed to get app dir: {}", e);
+      error!(target: LOG_TARGET, "❌ Failed to get app dir: {}", e);
       PathBuf::from("")
     })
     .to_path_buf();
@@ -84,9 +84,9 @@ async fn download_file(url: &str, dest: PathBuf) -> Result<(), Error> {
       file.write_all(&chunk).map_err(|_| IOError(FailedToWriteFile { path: path.clone() }))?;
     }
   } else if response.status().is_server_error() {
-    println!("Download server error! Status: {:?}", response.status());
+    error!(target: LOG_TARGET, "❌ Download server error! Status: {:?}", response.status());
   } else {
-    println!("Download failed. Something else happened. Status: {:?}", response);
+    error!(target: LOG_TARGET, "❌ Download failed! Unknown status. Server response: {:?}", response);
   }
 
   Ok(())

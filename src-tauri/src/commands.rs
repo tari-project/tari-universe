@@ -21,7 +21,8 @@ use crate::{
   },
   download_utils::{ download_file_with_retries, extract },
   error::{
-    Error::{ self, FailedToObtainPermissionTokenLock, JsonParsingError, RequestError, TappletServerError },
+    Error::{ self, IOError, FailedToObtainPermissionTokenLock, JsonParsingError, RequestError, TappletServerError },
+    IOError::*,
     RequestError::*,
     TappletServerError::*,
   },
@@ -110,13 +111,17 @@ pub async fn call_wallet(
 ) -> Result<serde_json::Value, Error> {
   let permission_token = tokens.permission
     .lock()
+    .inspect_err(|e| error!(target: LOG_TARGET, "❌ Error at call_wallet: {:?}", e))
     .map_err(|_| FailedToObtainPermissionTokenLock)?
     .clone();
-  let req_params: serde_json::Value = serde_json::from_str(&params).map_err(|e| JsonParsingError(e))?;
-
+  let req_params: serde_json::Value = serde_json
+    ::from_str(&params)
+    .inspect_err(|e| error!(target: LOG_TARGET, "❌ Error at call_wallet: {:?}", e))
+    .map_err(|e| JsonParsingError(e))?;
   match make_request(Some(permission_token), method, req_params).await {
     Ok(res) => Ok(res),
     Err(e) => {
+      error!(target: LOG_TARGET,"❌ Error at call_wallet: {:?}", e);
       return Err(Error::RequestFailed { message: e.to_string() });
     }
   }
@@ -143,14 +148,16 @@ pub async fn launch_tapplet(
 
   // Extract the tapplet archieve each time before launching
   // This way make sure that local files have not been replaced and are not malicious
-  let _ = extract(&file_path, &tapplet_path.clone()).await;
+  let _ = extract(&file_path, &tapplet_path.clone()).await
+    .inspect_err(|e| error!(target: LOG_TARGET, "❌ Error extracting file: {:?}", e))
+    .map_err(|_| { IOError(FailedToUnpackFile { path: tapplet_path.to_string_lossy().to_string() }) })?;
   //TODO should compare integrity field with the one stored in db or from github manifest?
   match check_files_and_validate_checksum(tapp_version, tapplet_path.clone()) {
     Ok(is_valid) => {
-      info!(target: LOG_TARGET,"Checksum validated without error. Is valid?: {:?}", is_valid);
+      info!(target: LOG_TARGET,"✅ Checksum validation successfully with test result: {:?}", is_valid);
     }
     Err(e) => {
-      error!(target: LOG_TARGET,"Error validating checksum: {:?}", e);
+      error!(target: LOG_TARGET,"❌ Error validating checksum: {:?}", e);
       return Err(e.into());
     }
   }
@@ -228,14 +235,16 @@ pub async fn download_and_extract_tapp(
   });
   handle.await?.map_err(|_| Error::RequestError(FailedToDownload { url: tapp_version.registry_url.clone() }))?;
 
-  let _ = extract(&file_path, &tapplet_path.clone()).await;
+  let _ = extract(&file_path, &tapplet_path.clone()).await.inspect_err(
+    |e| error!(target: LOG_TARGET, "❌ Error extracting file: {:?}", e)
+  );
   //TODO should compare integrity field with the one stored in db or from github manifest?
   match check_files_and_validate_checksum(tapp_version, tapplet_path.clone()) {
     Ok(is_valid) => {
-      info!(target: LOG_TARGET,"Checksum validated without error. Is valid?: {:?}", is_valid);
+      info!(target: LOG_TARGET,"✅ Checksum validation successfully with test result: {:?}", is_valid);
     }
     Err(e) => {
-      error!(target: LOG_TARGET,"Error validating checksum: {:?}", e);
+      error!(target: LOG_TARGET,"🚨 Error validating checksum: {:?}", e);
       return Err(e.into());
     }
   }
@@ -460,6 +469,6 @@ pub fn delete_dev_tapplet(dev_tapplet_id: i32, db_connection: State<'_, Database
 pub fn open_log_dir(app_handle: tauri::AppHandle) {
   let log_dir = app_handle.path().app_log_dir().expect("Could not get log dir");
   if let Err(e) = open::that(log_dir) {
-    error!(target: LOG_TARGET, "Could not open log dir: {:?}", e);
+    error!(target: LOG_TARGET, "❌ Could not open log dir: {:?}", e);
   }
 }

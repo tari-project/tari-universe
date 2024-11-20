@@ -13,7 +13,7 @@ pub enum Error {
   #[error("failed-to-find-tapplet-version")] VersionNotFound,
   #[error("failed-to-obtain-permission-token-lock")] FailedToObtainPermissionTokenLock,
   #[error("failed-to-obtain-auth-token-lock")] FailedToObtainAuthTokenLock,
-  #[error("provider-call-failed-for-method | method-{method} & params-{params}")] ProviderError {
+  #[error("failed-to-call-provider | method-{method} & params-{params}")] ProviderError {
     method: String,
     params: String,
   },

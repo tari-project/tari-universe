@@ -7,7 +7,6 @@ export type TUProviderMethod = Exclude<keyof TUInternalProvider, "runOne">
 
 export type Transaction = {
   methodName: TUProviderMethod
-  // args: any[]
   args: SubmitTransactionRequest[]
   id: number
   submit: () => void

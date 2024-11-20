@@ -47,7 +47,7 @@ pub async fn start_wallet_daemon(
   let shutdown = Shutdown::new();
   let shutdown_signal = shutdown.to_signal();
 
-  info!(target: LOG_TARGET, "Wallet daemon configuration completed successfully");
+  info!(target: LOG_TARGET, "🚀 Wallet daemon configuration completed successfully");
 
   run_tari_dan_wallet_daemon(config, shutdown_signal).await
 }
