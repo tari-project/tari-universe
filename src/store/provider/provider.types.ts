@@ -13,7 +13,6 @@ export type InitProviderFailurePayload = {
 }
 export type InitProviderSuccessPayload = {
   provider: TariUniverseProvider
-  permissions: TariPermission[]
 }
 
 export type UpdatePermissionsRequestPayload = {

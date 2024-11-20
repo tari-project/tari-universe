@@ -24,14 +24,6 @@ import {
 import { AccountsGetBalancesResponse } from "@tari-project/wallet_jrpc_client"
 import { BalanceUpdate } from "../simulation/simulation.types"
 import { ErrorSource } from "../error/error.types"
-import {
-  TariPermission,
-  TariPermissionAccountInfo,
-  TariPermissionKeyList,
-  TariPermissions,
-  TariPermissionSubstatesRead,
-  TariPermissionTransactionSend,
-} from "@tari-project/tarijs/dist/providers/wallet_daemon"
 
 let handleMessage: typeof window.postMessage
 
@@ -147,15 +139,7 @@ export const initializeAction = () => ({
       }
       window.addEventListener("message", handleMessage, false)
 
-      // set default permissions
-      let permissions: TariPermission[] = [
-        new TariPermissionKeyList(),
-        new TariPermissionAccountInfo(),
-        new TariPermissionTransactionSend(),
-        new TariPermissionSubstatesRead(),
-      ]
-
-      listenerApi.dispatch(providerActions.initializeSuccess({ provider, permissions }))
+      listenerApi.dispatch(providerActions.initializeSuccess({ provider }))
     } catch (error) {
       listenerApi.dispatch(providerActions.initializeFailure({ errorMsg: error as string }))
     }
