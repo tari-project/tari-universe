@@ -16,7 +16,6 @@ export function ActiveDevTapplet() {
   useEffect(() => {
     const fetchTappletManifest = async () => {
       try {
-        // const response = await fetch(`${state?.endpoint}/tapplet.manifest.json`)
         const response = await fetch(`${state?.endpoint}/src/tapplet.config.json`)
         const config: TappletConfig = await response.json()
         if (config?.packageName === state?.package_name) {
