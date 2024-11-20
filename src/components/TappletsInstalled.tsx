@@ -41,7 +41,7 @@ export const TappletsInstalled: React.FC = () => {
             <ListItemAvatar>
               <Avatar src={item.logoAddr} />
             </ListItemAvatar>
-            <ListItemText primary={item.display_name} />
+            <ListItemText primary={`${item.display_name} v${item.installed_version}`} />
             <IconButton aria-label="launch" style={{ marginRight: 10 }}>
               <NavLink to={`/${TabKey.ACTIVE_TAPPLET}/${item.installed_tapplet.id}`} style={{ display: "contents" }}>
                 <Launch color="primary" />

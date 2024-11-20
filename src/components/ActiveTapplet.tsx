@@ -7,6 +7,8 @@ import { useDispatch } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
 import { useTranslation } from "react-i18next"
 import { ErrorSource } from "../store/error/error.types"
+import { providerActions } from "../store/provider/provider.slice"
+import { LaunchedTappResult } from "@type/tapplet"
 
 export function ActiveTapplet() {
   const { t } = useTranslation("components")
@@ -17,8 +19,19 @@ export function ActiveTapplet() {
 
   useEffect(() => {
     invoke("launch_tapplet", { installedTappletId })
-      .then((res: unknown) => {
-        setTappletAddress(res as string)
+      .then((res: any) => {
+        const launchedTappParams: LaunchedTappResult = res
+        setTappletAddress(launchedTappParams.endpoint)
+        if (launchedTappParams.permissions) {
+          dispatch(providerActions.updatePermissionsRequest({ permissions: launchedTappParams.permissions }))
+        } else {
+          dispatch(
+            errorActions.showError({
+              message: `failed-to-fetch-tapp-config | error-${"Tapplet permissions undefined"}`,
+              errorSource: ErrorSource.BACKEND,
+            })
+          )
+        }
       })
       .catch((error: string) => dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND })))
 

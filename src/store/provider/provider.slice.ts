@@ -1,16 +1,32 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit"
 import { listenerMiddleware } from "../store.listener"
-import { initializeAction } from "./provider.action"
+import { initializeAction, updatePermissionsAction } from "./provider.action"
 import {
   InitProviderFailurePayload,
   InitProviderRequestPayload,
   InitProviderSuccessPayload,
   ProviderStoreState,
+  UpdatePermissionsFailurePayload,
+  UpdatePermissionsRequestPayload,
+  UpdatePermissionsSuccessPayload,
 } from "./provider.types"
+import {
+  TariPermissionAccountInfo,
+  TariPermissionKeyList,
+  TariPermissionSubstatesRead,
+  TariPermissionTransactionSend,
+} from "@tari-project/tarijs/dist/providers/tari_universe"
 
 const initialState: ProviderStoreState = {
   isInitialized: false,
   provider: null,
+  // TODO default permissions for built-in provider
+  permissions: [
+    new TariPermissionKeyList(),
+    new TariPermissionAccountInfo(),
+    new TariPermissionTransactionSend(),
+    new TariPermissionSubstatesRead(),
+  ],
 }
 
 const providerSlice = createSlice({
@@ -23,6 +39,11 @@ const providerSlice = createSlice({
       state.isInitialized = true
     },
     initializeFailure: (_, _action: PayloadAction<InitProviderFailurePayload>) => {},
+    updatePermissionsRequest: (_, _action: PayloadAction<UpdatePermissionsRequestPayload>) => {},
+    updatePermissionsSuccess: (state, action: PayloadAction<UpdatePermissionsSuccessPayload>) => {
+      state.permissions = action.payload.permissions
+    },
+    updatePermissionsFailure: (_, _action: PayloadAction<UpdatePermissionsFailurePayload>) => {},
   },
 })
 
@@ -30,3 +51,4 @@ export const providerActions = providerSlice.actions
 export const providerReducer = providerSlice.reducer
 
 listenerMiddleware.startListening(initializeAction())
+listenerMiddleware.startListening(updatePermissionsAction())

@@ -1,9 +1,9 @@
-import { TariUniverseProvider } from "@provider/TariUniverseProvider"
+import { TUInternalProvider } from "@provider/TUInternalProvider"
 import { BalanceUpdate } from "../simulation/simulation.types"
 import { SubmitTransactionRequest } from "@tari-project/tarijs"
 
 export type TransactionStatus = "pending" | "success" | "failure" | "cancelled"
-export type TUProviderMethod = Exclude<keyof TariUniverseProvider, "runOne">
+export type TUProviderMethod = Exclude<keyof TUInternalProvider, "runOne">
 
 export type Transaction = {
   methodName: TUProviderMethod
