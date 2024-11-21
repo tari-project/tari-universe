@@ -85,16 +85,12 @@ export const initializeAction = () => ({
           }
           const transactionReq: SubmitTransactionRequest = { ...args[0], is_dry_run: true }
           const tx = await provider.runOne(method, [transactionReq])
-          const txReq = await provider.client.waitForTransactionResult({
+          
+          await provider.client.waitForTransactionResult({
             transaction_id: tx.transaction_id,
             timeout_secs: 10,
           })
-          console.log("SIMULATION R", txReq)
           const txReceipt = await provider.getTransactionResult(tx.transaction_id)
-          const result = txReceipt.status
-
-          console.log("SIMULATION S", result)
-          console.log("SIMULATION T", txReceipt)
           const txResult = txReceipt.result as FinalizeResult | null
           if (!txResult?.result)
             return {
@@ -115,7 +111,7 @@ export const initializeAction = () => ({
           let walletBalances: AccountsGetBalancesResponse
 
           try {
-            walletBalances = await invoke("get_balances", {}) //TODO
+            walletBalances = await invoke("get_balances", {})
           } catch (error) {
             console.error(error)
             const e = typeof error === "string" ? error : "Get balances error"
