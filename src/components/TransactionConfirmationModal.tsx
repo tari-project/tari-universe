@@ -103,9 +103,17 @@ export const TransactionConfirmationModal: React.FC = () => {
         )}
         <DialogContentText>
           {t("balance-updates", { ns: "components" })}:
-          {simulation?.balanceUpdates?.map((update) => (
-            <BalanceUpdateView key={update.vaultAddress} {...update} />
-          ))}
+          {Array.isArray(simulation?.balanceUpdates) && simulation.balanceUpdates.length > 0 ? (
+            simulation.balanceUpdates.map((update) => <BalanceUpdateView key={update.vaultAddress} {...update} />)
+          ) : (
+            <span> No balance updates available.</span> // Optional: Provide feedback if there are no updates
+          )}
+        </DialogContentText>
+        <DialogContentText>
+          {t("tx-simulation-status", { ns: "components" })}: {simulation?.transaction?.status ?? "-"}
+        </DialogContentText>
+        <DialogContentText>
+          {t("tx-simulation-error-msg", { ns: "components" })}: {simulation?.transaction?.errorMsg ?? "-"}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
