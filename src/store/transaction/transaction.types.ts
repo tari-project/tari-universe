@@ -1,5 +1,5 @@
 import { TUInternalProvider } from "@provider/TUInternalProvider"
-import { BalanceUpdate } from "../simulation/simulation.types"
+import { BalanceUpdate, TxSimulation } from "../simulation/simulation.types"
 import { SubmitTransactionRequest } from "@tari-project/tarijs"
 
 export type TransactionStatus = "pending" | "success" | "failure" | "cancelled"
@@ -11,7 +11,7 @@ export type Transaction = {
   id: number
   submit: () => void
   cancel: () => void
-  runSimulation: () => Promise<BalanceUpdate[]>
+  runSimulation: () => Promise<{ balanceUpdates: BalanceUpdate[]; txSimulation: TxSimulation }>
   status: TransactionStatus
 }
 
