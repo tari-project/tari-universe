@@ -10,9 +10,9 @@ import { simulationActions } from "../store/simulation/simulation.slice"
 import { BalanceUpdateView } from "./BalanceUpdate"
 import { useTranslation } from "react-i18next"
 import { ErrorSource } from "../store/error/error.types"
-import { CallFunction, CallMethod } from "@tari-project/tarijs/dist/builders/types/Instruction"
 import { resolveBackendErrorMessage } from "./ErrorSnackBar"
 import { metadataSelector } from "../store/metadata/metadata.selector"
+import { getFunctionOrMethod, getTransactionStatusName } from "../helpers/transaction"
 
 const selectSimulationById = (state: RootState, id?: number) => (id ? simulationsSelectors.selectById(state, id) : null)
 
@@ -50,31 +50,6 @@ export const TransactionConfirmationModal: React.FC = () => {
     )
   }
 
-  interface InstructionWithArgs {
-    instructionName: string
-    args: any[]
-  }
-  // Function to get function or method fields
-  function getFunctionOrMethod(instructions: object[]): InstructionWithArgs[] {
-    let functionNames: InstructionWithArgs[] = []
-    instructions.forEach((instruction) => {
-      // Check if the instruction is an object and not a string
-      if (typeof instruction === "object" && instruction !== null) {
-        if ("CallFunction" in instruction) {
-          const callFunction = instruction as CallFunction
-          functionNames.push({
-            instructionName: callFunction.CallFunction.function,
-            args: callFunction.CallFunction.args,
-          })
-        } else if ("CallMethod" in instruction) {
-          const callMethod = instruction as CallMethod
-          functionNames.push({ instructionName: callMethod.CallMethod.method, args: callMethod.CallMethod.args })
-        }
-      }
-    })
-    return functionNames
-  }
-
   return (
     <Dialog open={!!transaction} maxWidth="sm" fullWidth>
       <DialogTitle textAlign="center">{t("transaction-confirmation", { ns: "components" })}:</DialogTitle>
@@ -88,7 +63,7 @@ export const TransactionConfirmationModal: React.FC = () => {
             {getFunctionOrMethod(arg.instructions)
               .flatMap((i) => i.instructionName + " with args: " + i.args)
               .map((instruction, index) => (
-                <div key={index}>{instruction}</div> // Using <div> or <span> to wrap each instruction
+                <div key={index}>{instruction}</div>
               ))}
           </DialogContentText>
         ))}
@@ -102,19 +77,24 @@ export const TransactionConfirmationModal: React.FC = () => {
           </DialogContentText>
         )}
         <DialogContentText>
-          {t("balance-updates", { ns: "components" })}:
+          {t("balance-updates", { ns: "components" })}:{" "}
           {Array.isArray(simulation?.balanceUpdates) && simulation.balanceUpdates.length > 0 ? (
             simulation.balanceUpdates.map((update) => <BalanceUpdateView key={update.vaultAddress} {...update} />)
           ) : (
-            <span> No balance updates available.</span> // Optional: Provide feedback if there are no updates
+            <span>{t("no-balance-update", { ns: "components" })}</span>
           )}
         </DialogContentText>
         <DialogContentText>
-          {t("tx-simulation-status", { ns: "components" })}: {simulation?.transaction?.status ?? "-"}
+          {t("tx-simulation-status", { ns: "components" })}: {getTransactionStatusName(simulation?.transaction?.status)}
         </DialogContentText>
-        <DialogContentText>
-          {t("tx-simulation-error-msg", { ns: "components" })}: {simulation?.transaction?.errorMsg ?? "-"}
-        </DialogContentText>
+        {simulation?.transaction.errorMsg && (
+          <DialogContentText>
+            {t("tx-simulation-error-msg", { ns: "components" })}:{" "}
+            {typeof simulation?.transaction?.errorMsg === "string"
+              ? simulation.transaction.errorMsg
+              : JSON.stringify(simulation?.transaction?.errorMsg)}
+          </DialogContentText>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} variant="contained">
