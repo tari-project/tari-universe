@@ -18,5 +18,7 @@
   "create-account": "New account",
   "open-logs-directory": "Logs",
   "simulation-status": "Simulation status",
-  "simulation-error-msg": "Simulation error"
+  "simulation-error-msg": "Simulation error message",
+  "tx-simulation-status": "Simulated transaction error",
+  "tx-simulation-error-msg": "Simulated tx error message"
 }
