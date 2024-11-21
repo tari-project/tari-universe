@@ -1,5 +1,6 @@
 use axum_jrpc::{ JsonRpcAnswer, JsonRpcRequest, JsonRpcResponse };
 use serde::Serialize;
+use serde_json::Value;
 use std::{ net::SocketAddr, str::FromStr };
 use tari_wallet_daemon_client::{
   types::{
@@ -53,19 +54,20 @@ pub async fn account_create(account_name: Option<String>, permissions_token: Str
   Ok(())
 }
 
-pub async fn free_coins(account_name: Option<String>, permissions_token: String) -> Result<(), anyhow::Error> {
+pub async fn free_coins(account_name: Option<String>, permissions_token: String) -> Result<Value, anyhow::Error> {
   let free_coins_params = AccountsCreateFreeTestCoinsRequest {
     account: account_name.map(|acc_name| ComponentAddressOrName::Name(acc_name)),
     amount: (100_000_000).into(),
     max_fee: None,
     key_id: None,
   };
-  let _resp = make_request(
+  let resp = make_request(
     Some(permissions_token),
     "accounts.create_free_test_coins".to_string(),
     free_coins_params
   ).await?;
-  Ok(())
+
+  Ok(resp)
 }
 
 pub async fn balances(
