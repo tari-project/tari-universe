@@ -21,7 +21,7 @@ export const Wallet: React.FC = () => {
 
   useEffect(() => {
     refreshAccount()
-  }, [provider])
+  }, [provider, currentAccount])
 
   const refreshAccount = useCallback(async () => {
     try {

@@ -15,7 +15,10 @@ export const Account: React.FC = () => {
     <>
       <Paper variant="outlined" elevation={0} sx={{ padding: 1, borderRadius: 2, width: "100%" }}>
         <Stack direction="column" justifyContent="flex-end">
-          <Typography variant="caption" textAlign="left">{`Name: ${currentAccount?.account.name}`}</Typography>
+          <Typography
+            variant="caption"
+            textAlign="left"
+          >{`Id: ${currentAccount?.account.key_index} name: ${currentAccount?.account.name}`}</Typography>
           <Typography variant="caption" textAlign="left">{`${t("address", {
             ns: "common",
           })}: ${shortenSubstateAddress(accountAddress)}`}</Typography>

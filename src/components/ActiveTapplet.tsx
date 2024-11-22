@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next"
 import { ErrorSource } from "../store/error/error.types"
 import { providerActions } from "../store/provider/provider.slice"
 import { LaunchedTappResult } from "@type/tapplet"
+import { tappletProvidersActions } from "../store/tappletProviders/tappletProviders.slice"
 
 export function ActiveTapplet() {
   const { t } = useTranslation("components")
@@ -23,7 +24,8 @@ export function ActiveTapplet() {
         const launchedTappParams: LaunchedTappResult = res
         setTappletAddress(launchedTappParams.endpoint)
         if (launchedTappParams.permissions) {
-          dispatch(providerActions.updatePermissionsRequest({ permissions: launchedTappParams.permissions }))
+          // dispatch(providerActions.updatePermissionsRequest({ permissions: launchedTappParams.permissions }))
+          dispatch(tappletProvidersActions.addTappProviderReq({ tappletProvider: launchedTappParams })) //TODO
         } else {
           dispatch(
             errorActions.showError({

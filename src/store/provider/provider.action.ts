@@ -105,8 +105,11 @@ export const initializeAction = () => ({
         const submit = async () => {
           try {
             const result = await provider.runOne(_method, args)
+            console.log(">>> result provider action", result)
             if (event.source) {
+              console.log(">>> provider action event")
               event.source.postMessage({ id, result, type: "provider-call" }, { targetOrigin: event.origin })
+              console.log(">>> provider action event ok")
             }
           } catch (error) {
             console.error(error)

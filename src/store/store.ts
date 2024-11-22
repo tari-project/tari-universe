@@ -9,6 +9,7 @@ import { devTappletsReducer } from "./devTapplets/devTapplets.slice"
 import { simulationReducer } from "./simulation/simulation.slice"
 import { metadataReducer } from "./metadata/metadata.slice"
 import { accountReducer } from "./account/account.slice"
+import { tappletProvidersReducer } from "./tappletProviders/tappletProviders.slice"
 
 export const store = configureStore({
   reducer: {
@@ -21,6 +22,7 @@ export const store = configureStore({
     simulation: simulationReducer,
     metadata: metadataReducer,
     account: accountReducer,
+    tappletProviders: tappletProvidersReducer,
   },
 
   middleware: (getDefaultMiddleware) =>
