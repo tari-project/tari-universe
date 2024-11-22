@@ -83,6 +83,7 @@ export class TUInternalProvider implements TariProvider {
   }
 
   public async createFreeTestCoins(accountName?: string, amount = 1_000_000, fee?: number): Promise<Account> {
+    console.log("### free coins", accountName)
     const res = await this.client.createFreeTestCoins({
       account: (accountName && { Name: accountName }) || null,
       amount,
@@ -150,13 +151,11 @@ export class TUInternalProvider implements TariProvider {
     })
   }
 
-  public async getAccountsList(limit = 0, offset = 10): Promise<AccountsListResponse> {
-    // TODO https://github.com/tari-project/tari-universe/issues/141
-    const res = await this.client.accountsList({
+  public async getAccountsList(limit = 10, offset = 0): Promise<AccountsListResponse> {
+    return await this.client.accountsList({
       limit,
       offset,
     })
-    return res
   }
 
   public async getAccountsBalances(

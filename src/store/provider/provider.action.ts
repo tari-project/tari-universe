@@ -55,6 +55,7 @@ export const initializeAction = () => ({
       const dispatch = listenerApi.dispatch
       const state = listenerApi.getState() as RootState
       const provider = providerSelector.selectProvider(state)
+      console.log(">>>>> INIT PROVIDER", provider.providerName)
 
       handleMessage = async (event: MessageEvent<TransactionEvent>) => {
         if (!event?.data?.args || !event?.data?.methodName) {

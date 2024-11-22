@@ -22,12 +22,14 @@ import { invoke } from "@tauri-apps/api/core"
 import { errorActions } from "./store/error/error.slice"
 import { ErrorSource } from "./store/error/error.types"
 import { Account } from "./components/Account"
+import { accountActions } from "./store/account/account.slice"
 
 function App() {
   const { t } = useTranslation(["navigation", "components"])
   const dispatch = useDispatch()
   useEffect(() => {
     dispatch(providerActions.initializeRequest({}))
+    dispatch(accountActions.initializeRequest({}))
     dispatch(registeredTappletsActions.initializeRequest({}))
     dispatch(installedTappletsActions.initializeRequest({}))
     dispatch(devTappletsActions.initializeRequest({}))

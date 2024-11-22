@@ -14,12 +14,15 @@ import { useDispatch } from "react-redux"
 interface SelectAccountProps {
   onSubmit: (name: string) => void
   accountsList: AccountInfo[]
+  currentAccount?: AccountInfo
 }
 
-function SelectAccount({ onSubmit, accountsList }: SelectAccountProps) {
+function SelectAccount({ onSubmit, accountsList, currentAccount }: SelectAccountProps) {
   const { t } = useTranslation(["components", "common"])
   const dispatch = useDispatch()
-  const [newAccountName, setNewAccountName] = useState("")
+
+  const currentAccountName = currentAccount?.account.name ?? ""
+  const [newAccountName, setNewAccountName] = useState(currentAccountName)
 
   const handleChange = (event: SelectChangeEvent) => {
     dispatch(
@@ -59,7 +62,9 @@ function SelectAccount({ onSubmit, accountsList }: SelectAccountProps) {
           labelId="account-select-label"
           id="account-select"
           value={
-            accountsList.some((account: AccountInfo) => account.account.name == newAccountName) ? newAccountName : ""
+            accountsList.some((account: AccountInfo) => account.account.name == currentAccountName)
+              ? currentAccountName
+              : ""
           }
           label="Account"
           onChange={handleChange}
@@ -74,7 +79,6 @@ function SelectAccount({ onSubmit, accountsList }: SelectAccountProps) {
               </MenuItem>
             )
           })}
-          <Divider />
         </Select>
       </FormControl>
     </Box>

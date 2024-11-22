@@ -12,6 +12,7 @@ import {
 } from "./provider.types"
 import {
   TariPermissionAccountInfo,
+  TariPermissionAccountList,
   TariPermissionKeyList,
   TariPermissionSubstatesRead,
   TariPermissionTransactionSend,
@@ -22,10 +23,11 @@ const initialState: ProviderStoreState = {
   provider: null,
   // TODO default permissions for built-in provider
   permissions: [
-    new TariPermissionKeyList(),
     new TariPermissionAccountInfo(),
-    new TariPermissionTransactionSend(),
+    new TariPermissionAccountList(),
+    new TariPermissionKeyList(),
     new TariPermissionSubstatesRead(),
+    new TariPermissionTransactionSend(),
   ],
 }
 

@@ -25,7 +25,7 @@ export const Wallet: React.FC = () => {
 
   const refreshAccount = useCallback(async () => {
     try {
-      const { accounts } = await provider.getAccountsList() //TODO fix to get value not empty array - https://github.com/tari-project/tari-universe/issues/141
+      const { accounts } = await provider.getAccountsList()
       setAccountsList(accounts)
     } catch (error) {
       console.error(error)
@@ -82,7 +82,11 @@ export const Wallet: React.FC = () => {
         {t("tari-wallet-daemon", { ns: "components" })}
       </Typography>
       <Box display="flex" flexDirection="column" gap={2} alignItems="center" py={4}>
-        <SelectAccount onSubmit={handleCreateAccount} accountsList={accountsList} />
+        <SelectAccount
+          onSubmit={handleCreateAccount}
+          accountsList={accountsList}
+          currentAccount={currentAccount ?? undefined}
+        />
         <Paper variant="outlined" elevation={0} sx={{ padding: 1, borderRadius: 2, width: "auto", minWidth: 200 }}>
           <Stack direction="column" justifyContent="flex-end">
             <Typography variant="caption" textAlign="left">{`Name: ${currentAccount?.account.name}`}</Typography>
