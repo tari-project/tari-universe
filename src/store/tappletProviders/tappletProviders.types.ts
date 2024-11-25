@@ -1,16 +1,17 @@
 import { EntityState } from "@reduxjs/toolkit"
 import { TariProvider } from "@tari-project/tarijs"
 import { TariPermission } from "@tari-project/tarijs/dist/providers/tari_universe"
+import { LaunchedTappResult } from "@type/tapplet"
 
 export type TappletProvider = {
-  id: string
+  id: number
   provider: TariProvider
   permissions: TariPermission[]
 }
 
 export type TappletProvidersStoreState = {
   isInitialized: boolean
-  tappletProviders: EntityState<TappletProvider, string>
+  tappletProviders: EntityState<TappletProvider, number>
 }
 
 export type InitTappletProvidersRequestPayload = {}
@@ -20,6 +21,13 @@ export type InitTappletProvidersFailurePayload = {
 export type InitTappletProvidersSuccessPayload = {
   tappletProviders: TappletProvider[]
 }
-export type AddTappletProvidersRequestPayload = {
+export type AddTappletProviderRequestPayload = {
+  installedTappletId: number
+  launchedTappParams: LaunchedTappResult
+}
+export type AddTappletProviderSuccessPayload = {
   tappletProvider: TappletProvider
+}
+export type AddTappletProviderFailurePayload = {
+  errorMsg: string
 }

@@ -1,35 +1,32 @@
 import { PayloadAction, createEntityAdapter, createSlice } from "@reduxjs/toolkit"
 import { listenerMiddleware } from "../store.listener"
-import { initializeAction } from "./tappletProviders.action"
+import { addTappProviderAction, initializeAction } from "./tappletProviders.action"
 import {
-  AddTappletProvidersRequestPayload,
+  AddTappletProviderFailurePayload,
+  AddTappletProviderRequestPayload,
+  AddTappletProviderSuccessPayload,
   InitTappletProvidersFailurePayload,
   InitTappletProvidersRequestPayload,
   InitTappletProvidersSuccessPayload,
   TappletProvider,
-  TappletProvidersStoreState,
 } from "./tappletProviders.types"
 
 export const tappletProvidersAdapter = createEntityAdapter<TappletProvider>()
 
-const initialState: TappletProvidersStoreState = {
-  isInitialized: false,
-  tappletProviders: tappletProvidersAdapter.getInitialState(),
-}
-
 const tappletProvidersSlice = createSlice({
   name: "tappletProviders",
-  initialState,
+  initialState: tappletProvidersAdapter.getInitialState(),
   reducers: {
     initializeRequest: (_, _action: PayloadAction<InitTappletProvidersRequestPayload>) => {},
     initializeSuccess: (state, action: PayloadAction<InitTappletProvidersSuccessPayload>) => {
-      state.isInitialized = true
-      tappletProvidersAdapter.setAll(state.tappletProviders, action.payload.tappletProviders)
+      tappletProvidersAdapter.setAll(state, action.payload.tappletProviders)
     },
     initializeFailure: (_, _action: PayloadAction<InitTappletProvidersFailurePayload>) => {},
-    addTappProviderReq: (state, action: PayloadAction<AddTappletProvidersRequestPayload>) => {
-      // tappletProvidersAdapter.addOne(state, action.payload.tappletProvider) //TODO
+    addTappProviderReq: (_, _action: PayloadAction<AddTappletProviderRequestPayload>) => {},
+    addTappProviderSuccess: (state, action: PayloadAction<AddTappletProviderSuccessPayload>) => {
+      tappletProvidersAdapter.addOne(state, action.payload.tappletProvider) //TODO
     },
+    addTappProviderFailure: (_, _action: PayloadAction<AddTappletProviderFailurePayload>) => {},
   },
 })
 
@@ -37,3 +34,4 @@ export const tappletProvidersActions = tappletProvidersSlice.actions
 export const tappletProvidersReducer = tappletProvidersSlice.reducer
 
 listenerMiddleware.startListening(initializeAction())
+listenerMiddleware.startListening(addTappProviderAction())

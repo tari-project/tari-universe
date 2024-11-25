@@ -1,25 +1,21 @@
-import { TariPermissions } from "@tari-project/tarijs"
 import { createSelector } from "@reduxjs/toolkit"
 import { RootState } from "../store"
-import { WalletDaemonParameters, TUInternalProvider } from "@provider/TUInternalProvider"
+import { tappletProvidersAdapter } from "./tappletProviders.slice"
+
+const selectTappletProviders = (state: RootState) => state.tappletProviders
+const selectTransactionId = (_: RootState, tappletProviderId: number) => tappletProviderId
 
 const tappletProvidersStateSelector = (state: RootState) => state.tappletProviders
+export const tappletProvidersSelectors = tappletProvidersAdapter.getSelectors<RootState>(
+  (state) => state.tappletProviders
+)
 
-const selectTappletProvider = createSelector([tappletProvidersStateSelector], (state) => {
-  let permissions = new TariPermissions()
-  // TODO add
-  // if (state.tappletProviders.) {
-  //   state.permissions.map((p) => permissions.addPermission(toPermission(p)))
-  // }
-
-  let optionalPermissions = new TariPermissions()
-  const params: WalletDaemonParameters = {
-    permissions,
-    optionalPermissions,
-  }
-  return TUInternalProvider.build(params)
-})
-
+const getAllTappletProviders = createSelector([tappletProvidersStateSelector], (state) => ({ ...state }))
+const getTappletProviderById = createSelector(
+  [selectTappletProviders, selectTransactionId],
+  (providers, id: number) => providers.entities[id]
+)
 export const tappletProviderSelector = {
-  selectTappletProvider,
+  getAllTappletProviders,
+  getTappletProviderById,
 }

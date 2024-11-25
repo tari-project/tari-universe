@@ -25,7 +25,12 @@ export function ActiveTapplet() {
         setTappletAddress(launchedTappParams.endpoint)
         if (launchedTappParams.permissions) {
           // dispatch(providerActions.updatePermissionsRequest({ permissions: launchedTappParams.permissions }))
-          dispatch(tappletProvidersActions.addTappProviderReq({ tappletProvider: launchedTappParams })) //TODO
+          dispatch(
+            tappletProvidersActions.addTappProviderReq({
+              installedTappletId: installedTappletId,
+              launchedTappParams: launchedTappParams,
+            })
+          ) //TODO
         } else {
           dispatch(
             errorActions.showError({

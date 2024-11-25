@@ -10,6 +10,7 @@ import SelectAccount from "./SelectAccount"
 import { AccountInfo, substateIdToString } from "@tari-project/typescript-bindings"
 import { accountActions } from "../store/account/account.slice"
 import { accountSelector } from "../store/account/account.selector"
+import { tappletProviderSelector } from "../store/tappletProviders/tappletProviders.selector"
 
 export const Wallet: React.FC = () => {
   const { t } = useTranslation(["components", "common"])
