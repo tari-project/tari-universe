@@ -9,12 +9,15 @@ import { ErrorSource } from "../store/error/error.types"
 import { providerActions } from "../store/provider/provider.slice"
 import { tappletProvidersActions } from "../store/tappletProviders/tappletProviders.slice"
 import { devTappletsSelectors } from "../store/devTapplets/devTapplets.selector"
+import { tappletProviderSelector } from "../store/tappletProviders/tappletProviders.selector"
 
 export function ActiveDevTapplet() {
   let { state }: { state: DevTapplet } = useLocation()
   const [isVerified, setIsVerified] = useState<boolean>(false)
   const dispatch = useDispatch()
   const devTapplets = useSelector(devTappletsSelectors.selectAll)
+  const tappProvs = useSelector(tappletProviderSelector.getAllTappletProviders)
+  console.log("all tap prov", tappProvs)
 
   useEffect(() => {
     const fetchTappletManifest = async () => {
@@ -25,15 +28,19 @@ export function ActiveDevTapplet() {
         if (config?.packageName === state?.package_name) {
           setIsVerified(true)
           console.log("DEV TAPP config", config)
-          if (config?.requiredPermissions) {
-            dispatch(providerActions.updatePermissionsRequest({ permissions: config?.requiredPermissions }))
+          if (config?.permissions) {
+            dispatch(
+              providerActions.updatePermissionsRequest({
+                permissions: config?.permissions,
+              })
+            )
             console.log("DEV TAPP dispatch")
             dispatch(
               tappletProvidersActions.addTappProviderReq({
                 installedTappletId: devTapplets.length, //TODO get unique ID
                 launchedTappParams: {
                   endpoint: state?.endpoint,
-                  permissions: config.requiredPermissions,
+                  permissions: config.permissions,
                 },
               })
             ) //TODO

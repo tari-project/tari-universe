@@ -64,7 +64,7 @@ export interface TappletAudit {
 
 export interface LaunchedTappResult {
   endpoint: string
-  permissions: TariPermission[]
+  permissions: TappletPermissions
 }
 
 export type SupportedChain = "MAINNET" | "STAGENET" | "NEXTNET" | ""
@@ -72,6 +72,10 @@ export interface TappletConfig {
   packageName: string
   version: string
   supportedChain: SupportedChain[]
+  permissions: TappletPermissions
+}
+
+export interface TappletPermissions {
   requiredPermissions: TariPermission[]
   optionalPermissions: TariPermission[]
 }

@@ -6,7 +6,7 @@ use crate::{
   database::models::TappletVersion,
   error::{ Error::{ self, IOError, JsonParsingError, RequestError }, IOError::*, RequestError::* },
   hash_calculator::calculate_checksum,
-  interface::{ RegisteredTapplets, TappletAssets, TappletConfig, TariPermission },
+  interface::{ RegisteredTapplets, TappletAssets, TappletConfig, TappletPermissions, TariPermission },
 };
 use log::error;
 use crate::constants::TAPPLETS_INSTALLED_DIR;
@@ -153,7 +153,7 @@ pub fn check_files_and_validate_checksum(tapp: TappletVersion, tapp_dir: PathBuf
   Ok(is_checksum_valid)
 }
 
-pub fn get_tapp_permissions(tapp_path: PathBuf) -> Result<Vec<TariPermission>, Error> {
+pub fn get_tapp_permissions(tapp_path: PathBuf) -> Result<TappletPermissions, Error> {
   // tapp_dir = universe.tari/tapplets_installed/<tapplet_name>/<version>/package
   let tapp_dir: PathBuf = tapp_path.join("package");
   let tapp_config = tapp_dir.join("dist").join("tapplet.config.json");
@@ -163,5 +163,8 @@ pub fn get_tapp_permissions(tapp_path: PathBuf) -> Result<Vec<TariPermission>, E
 
   let config = fs::read_to_string(tapp_config.clone()).unwrap_or_default();
   let tapplet: TappletConfig = serde_json::from_str(&config).map_err(|e| JsonParsingError(e))?;
-  Ok(tapplet.permissions)
+  Ok(TappletPermissions {
+    required_permissions: tapplet.permissions.required_permissions,
+    optional_permissions: tapplet.permissions.optional_permissions,
+  })
 }

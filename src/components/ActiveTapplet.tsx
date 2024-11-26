@@ -7,7 +7,6 @@ import { useDispatch } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
 import { useTranslation } from "react-i18next"
 import { ErrorSource } from "../store/error/error.types"
-import { providerActions } from "../store/provider/provider.slice"
 import { LaunchedTappResult } from "@type/tapplet"
 import { tappletProvidersActions } from "../store/tappletProviders/tappletProviders.slice"
 

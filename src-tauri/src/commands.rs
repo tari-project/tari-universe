@@ -21,7 +21,7 @@ use crate::{
   },
   download_utils::{ download_file_with_retries, extract },
   error::{
-    Error::{ self, IOError, FailedToObtainPermissionTokenLock, JsonParsingError, RequestError, TappletServerError },
+    Error::{ self, FailedToObtainPermissionTokenLock, IOError, JsonParsingError, RequestError, TappletServerError },
     IOError::*,
     RequestError::*,
     TappletServerError::*,
@@ -31,6 +31,7 @@ use crate::{
     InstalledTappletWithName,
     LaunchedTappResult,
     RegisteredTappletWithVersion,
+    TappletPermissions,
     TariPermission,
   },
   progress_tracker::ProgressTracker,
@@ -162,7 +163,7 @@ pub async fn launch_tapplet(
     }
   }
 
-  let permissions: Vec<TariPermission> = match get_tapp_permissions(tapplet_path.clone()) {
+  let permissions: TappletPermissions = match get_tapp_permissions(tapplet_path.clone()) {
     Ok(p) => p,
     Err(e) => {
       error!(target: LOG_TARGET,"Error getting permissions: {:?}", e);

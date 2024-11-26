@@ -10,11 +10,12 @@ const isInitialized = createSelector([providerStateSelector], (state) => state.i
 
 const selectProvider = createSelector([providerStateSelector], (state) => {
   let permissions = new TariPermissions()
+  let optionalPermissions = new TariPermissions()
   if (state.permissions) {
-    state.permissions.map((p) => permissions.addPermission(toPermission(p)))
+    state.permissions.requiredPermissions.map((p) => permissions.addPermission(toPermission(p)))
+    state.permissions.optionalPermissions.map((p) => optionalPermissions.addPermission(toPermission(p)))
   }
 
-  let optionalPermissions = new TariPermissions()
   const params: WalletDaemonParameters = {
     permissions,
     optionalPermissions,

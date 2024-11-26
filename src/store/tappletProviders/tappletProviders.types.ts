@@ -1,16 +1,14 @@
 import { EntityState } from "@reduxjs/toolkit"
 import { TariProvider } from "@tari-project/tarijs"
-import { TariPermission } from "@tari-project/tarijs/dist/providers/tari_universe"
-import { LaunchedTappResult } from "@type/tapplet"
+import { LaunchedTappResult, TappletPermissions } from "@type/tapplet"
 
 export type TappletProvider = {
   id: number
   provider: TariProvider
-  permissions: TariPermission[]
+  permissions: TappletPermissions
 }
 
 export type TappletProvidersStoreState = {
-  isInitialized: boolean
   tappletProviders: EntityState<TappletProvider, number>
 }
 

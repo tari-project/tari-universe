@@ -85,8 +85,8 @@ export const initializeAction = () => ({
           const balanceUpdates: BalanceUpdate[] = up_substates
             .map((upSubstate) => {
               const [substateId, { substate }] = upSubstate
-              if (!isVaultId(substateId) || !isVaultSubstate(substate)) return
-              if (!isFungible(substate.Vault.resource_container)) return
+              if (!isVaultId(substateId) || !isVaultSubstate(substate)) return undefined
+              if (!isFungible(substate.Vault.resource_container)) return undefined
               const userBalance = walletBalances.balances.find((balance) => {
                 if (!isVaultId(balance.vault_address)) return false
                 return balance.vault_address.Vault === substateId.Vault
@@ -99,7 +99,7 @@ export const initializeAction = () => ({
                 newBalance: substate.Vault.resource_container.Fungible.amount,
               }
             })
-            .filter((vault) => vault !== undefined)
+            .filter((vault): vault is BalanceUpdate => vault !== undefined)
           return balanceUpdates
         }
         const submit = async () => {
@@ -157,7 +157,7 @@ export const updatePermissionsAction = () => ({
   ) => {
     const permissions = action.payload.permissions
     try {
-      listenerApi.dispatch(providerActions.updatePermissionsSuccess({ permissions }))
+      listenerApi.dispatch(providerActions.updatePermissionsSuccess({ permissions: permissions }))
     } catch (error) {
       listenerApi.dispatch(providerActions.updatePermissionsFailure({ errorMsg: error as string }))
     }

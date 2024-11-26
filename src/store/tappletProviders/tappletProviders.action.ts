@@ -1,6 +1,4 @@
 import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
-import { invoke } from "@tauri-apps/api/core"
-
 import { tappletProvidersActions } from "./tappletProviders.slice"
 import {
   AddTappletProviderRequestPayload,
@@ -9,8 +7,6 @@ import {
 } from "./tappletProviders.types"
 import { TariPermissions, WalletDaemonParameters } from "@tari-project/tarijs"
 import { TUInternalProvider } from "@provider/TUInternalProvider"
-import { RootState } from "../store"
-import { LaunchedTappResult } from "@type/tapplet"
 import { toPermission } from "@type/tariPermissions"
 
 export const initializeAction = () => ({
@@ -36,16 +32,20 @@ export const addTappProviderAction = () => ({
     try {
       console.log(" ^^^^ ADD PROVIDER ACTION")
       const launchedTappParams = action.payload.launchedTappParams
-      // const launchedTappParams: LaunchedTappResult = await invoke("launch_tapplet", { tappletId })
       console.log(" ^^^^ ADD PROVIDER LAUNCHED", launchedTappParams)
 
-      let permissions = new TariPermissions()
-      if (launchedTappParams.permissions) {
-        launchedTappParams.permissions.map((p) => permissions.addPermission(toPermission(p)))
-      }
+      let requiredPermissions = new TariPermissions()
       let optionalPermissions = new TariPermissions() //TODO add support for optional params
+      if (launchedTappParams.permissions) {
+        launchedTappParams.permissions.requiredPermissions.map((p) =>
+          requiredPermissions.addPermission(toPermission(p))
+        )
+        launchedTappParams.permissions.optionalPermissions.map((p) =>
+          optionalPermissions.addPermission(toPermission(p))
+        )
+      }
       const params: WalletDaemonParameters = {
-        permissions,
+        permissions: requiredPermissions,
         optionalPermissions,
       }
       const provider: TappletProvider = {

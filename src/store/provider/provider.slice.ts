@@ -22,13 +22,16 @@ const initialState: ProviderStoreState = {
   isInitialized: false,
   provider: null,
   // TODO default permissions for built-in provider
-  permissions: [
-    new TariPermissionAccountInfo(),
-    new TariPermissionAccountList(),
-    new TariPermissionKeyList(),
-    new TariPermissionSubstatesRead(),
-    new TariPermissionTransactionSend(),
-  ],
+  permissions: {
+    requiredPermissions: [
+      new TariPermissionAccountInfo(),
+      new TariPermissionAccountList(),
+      new TariPermissionKeyList(),
+      new TariPermissionSubstatesRead(),
+      new TariPermissionTransactionSend(),
+    ],
+    optionalPermissions: [],
+  },
 }
 
 const providerSlice = createSlice({
