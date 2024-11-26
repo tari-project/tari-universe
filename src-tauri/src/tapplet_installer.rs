@@ -8,7 +8,7 @@ use crate::{
   hash_calculator::calculate_checksum,
   interface::{ RegisteredTapplets, TappletAssets, TappletConfig, TappletPermissions, TariPermission },
 };
-use log::error;
+use log::{ error, warn };
 use crate::constants::TAPPLETS_INSTALLED_DIR;
 pub const LOG_TARGET: &str = "tari::universe";
 
@@ -158,7 +158,11 @@ pub fn get_tapp_permissions(tapp_path: PathBuf) -> Result<TappletPermissions, Er
   let tapp_dir: PathBuf = tapp_path.join("package");
   let tapp_config = tapp_dir.join("dist").join("tapplet.config.json");
   if !tapp_config.exists() {
-    return Err(IOError(FailedToGetFilePath));
+    warn!(target: LOG_TARGET, "❌ Failed to get Tapplet permissions. Config file not found.");
+    return Ok(TappletPermissions {
+      required_permissions: vec![],
+      optional_permissions: vec![],
+    });
   }
 
   let config = fs::read_to_string(tapp_config.clone()).unwrap_or_default();
