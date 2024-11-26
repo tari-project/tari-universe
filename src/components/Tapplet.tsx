@@ -1,14 +1,21 @@
 import { useEffect, useRef } from "react"
 import { useSelector } from "react-redux"
 import { providerSelector } from "../store/provider/provider.selector"
+import { tappletProviderSelector } from "../store/tappletProviders/tappletProviders.selector"
+import { RootState } from "../store/store"
 
 type TappletProps = {
   source: string
+  tappletId: number
 }
+const selectTappProviderById = (state: RootState, id?: number) =>
+  id ? tappletProviderSelector.getTappletProviderById(state, id) : null
 
-export const Tapplet: React.FC<TappletProps> = ({ source }) => {
+export const Tapplet: React.FC<TappletProps> = ({ source, tappletId }) => {
   const tappletRef = useRef<HTMLIFrameElement | null>(null)
   const provider = useSelector(providerSelector.selectProvider)
+  const tappProvider = useSelector((state: RootState) => selectTappProviderById(state, tappletId))
+  console.log("#### TAPP PROVIDER", tappletId, tappProvider)
 
   function sendWindowSize() {
     if (tappletRef.current) {

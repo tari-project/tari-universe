@@ -23,13 +23,12 @@ export function ActiveTapplet() {
         const launchedTappParams: LaunchedTappResult = res
         setTappletAddress(launchedTappParams.endpoint)
         if (launchedTappParams.permissions) {
-          // dispatch(providerActions.updatePermissionsRequest({ permissions: launchedTappParams.permissions }))
           dispatch(
             tappletProvidersActions.addTappProviderReq({
-              installedTappletId: installedTappletId,
-              launchedTappParams: launchedTappParams,
+              installedTappletId,
+              launchedTappParams,
             })
-          ) //TODO
+          )
         } else {
           dispatch(
             errorActions.showError({
@@ -51,7 +50,11 @@ export function ActiveTapplet() {
 
   return (
     <Box height="100%">
-      {tappletAddress ? <Tapplet source={tappletAddress} /> : <Typography>{t("taplet-obtain-failure")}</Typography>}
+      {tappletAddress ? (
+        <Tapplet source={tappletAddress} tappletId={installedTappletId} />
+      ) : (
+        <Typography>{t("taplet-obtain-failure")}</Typography>
+      )}
     </Box>
   )
 }

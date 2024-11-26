@@ -6,7 +6,6 @@ import { Tapplet } from "./Tapplet"
 import { useDispatch, useSelector } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
 import { ErrorSource } from "../store/error/error.types"
-import { providerActions } from "../store/provider/provider.slice"
 import { tappletProvidersActions } from "../store/tappletProviders/tappletProviders.slice"
 import { devTappletsSelectors } from "../store/devTapplets/devTapplets.selector"
 import { tappletProviderSelector } from "../store/tappletProviders/tappletProviders.selector"
@@ -20,7 +19,7 @@ export function ActiveDevTapplet() {
   console.log("all tap prov", tappProvs)
 
   useEffect(() => {
-    const fetchTappletManifest = async () => {
+    const fetchTappletConfig = async () => {
       try {
         const response = await fetch(`${state?.endpoint}/src/tapplet.config.json`)
         const config: TappletConfig = await response.json()
@@ -28,16 +27,12 @@ export function ActiveDevTapplet() {
         if (config?.packageName === state?.package_name) {
           setIsVerified(true)
           console.log("DEV TAPP config", config)
+          console.log("DEV TAPP state", state)
           if (config?.permissions) {
-            dispatch(
-              providerActions.updatePermissionsRequest({
-                permissions: config?.permissions,
-              })
-            )
             console.log("DEV TAPP dispatch")
             dispatch(
               tappletProvidersActions.addTappProviderReq({
-                installedTappletId: devTapplets.length, //TODO get unique ID
+                installedTappletId: Number(state.id), //TODO get unique ID
                 launchedTappParams: {
                   endpoint: state?.endpoint,
                   permissions: config.permissions,
@@ -72,9 +67,9 @@ export function ActiveDevTapplet() {
     }
 
     if (state?.endpoint) {
-      fetchTappletManifest()
+      fetchTappletConfig()
     }
   }, [])
 
-  return <Box height="100%">{isVerified && <Tapplet source={state.endpoint} />}</Box>
+  return <Box height="100%">{isVerified && <Tapplet source={state.endpoint} tappletId={Number(state.id)} />}</Box>
 }

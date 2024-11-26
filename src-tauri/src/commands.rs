@@ -32,7 +32,6 @@ use crate::{
     LaunchedTappResult,
     RegisteredTappletWithVersion,
     TappletPermissions,
-    TariPermission,
   },
   progress_tracker::ProgressTracker,
   rpc::{ account_create, balances, free_coins, make_request },
@@ -449,8 +448,9 @@ pub async fn add_dev_tapplet(
     package_name: &manifest_res.package_name,
     display_name: &manifest_res.display_name,
   };
-
-  store.create(&new_dev_tapplet)
+  let dev_tapplet = store.create(&new_dev_tapplet);
+  info!(target: LOG_TARGET,"✅ Dev tapplet added to db successfully: {:?}", new_dev_tapplet);
+  dev_tapplet
 }
 
 #[tauri::command]
