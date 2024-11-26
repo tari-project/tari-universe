@@ -1,10 +1,13 @@
 import { PayloadAction, createEntityAdapter, createSlice } from "@reduxjs/toolkit"
 import { listenerMiddleware } from "../store.listener"
-import { addTappProviderAction, initializeAction } from "./tappletProviders.action"
+import { addTappProviderAction, deleteTappletProviderAction, initializeAction } from "./tappletProviders.action"
 import {
   AddTappletProviderFailurePayload,
   AddTappletProviderRequestPayload,
   AddTappletProviderSuccessPayload,
+  DeleteTappletProviderFailurePayload,
+  DeleteTappletProviderRequestPayload,
+  DeleteTappletProviderSuccessPayload,
   InitTappletProvidersFailurePayload,
   InitTappletProvidersRequestPayload,
   InitTappletProvidersSuccessPayload,
@@ -24,9 +27,14 @@ const tappletProvidersSlice = createSlice({
     initializeFailure: (_, _action: PayloadAction<InitTappletProvidersFailurePayload>) => {},
     addTappProviderReq: (_, _action: PayloadAction<AddTappletProviderRequestPayload>) => {},
     addTappProviderSuccess: (state, action: PayloadAction<AddTappletProviderSuccessPayload>) => {
-      tappletProvidersAdapter.addOne(state, action.payload.tappletProvider) //TODO
+      tappletProvidersAdapter.addOne(state, action.payload.tappletProvider)
     },
     addTappProviderFailure: (_, _action: PayloadAction<AddTappletProviderFailurePayload>) => {},
+    deleteTappProviderRequest: (_, _action: PayloadAction<DeleteTappletProviderRequestPayload>) => {},
+    deleteTappProviderSuccess: (state, action: PayloadAction<DeleteTappletProviderSuccessPayload>) => {
+      tappletProvidersAdapter.removeOne(state, action.payload.tappletProviderId)
+    },
+    deleteTappProviderFailure: (_, _action: PayloadAction<DeleteTappletProviderFailurePayload>) => {},
   },
 })
 
@@ -35,3 +43,4 @@ export const tappletProvidersReducer = tappletProvidersSlice.reducer
 
 listenerMiddleware.startListening(initializeAction())
 listenerMiddleware.startListening(addTappProviderAction())
+listenerMiddleware.startListening(deleteTappletProviderAction())

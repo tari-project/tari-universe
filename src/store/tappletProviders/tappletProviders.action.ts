@@ -2,6 +2,7 @@ import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "
 import { tappletProvidersActions } from "./tappletProviders.slice"
 import {
   AddTappletProviderRequestPayload,
+  DeleteTappletProviderRequestPayload,
   InitTappletProvidersRequestPayload,
   TappletProvider,
 } from "./tappletProviders.types"
@@ -57,6 +58,22 @@ export const addTappProviderAction = () => ({
       listenerApi.dispatch(tappletProvidersActions.addTappProviderSuccess({ tappletProvider: provider }))
     } catch (error) {
       listenerApi.dispatch(tappletProvidersActions.addTappProviderFailure({ errorMsg: error as string }))
+    }
+  },
+})
+
+export const deleteTappletProviderAction = () => ({
+  actionCreator: tappletProvidersActions.deleteTappProviderRequest,
+  effect: async (
+    action: PayloadAction<DeleteTappletProviderRequestPayload>,
+    listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
+  ) => {
+    const tappletProviderId = action.payload.tappletId
+    console.log("******** DELETE ME ", tappletProviderId)
+    try {
+      listenerApi.dispatch(tappletProvidersActions.deleteTappProviderSuccess({ tappletProviderId }))
+    } catch (error) {
+      listenerApi.dispatch(tappletProvidersActions.deleteTappProviderFailure({ errorMsg: error as string }))
     }
   },
 })

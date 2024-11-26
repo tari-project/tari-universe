@@ -29,3 +29,13 @@ export type AddTappletProviderSuccessPayload = {
 export type AddTappletProviderFailurePayload = {
   errorMsg: string
 }
+
+export type DeleteTappletProviderRequestPayload = {
+  tappletId: number
+}
+export type DeleteTappletProviderSuccessPayload = {
+  tappletProviderId: number
+}
+export type DeleteTappletProviderFailurePayload = {
+  errorMsg: string
+}

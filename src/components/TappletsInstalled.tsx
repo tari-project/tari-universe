@@ -11,12 +11,15 @@ import { devTappletsActions } from "../store/devTapplets/devTapplets.slice"
 import { DevTapplet, InstalledTappletWithName } from "@type/tapplet"
 import { useTranslation } from "react-i18next"
 import { installedTappletsListSelector } from "../store/installedTapplets/installedTapplets.selector"
+import { tappletProviderSelector } from "../store/tappletProviders/tappletProviders.selector"
 
 export const TappletsInstalled: React.FC = () => {
   const { t } = useTranslation("components")
   const installedTapplets = useSelector(installedTappletsListSelector)
   const devTapplets = useSelector(devTappletsSelectors.selectAll)
   const dispatch = useDispatch()
+  const tappProvs = useSelector(tappletProviderSelector.getAllTappletProviders)
+  console.log("all tap prov tapp", tappProvs)
 
   const updateInstalledTappletHandler = useCallback(
     (item: InstalledTappletWithName) => dispatch(installedTappletsActions.updateInstalledTappletRequest({ item })),

@@ -7,14 +7,12 @@ import { useDispatch, useSelector } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
 import { ErrorSource } from "../store/error/error.types"
 import { tappletProvidersActions } from "../store/tappletProviders/tappletProviders.slice"
-import { devTappletsSelectors } from "../store/devTapplets/devTapplets.selector"
 import { tappletProviderSelector } from "../store/tappletProviders/tappletProviders.selector"
 
 export function ActiveDevTapplet() {
   let { state }: { state: DevTapplet } = useLocation()
   const [isVerified, setIsVerified] = useState<boolean>(false)
   const dispatch = useDispatch()
-  const devTapplets = useSelector(devTappletsSelectors.selectAll)
   const tappProvs = useSelector(tappletProviderSelector.getAllTappletProviders)
   console.log("all tap prov", tappProvs)
 
