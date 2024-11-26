@@ -5,7 +5,6 @@ import { accountSelector } from "../store/account/account.selector"
 import { substateIdToString } from "@tari-project/typescript-bindings"
 import { shortenSubstateAddress } from "../helpers/address"
 
-// TODO this component is just mvp to displat active account
 export const Account: React.FC = () => {
   const { t } = useTranslation(["components", "common"])
   const currentAccount = useSelector(accountSelector.selectAccount)

@@ -8,36 +8,48 @@ import { errorActions } from "../store/error/error.slice"
 import { ErrorSource } from "../store/error/error.types"
 import { tappletProvidersActions } from "../store/tappletProviders/tappletProviders.slice"
 import { tappletProviderSelector } from "../store/tappletProviders/tappletProviders.selector"
+import { RootState } from "../store/store"
+import { TUInternalProvider } from "@provider/TUInternalProvider"
+
+const selectTappProviderById = (state: RootState, id?: number) =>
+  id ? tappletProviderSelector.getTappletProviderById(state, id) : null
 
 export function ActiveDevTapplet() {
-  let { state }: { state: DevTapplet } = useLocation()
-  const [isVerified, setIsVerified] = useState<boolean>(false)
+  let { state: devTapplet }: { state: DevTapplet } = useLocation()
   const dispatch = useDispatch()
-  const tappProvs = useSelector(tappletProviderSelector.getAllTappletProviders)
-  console.log("all tap prov", tappProvs)
+  const [isVerified, setIsVerified] = useState<boolean>(false)
+  const tappProvider = useSelector((state: RootState) => selectTappProviderById(state, Number(devTapplet.id)))
 
   useEffect(() => {
     const fetchTappletConfig = async () => {
       try {
-        const response = await fetch(`${state?.endpoint}/src/tapplet.config.json`)
+        const response = await fetch(`${devTapplet?.endpoint}/src/tapplet.config.json`)
         const config: TappletConfig = await response.json()
         console.log("DEV TAPP")
-        if (config?.packageName === state?.package_name) {
+        if (config?.packageName === devTapplet?.package_name) {
           setIsVerified(true)
           console.log("DEV TAPP config", config)
-          console.log("DEV TAPP state", state)
+          console.log("DEV TAPP devTapplet", devTapplet)
           if (config?.permissions) {
-            console.log("DEV TAPP dispatch")
-            dispatch(
-              tappletProvidersActions.addTappProviderReq({
-                installedTappletId: Number(state.id), //TODO get unique ID
-                launchedTappParams: {
-                  endpoint: state?.endpoint,
+            if (config.permissions != tappProvider?.permissions) {
+              console.log("DEV TAPP dispatch")
+              dispatch(
+                tappletProvidersActions.addTappProviderReq({
+                  installedTappletId: Number(devTapplet.id),
+                  launchedTappParams: {
+                    endpoint: devTapplet?.endpoint,
+                    permissions: config.permissions,
+                  },
+                })
+              )
+            } else {
+              dispatch(
+                tappletProvidersActions.updateTappProviderRequest({
+                  tappletId: Number(devTapplet.id),
                   permissions: config.permissions,
-                },
-              })
-            ) //TODO
-            console.log("DEV TAPP dispatch 2")
+                })
+              )
+            }
           } else {
             dispatch(
               errorActions.showError({
@@ -49,7 +61,7 @@ export function ActiveDevTapplet() {
         } else {
           dispatch(
             errorActions.showError({
-              message: `manifest-package-name-mismatch | expectedPackageName-${state?.package_name} & receivedPackageName-${config?.packageName} & endpoint-${state?.endpoint}`,
+              message: `manifest-package-name-mismatch | expectedPackageName-${devTapplet?.package_name} & receivedPackageName-${config?.packageName} & endpoint-${devTapplet?.endpoint}`,
               errorSource: ErrorSource.BACKEND,
             })
           )
@@ -64,10 +76,14 @@ export function ActiveDevTapplet() {
       }
     }
 
-    if (state?.endpoint) {
+    if (devTapplet?.endpoint) {
       fetchTappletConfig()
     }
   }, [])
 
-  return <Box height="100%">{isVerified && <Tapplet source={state.endpoint} tappletId={Number(state.id)} />}</Box>
+  return (
+    <Box height="100%">
+      {isVerified && <Tapplet source={devTapplet.endpoint} provider={tappProvider as unknown as TUInternalProvider} />}
+    </Box> //TODO type provider
+  )
 }

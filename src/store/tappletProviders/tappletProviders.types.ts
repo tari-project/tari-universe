@@ -39,3 +39,14 @@ export type DeleteTappletProviderSuccessPayload = {
 export type DeleteTappletProviderFailurePayload = {
   errorMsg: string
 }
+
+export type UpdateTappletProviderRequestPayload = {
+  tappletId: number
+  permissions: TappletPermissions
+}
+export type UpdateTappletProviderSuccessPayload = {
+  tappletProvider: TappletProvider
+}
+export type UpdateTappletProviderFailurePayload = {
+  errorMsg: string
+}

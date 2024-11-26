@@ -5,6 +5,7 @@ import {
   DeleteTappletProviderRequestPayload,
   InitTappletProvidersRequestPayload,
   TappletProvider,
+  UpdateTappletProviderRequestPayload,
 } from "./tappletProviders.types"
 import { TariPermissions, WalletDaemonParameters } from "@tari-project/tarijs"
 import { TUInternalProvider } from "@provider/TUInternalProvider"
@@ -36,7 +37,7 @@ export const addTappProviderAction = () => ({
       console.log(" ^^^^ ADD PROVIDER LAUNCHED", launchedTappParams)
 
       let requiredPermissions = new TariPermissions()
-      let optionalPermissions = new TariPermissions() //TODO add support for optional params
+      let optionalPermissions = new TariPermissions()
       if (launchedTappParams.permissions) {
         launchedTappParams.permissions.requiredPermissions.map((p) =>
           requiredPermissions.addPermission(toPermission(p))
@@ -74,6 +75,36 @@ export const deleteTappletProviderAction = () => ({
       listenerApi.dispatch(tappletProvidersActions.deleteTappProviderSuccess({ tappletProviderId }))
     } catch (error) {
       listenerApi.dispatch(tappletProvidersActions.deleteTappProviderFailure({ errorMsg: error as string }))
+    }
+  },
+})
+
+export const updateTappletProviderAction = () => ({
+  actionCreator: tappletProvidersActions.updateTappProviderRequest,
+  effect: async (
+    action: PayloadAction<UpdateTappletProviderRequestPayload>,
+    listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
+  ) => {
+    const id = action.payload.tappletId
+    let requiredPermissions = new TariPermissions()
+    let optionalPermissions = new TariPermissions()
+    if (action.payload.permissions) {
+      action.payload.permissions.requiredPermissions.map((p) => requiredPermissions.addPermission(toPermission(p)))
+      action.payload.permissions.optionalPermissions.map((p) => optionalPermissions.addPermission(toPermission(p)))
+    }
+    const params: WalletDaemonParameters = {
+      permissions: requiredPermissions,
+      optionalPermissions,
+    }
+    const provider: TappletProvider = {
+      id,
+      permissions: action.payload.permissions,
+      provider: TUInternalProvider.build(params),
+    }
+    try {
+      listenerApi.dispatch(tappletProvidersActions.updateTappProviderSuccess({ tappletProvider: provider }))
+    } catch (error) {
+      listenerApi.dispatch(tappletProvidersActions.updateTappProviderFailure({ errorMsg: error as string }))
     }
   },
 })
