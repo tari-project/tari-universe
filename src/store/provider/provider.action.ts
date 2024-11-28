@@ -1,8 +1,16 @@
 import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
 import { InitProviderRequestPayload, UpdatePermissionsRequestPayload } from "./provider.types"
 import { providerActions } from "./provider.slice"
-import { RootState } from "../store"
-import { providerSelector } from "./provider.selector"
+import { TUInternalProvider } from "@provider/TUInternalProvider"
+import { WalletDaemonParameters } from "@tari-project/tarijs"
+import {
+  TariPermissionAccountInfo,
+  TariPermissionAccountList,
+  TariPermissionKeyList,
+  TariPermissions,
+  TariPermissionSubstatesRead,
+  TariPermissionTransactionSend,
+} from "@tari-project/tarijs/dist/providers/tari_universe"
 
 export const initializeAction = () => ({
   actionCreator: providerActions.initializeRequest,
@@ -11,11 +19,23 @@ export const initializeAction = () => ({
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
     try {
-      const state = listenerApi.getState() as RootState
-      const provider = providerSelector.selectProvider(state) //TODO why we need this?
-      console.log("[store] INIT PROVIDER", provider.providerName)
+      console.log("[store provider] INIT")
+      //TODO set default permissions
+      let permissions = new TariPermissions()
+      let optionalPermissions = new TariPermissions()
+      permissions.addPermission(new TariPermissionAccountInfo())
+      permissions.addPermission(new TariPermissionAccountList())
+      permissions.addPermission(new TariPermissionKeyList())
+      permissions.addPermission(new TariPermissionSubstatesRead())
+      permissions.addPermission(new TariPermissionTransactionSend())
 
-      listenerApi.dispatch(providerActions.initializeSuccess({ provider }))
+      const params: WalletDaemonParameters = {
+        permissions,
+        optionalPermissions,
+      }
+      const internalProvider = TUInternalProvider.build(params)
+
+      listenerApi.dispatch(providerActions.initializeSuccess({ provider: internalProvider }))
     } catch (error) {
       listenerApi.dispatch(providerActions.initializeFailure({ errorMsg: error as string }))
     }

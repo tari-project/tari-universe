@@ -1,11 +1,6 @@
 import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
 import { transactionActions } from "./transaction.slice"
-import {
-  InitTransactionRequestPayload,
-  Transaction,
-  TransactionRequestPayload,
-  TUProviderMethod,
-} from "./transaction.types"
+import { InitTransactionRequestPayload, Transaction, TransactionRequestPayload } from "./transaction.types"
 import { errorActions } from "../error/error.slice"
 import { RootState } from "../store"
 import { simulationActions } from "../simulation/simulation.slice"
@@ -14,7 +9,6 @@ import { SubmitTransactionRequest } from "@tari-project/tarijs"
 import { invoke } from "@tauri-apps/api/core"
 import { FinalizeResult, AccountsGetBalancesResponse } from "@tari-project/typescript-bindings"
 import { BalanceUpdate } from "../simulation/simulation.types"
-import { providerActions } from "../provider/provider.slice"
 import { txCheck } from "@type/transaction"
 
 export const addTransactionAction = () => ({

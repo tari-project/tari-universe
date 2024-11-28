@@ -10,26 +10,12 @@ import {
   UpdatePermissionsRequestPayload,
   UpdatePermissionsSuccessPayload,
 } from "./provider.types"
-import {
-  TariPermissionAccountInfo,
-  TariPermissionAccountList,
-  TariPermissionKeyList,
-  TariPermissionSubstatesRead,
-  TariPermissionTransactionSend,
-} from "@tari-project/tarijs/dist/providers/tari_universe"
 
 const initialState: ProviderStoreState = {
   isInitialized: false,
   provider: null,
-  // TODO default permissions for built-in provider
   permissions: {
-    requiredPermissions: [
-      new TariPermissionAccountInfo(),
-      new TariPermissionAccountList(),
-      new TariPermissionKeyList(),
-      new TariPermissionSubstatesRead(),
-      new TariPermissionTransactionSend(),
-    ],
+    requiredPermissions: [],
     optionalPermissions: [],
   },
 }

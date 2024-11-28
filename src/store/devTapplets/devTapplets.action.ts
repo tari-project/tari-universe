@@ -46,9 +46,8 @@ export const addDevTappletAction = () => ({
   ) => {
     const endpoint = action.payload.endpoint
     try {
-      console.log(" ~~~ add dev tapplet", endpoint)
-      const tst = await invoke("add_dev_tapplet", { endpoint })
-      console.log(" ~~~ add dev tapplet ok", tst)
+      await invoke("add_dev_tapplet", { endpoint })
+
       listenerApi.dispatch(devTappletsActions.addDevTappletSuccess({}))
       listenerApi.dispatch(devTappletsActions.initializeRequest({}))
     } catch (error) {

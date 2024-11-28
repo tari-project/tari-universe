@@ -24,6 +24,7 @@ export const Wallet: React.FC = () => {
   }, [provider, currentAccount])
 
   const refreshAccount = useCallback(async () => {
+    if (!provider) return
     try {
       const { accounts } = await provider.getAccountsList()
       setAccountsList(accounts)
@@ -36,6 +37,7 @@ export const Wallet: React.FC = () => {
   }, [provider])
 
   async function handleCreateAccount(accountName: string) {
+    if (!provider) return
     try {
       await provider.createFreeTestCoins(accountName)
       dispatch(
@@ -51,7 +53,8 @@ export const Wallet: React.FC = () => {
     }
   }
 
-  async function get_free_coins() {
+  async function getFreeTestCoins() {
+    if (!provider) return
     try {
       const currentAccountName = currentAccount?.account.name ?? undefined
       await provider.createFreeTestCoins(currentAccountName)
@@ -63,7 +66,8 @@ export const Wallet: React.FC = () => {
     }
   }
 
-  async function get_balances() {
+  async function getBalances() {
+    if (!provider) return
     try {
       const accountAddress = substateIdToString(currentAccount?.account.address ?? null)
       const resp = await provider.getAccountBalances(accountAddress)
@@ -95,10 +99,10 @@ export const Wallet: React.FC = () => {
             })}: ${substateIdToString(currentAccount?.account.address ?? null)}`}</Typography>
           </Stack>
         </Paper>
-        <Button onClick={get_free_coins} variant="contained" sx={{ width: 200 }}>
+        <Button onClick={getFreeTestCoins} variant="contained" sx={{ width: 200 }}>
           {t("get-free-coins", { ns: "components" })}
         </Button>
-        <Button onClick={get_balances} variant="contained" sx={{ width: 200 }}>
+        <Button onClick={getBalances} variant="contained" sx={{ width: 200 }}>
           {t("get-balances", { ns: "components" })}
         </Button>
       </Box>
