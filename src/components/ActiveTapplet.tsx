@@ -41,6 +41,8 @@ export function ActiveTapplet() {
               })
             )
           } else {
+            // not sure if we should update it every time but I dont think so
+            // TODO check if update needed
             dispatch(
               tappletProvidersActions.updateTappProviderRequest({
                 tappletId: Number(id),

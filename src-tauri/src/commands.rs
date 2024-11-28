@@ -21,7 +21,7 @@ use crate::{
   },
   download_utils::{ download_file_with_retries, extract },
   error::{
-    Error::{ self, FailedToObtainPermissionTokenLock, IOError, JsonParsingError, RequestError, TappletServerError },
+    Error::{ self, IOError, FailedToObtainPermissionTokenLock, JsonParsingError, RequestError, TappletServerError },
     IOError::*,
     RequestError::*,
     TappletServerError::*,
@@ -281,6 +281,7 @@ pub async fn fetch_tapplets(app_handle: AppHandle, db_connection: State<'_, Data
   for tapplet_manifest in tapplets.registered_tapplets.values() {
     let inserted_tapplet = store.create(&CreateTapplet::from(tapplet_manifest))?;
 
+    // TODO uncomment if audit data in manifest
     // for audit_data in tapplet_manifest.metadata.audits.iter() {
     //   store.create(
     //     &(CreateTappletAudit {

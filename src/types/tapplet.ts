@@ -32,7 +32,7 @@ export interface InstalledTappletWithName {
 }
 
 export interface DevTapplet {
-  id: string
+  id: string //TODO change to number
   package_name: string
   endpoint: string
   display_name: string
