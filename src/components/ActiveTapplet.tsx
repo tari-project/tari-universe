@@ -11,7 +11,6 @@ import { LaunchedTappResult } from "@type/tapplet"
 import { tappletProvidersActions } from "../store/tappletProviders/tappletProviders.slice"
 import { RootState } from "../store/store"
 import { tappletProviderSelector } from "../store/tappletProviders/tappletProviders.selector"
-import { TUInternalProvider } from "@provider/TUInternalProvider"
 
 const selectTappProviderById = (state: RootState, id?: number) =>
   id ? tappletProviderSelector.getTappletProviderById(state, id) : null
@@ -30,7 +29,7 @@ export function ActiveTapplet() {
         const launchedTappParams: LaunchedTappResult = res
         setTappletAddress(launchedTappParams.endpoint)
         if (launchedTappParams.permissions) {
-          if (launchedTappParams.permissions != tappProvider?.permissions) {
+          if (id != tappProvider?.id) {
             console.log("DEV TAPP dispatch")
             dispatch(
               tappletProvidersActions.addTappProviderReq({
@@ -70,8 +69,8 @@ export function ActiveTapplet() {
 
   return (
     <Box height="100%">
-      {tappletAddress ? (
-        <Tapplet source={tappletAddress} provider={tappProvider as unknown as TUInternalProvider} /> //TODO type provider
+      {tappletAddress && tappProvider ? (
+        <Tapplet source={tappletAddress} provider={tappProvider.provider} />
       ) : (
         <Typography>{t("taplet-obtain-failure")}</Typography>
       )}

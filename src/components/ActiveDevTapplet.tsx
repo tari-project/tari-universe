@@ -9,7 +9,6 @@ import { ErrorSource } from "../store/error/error.types"
 import { tappletProvidersActions } from "../store/tappletProviders/tappletProviders.slice"
 import { tappletProviderSelector } from "../store/tappletProviders/tappletProviders.selector"
 import { RootState } from "../store/store"
-import { TUInternalProvider } from "@provider/TUInternalProvider"
 
 const selectTappProviderById = (state: RootState, id?: number) =>
   id ? tappletProviderSelector.getTappletProviderById(state, id) : null
@@ -19,19 +18,19 @@ export function ActiveDevTapplet() {
   const dispatch = useDispatch()
   const [isVerified, setIsVerified] = useState<boolean>(false)
   const tappProvider = useSelector((state: RootState) => selectTappProviderById(state, Number(devTapplet.id)))
+  console.log("^^^ tp", tappProvider)
 
   useEffect(() => {
     const fetchTappletConfig = async () => {
       try {
-        const response = await fetch(`${devTapplet?.endpoint}/src/tapplet.config.json`)
-        const config: TappletConfig = await response.json()
+        const config: TappletConfig = await (await fetch(`${devTapplet?.endpoint}/tapplet.config.json`)).json() //TODO add const as path to config
         console.log("DEV TAPP")
         if (config?.packageName === devTapplet?.package_name) {
           setIsVerified(true)
           console.log("DEV TAPP config", config)
           console.log("DEV TAPP devTapplet", devTapplet)
           if (config?.permissions) {
-            if (config.permissions != tappProvider?.permissions) {
+            if (Number(devTapplet.id) != tappProvider?.id) {
               console.log("DEV TAPP dispatch")
               dispatch(
                 tappletProvidersActions.addTappProviderReq({
@@ -83,7 +82,7 @@ export function ActiveDevTapplet() {
 
   return (
     <Box height="100%">
-      {isVerified && <Tapplet source={devTapplet.endpoint} provider={tappProvider as unknown as TUInternalProvider} />}
-    </Box> //TODO type provider
+      {isVerified && tappProvider && <Tapplet source={devTapplet.endpoint} provider={tappProvider.provider} />}
+    </Box>
   )
 }

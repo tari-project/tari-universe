@@ -43,7 +43,6 @@ const tappletProvidersSlice = createSlice({
       tappletProvidersAdapter.updateOne(state, {
         id: action.payload.tappletProvider.id,
         changes: {
-          permissions: action.payload.tappletProvider.permissions,
           provider: action.payload.tappletProvider.provider,
         },
       })

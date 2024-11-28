@@ -14,24 +14,17 @@ import {
   SubmitTransactionRequest,
   SubmitTransactionResponse,
   Substate,
-  TariPermissions,
   TariProvider,
   TemplateDefinition,
   TransactionResult,
   TransactionStatus,
   VaultBalances,
+  WalletDaemonParameters,
 } from "@tari-project/tarijs"
 import { ListSubstatesResponse } from "@tari-project/tarijs/dist/providers"
 import { TUProviderMethod } from "../store/transaction/transaction.types"
 import { IPCRpcTransport } from "./ipc_transport"
 import { ComponentAccessRules } from "@tari-project/typescript-bindings"
-
-export type WalletDaemonParameters = {
-  permissions: TariPermissions
-  optionalPermissions: TariPermissions
-  name?: string
-  onConnection?: () => void
-}
 
 export type WindowSize = {
   width: number

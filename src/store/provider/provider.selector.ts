@@ -1,7 +1,7 @@
-import { TariPermissions } from "@tari-project/tarijs"
+import { TariPermissions, WalletDaemonParameters } from "@tari-project/tarijs"
 import { createSelector } from "@reduxjs/toolkit"
 import { RootState } from "../store"
-import { WalletDaemonParameters, TUInternalProvider } from "@provider/TUInternalProvider"
+import { TUInternalProvider } from "@provider/TUInternalProvider"
 import { toPermission } from "@type/tariPermissions"
 
 const providerStateSelector = (state: RootState) => state.provider

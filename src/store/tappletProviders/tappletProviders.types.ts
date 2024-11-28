@@ -1,11 +1,10 @@
+import { TUInternalProvider } from "@provider/TUInternalProvider"
 import { EntityState } from "@reduxjs/toolkit"
-import { TariProvider } from "@tari-project/tarijs"
 import { LaunchedTappResult, TappletPermissions } from "@type/tapplet"
 
 export type TappletProvider = {
   id: number
-  provider: TariProvider
-  permissions: TappletPermissions
+  provider: TUInternalProvider
 }
 
 export type TappletProvidersStoreState = {

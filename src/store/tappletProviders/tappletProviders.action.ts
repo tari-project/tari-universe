@@ -52,7 +52,6 @@ export const addTappProviderAction = () => ({
       }
       const provider: TappletProvider = {
         id: action.payload.installedTappletId,
-        permissions: launchedTappParams.permissions,
         provider: TUInternalProvider.build(params),
       }
       console.log(" ^^^^ ADD PROVIDER PROVIDER", provider)
@@ -98,7 +97,6 @@ export const updateTappletProviderAction = () => ({
     }
     const provider: TappletProvider = {
       id,
-      permissions: action.payload.permissions,
       provider: TUInternalProvider.build(params),
     }
     try {
