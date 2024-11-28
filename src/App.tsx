@@ -64,7 +64,6 @@ function App() {
           <Stack direction="row" gap={4} width="100%" justifyContent="flex-start">
             <Account />
           </Stack>
-
           <Stack direction="row" gap={4} gridArea="1 / 2 / 2 / 5" width="100%" justifyContent="center">
             <Link to={TabKey.WALLET} className="nav-item">
               {t("wallet")}

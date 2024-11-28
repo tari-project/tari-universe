@@ -13,6 +13,8 @@ export const runTransactionSimulationAction = () => ({
     const state = listenerApi.getState() as RootState
     const provider = state.provider.provider
     const dispatch = listenerApi.dispatch
+    console.log("[store simulation] tx id", action.payload.transactionId)
+
     const { runSimulation } = state.transaction.entities[transactionId]
 
     if (!provider) {
@@ -21,7 +23,9 @@ export const runTransactionSimulationAction = () => ({
     }
 
     try {
+      console.log("[store simulation] try run sim")
       const balanceUpdates = await runSimulation()
+      console.log("[store simulation] try run sim ok", balanceUpdates)
       dispatch(simulationActions.runSimulationSuccess({ transactionId, balanceUpdates }))
     } catch (error) {
       console.error(error)

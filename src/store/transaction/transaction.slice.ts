@@ -1,12 +1,19 @@
 import { PayloadAction, createEntityAdapter, createSlice } from "@reduxjs/toolkit"
 import {
+  InitTransactionFailurePayload,
+  InitTransactionRequestPayload,
   Transaction,
   TransactionFailurePayload,
   TransactionRequestPayload,
   TransactionSuccessPayload,
 } from "./transaction.types"
 import { listenerMiddleware } from "../store.listener"
-import { cancelTransactionAction, executeTransactionAction, transactionFailedAction } from "./transaction.action"
+import {
+  cancelTransactionAction,
+  executeTransactionAction,
+  initializeTransactionAction,
+  transactionFailedAction,
+} from "./transaction.action"
 
 export const transactionsAdapter = createEntityAdapter<Transaction>()
 
@@ -14,6 +21,8 @@ const transactionSlice = createSlice({
   name: "transaction",
   initialState: transactionsAdapter.getInitialState(),
   reducers: {
+    initializeRequest: (_, _action: PayloadAction<InitTransactionRequestPayload>) => {},
+    initializeFailure: (_, _action: PayloadAction<InitTransactionFailurePayload>) => {},
     addTransaction: (state, action: PayloadAction<TransactionRequestPayload>) => {
       transactionsAdapter.addOne(state, action.payload.transaction)
     },
@@ -42,6 +51,7 @@ const transactionSlice = createSlice({
 export const transactionActions = transactionSlice.actions
 export const transactionReducer = transactionSlice.reducer
 
+listenerMiddleware.startListening(initializeTransactionAction())
 listenerMiddleware.startListening(executeTransactionAction())
 listenerMiddleware.startListening(cancelTransactionAction())
 listenerMiddleware.startListening(transactionFailedAction())
