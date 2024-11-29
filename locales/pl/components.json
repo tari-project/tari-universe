@@ -18,5 +18,8 @@
   "create-account": "Dodaj nowe konto",
   "open-logs-directory": "Logi",
   "simulation-status": "Status symulacji",
-  "simulation-error-msg": "Błąd symulacji"
+  "simulation-error-msg": "Błąd symulacji",
+  "tx-simulation-status": "Status symulowanej transakcji",
+  "tx-simulation-error-msg": "Błąd symulowanej transakcji",
+  "no-balance-update": "Aktualizacja balansów niedostępna"
 }

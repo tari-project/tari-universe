@@ -2,6 +2,7 @@ import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "
 import { simulationActions } from "./simulation.slice"
 import { SimulationRequestPayload } from "./simulation.types"
 import { RootState } from "../store"
+import { TransactionStatus } from "@tari-project/tarijs"
 
 export const runTransactionSimulationAction = () => ({
   actionCreator: simulationActions.runSimulationRequest,
@@ -18,18 +19,34 @@ export const runTransactionSimulationAction = () => ({
     const { runSimulation } = state.transaction.entities[transactionId]
 
     if (!provider) {
-      dispatch(simulationActions.runSimulationFailure({ transactionId, errorMsg: "Provider not found" }))
+      dispatch(
+        simulationActions.runSimulationFailure({
+          transactionId,
+          errorMsg: "Provider not found",
+          transaction: { status: TransactionStatus.InvalidTransaction, errorMsg: "Provider not found" },
+        })
+      )
       return
     }
 
     try {
-      console.log("[store simulation] try run sim")
-      const balanceUpdates = await runSimulation()
-      console.log("[store simulation] try run sim ok", balanceUpdates)
-      dispatch(simulationActions.runSimulationSuccess({ transactionId, balanceUpdates }))
+      const simulationResult = await runSimulation()
+      dispatch(
+        simulationActions.runSimulationSuccess({
+          transactionId,
+          balanceUpdates: simulationResult.balanceUpdates,
+          transaction: simulationResult.txSimulation,
+        })
+      )
     } catch (error) {
       console.error(error)
-      dispatch(simulationActions.runSimulationFailure({ transactionId, errorMsg: String(error) }))
+      dispatch(
+        simulationActions.runSimulationFailure({
+          transactionId,
+          errorMsg: String(error),
+          transaction: { status: TransactionStatus.Rejected, errorMsg: String(error) },
+        })
+      )
     }
   },
 })

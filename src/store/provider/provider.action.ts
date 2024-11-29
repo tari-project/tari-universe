@@ -4,12 +4,7 @@ import { providerActions } from "./provider.slice"
 import { TUInternalProvider } from "@provider/TUInternalProvider"
 import { WalletDaemonParameters } from "@tari-project/tarijs"
 import {
-  TariPermissionAccountInfo,
-  TariPermissionAccountList,
-  TariPermissionKeyList,
   TariPermissions,
-  TariPermissionSubstatesRead,
-  TariPermissionTransactionSend,
 } from "@tari-project/tarijs/dist/providers/tari_universe"
 
 export const initializeAction = () => ({
