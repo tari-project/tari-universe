@@ -5,10 +5,10 @@ import { errorActions } from "../error/error.slice"
 import { RootState } from "../store"
 import { simulationActions } from "../simulation/simulation.slice"
 import { ErrorSource } from "../error/error.types"
-import { SubmitTransactionRequest } from "@tari-project/tarijs"
+import { SubmitTransactionRequest, TransactionStatus } from "@tari-project/tarijs"
 
 import { FinalizeResult, AccountsGetBalancesResponse } from "@tari-project/typescript-bindings"
-import { BalanceUpdate } from "../simulation/simulation.types"
+import { BalanceUpdate, TxSimulation } from "../simulation/simulation.types"
 import { txCheck } from "@type/transaction"
 
 export const addTransactionAction = () => ({
@@ -66,7 +66,7 @@ export const cancelTransactionAction = () => ({
   ) => {
     const { id, cancel } = action.payload.transaction
     const state = listenerApi.getState() as RootState
-    const provider = state.provider.provider
+    const provider = state.provider.provider //TODO use tapplet provider not TUInternal
     const dispatch = listenerApi.dispatch
 
     if (!provider) {
@@ -126,24 +126,56 @@ export const initializeTransactionAction = () => ({
 
       const { methodName, args, id } = event.data
       console.log("[store tx] INIT TRANSACTION method", methodName)
-      const runSimulation = async () => {
+
+      const runSimulation = async (): Promise<{ balanceUpdates: BalanceUpdate[]; txSimulation: TxSimulation }> => {
         if (methodName !== "submitTransaction") {
-          return []
+          return {
+            balanceUpdates: [],
+            txSimulation: {
+              status: TransactionStatus.InvalidTransaction,
+              errorMsg: `Simulation for ${methodName} not supported`,
+            },
+          }
         }
         const transactionReq: SubmitTransactionRequest = { ...args[0], is_dry_run: true }
         const tx = await provider.runOne(methodName, [transactionReq])
-        const txReceipt = await provider.getTransactionResult(tx.transaction_id)
 
-        // const walletBalances: AccountsGetBalancesResponse = await invoke("get_balances", {}) //TODO this always fails so used another fct as below
-        const walletBalances: AccountsGetBalancesResponse = await provider.client.accountsGetBalances({
-          account: null,
-          refresh: true,
+        await provider.client.waitForTransactionResult({
+          transaction_id: tx.transaction_id,
+          timeout_secs: 10,
         })
-        const txResult = txReceipt.result as FinalizeResult
-        if (!txCheck.isAccept(txResult.result)) return []
+        const txReceipt = await provider.getTransactionResult(tx.transaction_id)
+        const txResult = txReceipt.result as FinalizeResult | null
+        if (!txResult?.result)
+          return {
+            balanceUpdates: [],
+            txSimulation: {
+              status: TransactionStatus.InvalidTransaction,
+              errorMsg: "Transaction result undefined",
+            },
+          }
+
+        const txSimulation: TxSimulation = {
+          status: txReceipt.status,
+          errorMsg: txCheck.isReject(txResult?.result) ? (txResult.result.Reject as string) : "",
+        }
+
+        if (!txCheck.isAccept(txResult.result)) return { balanceUpdates: [], txSimulation }
+
+        let walletBalances: AccountsGetBalancesResponse
+        try {
+          // const walletBalances: AccountsGetBalancesResponse = await invoke("get_balances", {}) //TODO this always fails so used another fct as below
+          walletBalances = await provider.client.accountsGetBalances({
+            account: null,
+            refresh: true,
+          })
+        } catch (error) {
+          console.error(error)
+          const e = typeof error === "string" ? error : "Get balances error"
+          dispatch(errorActions.showError({ message: e, errorSource: ErrorSource.FRONTEND }))
+        }
 
         const { up_substates } = txResult.result.Accept
-
         const balanceUpdates: BalanceUpdate[] = up_substates
           .map((upSubstate) => {
             const [substateId, { substate }] = upSubstate
@@ -153,7 +185,7 @@ export const initializeTransactionAction = () => ({
               if (!txCheck.isVaultId(balance.vault_address)) return false
               return balance.vault_address.Vault === substateId.Vault
             })
-            if (!userBalance) return
+            if (!userBalance) return undefined
             return {
               vaultAddress: substateId.Vault,
               tokenSymbol: userBalance.token_symbol || "",
@@ -162,8 +194,9 @@ export const initializeTransactionAction = () => ({
             }
           })
           .filter((vault): vault is BalanceUpdate => vault !== undefined)
-        return balanceUpdates
+        return { balanceUpdates, txSimulation }
       }
+
       const submit = async () => {
         try {
           const result = await provider.runOne(methodName, args)

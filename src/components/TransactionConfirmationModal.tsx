@@ -59,9 +59,9 @@ export const TransactionConfirmationModal: React.FC = () => {
         </DialogContentText>
         {transaction?.args?.map((arg) => (
           <DialogContentText>
-            {t("instructions", { ns: "components" })}:{" "}
+            {t("Transaction instruction list", { ns: "components" })}:{" "}
             {getFunctionOrMethod(arg.instructions)
-              .flatMap((i) => i.instructionName + " with args: " + i.args)
+              .flatMap((i) => "- " + i.instructionName + " with args: " + i.args)
               .map((instruction, index) => (
                 <div key={index}>{instruction}</div>
               ))}
