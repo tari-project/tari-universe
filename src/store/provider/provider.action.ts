@@ -26,6 +26,7 @@ export const initializeAction = () => ({
       permissions.addPermission("Admin")
 
       const params: WalletDaemonParameters = {
+        name: "TUInternalProvider",
         permissions,
         optionalPermissions,
       }

@@ -6,7 +6,7 @@ import { RootState } from "../store"
 import { simulationActions } from "../simulation/simulation.slice"
 import { ErrorSource } from "../error/error.types"
 import { SubmitTransactionRequest } from "@tari-project/tarijs"
-import { invoke } from "@tauri-apps/api/core"
+
 import { FinalizeResult, AccountsGetBalancesResponse } from "@tari-project/typescript-bindings"
 import { BalanceUpdate } from "../simulation/simulation.types"
 import { txCheck } from "@type/transaction"
@@ -31,10 +31,11 @@ export const executeTransactionAction = () => ({
     action: PayloadAction<TransactionRequestPayload>,
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
-    const { id, submit } = action.payload.transaction
+    const { id, submit, methodName } = action.payload.transaction
     const state = listenerApi.getState() as RootState
-    const provider = state.provider.provider
+    const provider = state.provider.provider //TODO SHOULD BE USED TAPPLET PROVIDER NOT TUINTERNAL
     const dispatch = listenerApi.dispatch
+    console.log("[store tx] PROVIDER", provider)
 
     if (!provider) {
       dispatch(transactionActions.sendTransactionFailure({ id, errorMsg: "Provider not initialized" }))
@@ -43,6 +44,7 @@ export const executeTransactionAction = () => ({
 
     try {
       submit()
+      console.log("[store tx] submit done", methodName)
       dispatch(transactionActions.sendTransactionSuccess({ id }))
     } catch (error) {
       let message = "Error while executing transaction"
@@ -113,7 +115,6 @@ export const initializeTransactionAction = () => ({
       console.log("[store tx] init tx event", event)
       console.log("[store tx] init tx provider", provider)
 
-      // const handleMessage = async (event: MessageEvent<TransactionEvent>) => {
       if (!event.source) {
         dispatch(errorActions.showError({ message: "no-source-in-event", errorSource: ErrorSource.FRONTEND }))
         return
@@ -133,7 +134,11 @@ export const initializeTransactionAction = () => ({
         const tx = await provider.runOne(methodName, [transactionReq])
         const txReceipt = await provider.getTransactionResult(tx.transaction_id)
 
-        const walletBalances: AccountsGetBalancesResponse = await invoke("get_balances", {})
+        // const walletBalances: AccountsGetBalancesResponse = await invoke("get_balances", {}) //TODO this always fails so used another fct as below
+        const walletBalances: AccountsGetBalancesResponse = await provider.client.accountsGetBalances({
+          account: null,
+          refresh: true,
+        })
         const txResult = txReceipt.result as FinalizeResult
         if (!txCheck.isAccept(txResult.result)) return []
 

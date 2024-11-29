@@ -41,7 +41,7 @@ export function ActiveTapplet() {
         setTappletAddress(launchedTappParams.endpoint)
         if (launchedTappParams.permissions) {
           if (!tappProvider) {
-            console.log("DEV TAPP dispatch")
+            console.log("[ActiveTapplet] add tapp")
             dispatch(
               tappletProvidersActions.addTappProviderReq({
                 id: tappProviderId,
