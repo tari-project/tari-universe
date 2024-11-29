@@ -1,3 +1,5 @@
+import { TransactionStatus } from "@tari-project/tarijs"
+
 export type SimulationStatus = "pending" | "success" | "failure"
 
 export type Simulation = {
@@ -5,6 +7,7 @@ export type Simulation = {
   status: SimulationStatus
   balanceUpdates: BalanceUpdate[]
   errorMsg: string
+  transaction: TxSimulation
 }
 
 export type BalanceUpdate = {
@@ -20,8 +23,15 @@ export type SimulationRequestPayload = {
 export type SimulationSuccessPayload = {
   transactionId: number
   balanceUpdates: BalanceUpdate[]
+  transaction: TxSimulation
 }
 export type SimulationFailurePayload = {
   transactionId: number
+  errorMsg: string
+  transaction: TxSimulation
+}
+
+export type TxSimulation = {
+  status: TransactionStatus
   errorMsg: string
 }

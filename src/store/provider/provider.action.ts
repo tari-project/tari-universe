@@ -7,7 +7,7 @@ import { Transaction, TUProviderMethod } from "../transaction/transaction.types"
 import { errorActions } from "../error/error.slice"
 import { RootState } from "../store"
 import { providerSelector } from "./provider.selector"
-import { SubmitTransactionRequest } from "@tari-project/tarijs"
+import { SubmitTransactionRequest, TransactionStatus } from "@tari-project/tarijs"
 import { invoke } from "@tauri-apps/api/core"
 import {
   SubstateDiff,
@@ -20,15 +20,20 @@ import {
   ResourceContainer,
   ResourceAddress,
   Amount,
+  RejectReason,
 } from "@tari-project/typescript-bindings"
 import { AccountsGetBalancesResponse } from "@tari-project/wallet_jrpc_client"
-import { BalanceUpdate } from "../simulation/simulation.types"
+import { BalanceUpdate, TxSimulation } from "../simulation/simulation.types"
 import { ErrorSource } from "../error/error.types"
 
 let handleMessage: typeof window.postMessage
 
 const isAccept = (result: TransactionResult): result is { Accept: SubstateDiff } => {
   return "Accept" in result
+}
+
+const isReject = (result: TransactionResult): result is { Reject: RejectReason } => {
+  return "Reject" in result
 }
 
 const isVaultId = (substateId: SubstateId): substateId is { Vault: VaultId } => {
@@ -66,31 +71,64 @@ export const initializeAction = () => ({
         }
 
         const { methodName, args, id } = event.data
-        const _method = methodName as TUProviderMethod
-        const runSimulation = async () => {
+        const method = methodName as TUProviderMethod
+        // tx simulation
+        const runSimulation = async (): Promise<{ balanceUpdates: BalanceUpdate[]; txSimulation: TxSimulation }> => {
           if (methodName !== "submitTransaction") {
-            return []
+            return {
+              balanceUpdates: [],
+              txSimulation: {
+                status: TransactionStatus.InvalidTransaction,
+                errorMsg: `Simulation for ${methodName} not supported`,
+              },
+            }
           }
           const transactionReq: SubmitTransactionRequest = { ...args[0], is_dry_run: true }
-          const tx = await provider.runOne(_method, [transactionReq])
+          const tx = await provider.runOne(method, [transactionReq])
+          
+          await provider.client.waitForTransactionResult({
+            transaction_id: tx.transaction_id,
+            timeout_secs: 10,
+          })
           const txReceipt = await provider.getTransactionResult(tx.transaction_id)
+          const txResult = txReceipt.result as FinalizeResult | null
+          if (!txResult?.result)
+            return {
+              balanceUpdates: [],
+              txSimulation: {
+                status: TransactionStatus.InvalidTransaction,
+                errorMsg: "Transaction result undefined",
+              },
+            }
 
-          const walletBalances: AccountsGetBalancesResponse = await invoke("get_balances", {})
-          const txResult = txReceipt.result as FinalizeResult
-          if (!isAccept(txResult.result)) return []
+          const txSimulation: TxSimulation = {
+            status: txReceipt.status,
+            errorMsg: isReject(txResult?.result) ? (txResult.result.Reject as string) : "",
+          }
+
+          if (!isAccept(txResult.result)) return { balanceUpdates: [], txSimulation }
+
+          let walletBalances: AccountsGetBalancesResponse
+
+          try {
+            walletBalances = await invoke("get_balances", {})
+          } catch (error) {
+            console.error(error)
+            const e = typeof error === "string" ? error : "Get balances error"
+            dispatch(errorActions.showError({ message: e, errorSource: ErrorSource.FRONTEND }))
+          }
 
           const { up_substates } = txResult.result.Accept
-
           const balanceUpdates: BalanceUpdate[] = up_substates
             .map((upSubstate) => {
               const [substateId, { substate }] = upSubstate
-              if (!isVaultId(substateId) || !isVaultSubstate(substate)) return
-              if (!isFungible(substate.Vault.resource_container)) return
+              if (!isVaultId(substateId) || !isVaultSubstate(substate)) return undefined
+              if (!isFungible(substate.Vault.resource_container)) return undefined
               const userBalance = walletBalances.balances.find((balance) => {
                 if (!isVaultId(balance.vault_address)) return false
                 return balance.vault_address.Vault === substateId.Vault
               })
-              if (!userBalance) return
+              if (!userBalance) return undefined
               return {
                 vaultAddress: substateId.Vault,
                 tokenSymbol: userBalance.token_symbol || "",
@@ -98,12 +136,13 @@ export const initializeAction = () => ({
                 newBalance: substate.Vault.resource_container.Fungible.amount,
               }
             })
-            .filter((vault) => vault !== undefined)
-          return balanceUpdates
+            .filter((vault): vault is BalanceUpdate => vault !== undefined)
+          return { balanceUpdates, txSimulation }
         }
+        // tx submit
         const submit = async () => {
           try {
-            const result = await provider.runOne(_method, args)
+            const result = await provider.runOne(method, args)
             if (event.source) {
               event.source.postMessage({ id, result, type: "provider-call" }, { targetOrigin: event.origin })
             }
@@ -113,6 +152,7 @@ export const initializeAction = () => ({
             dispatch(errorActions.showError({ message: e, errorSource: ErrorSource.FRONTEND }))
           }
         }
+        // tx cancel
         const cancel = async () => {
           if (event.source) {
             event.source.postMessage(
@@ -126,11 +166,11 @@ export const initializeAction = () => ({
           cancel,
           runSimulation,
           status: "pending",
-          methodName: _method,
+          methodName: method,
           args,
           id,
         }
-        if (_method === "submitTransaction") {
+        if (method === "submitTransaction") {
           dispatch(transactionActions.addTransaction({ transaction }))
         } else {
           dispatch(transactionActions.sendTransactionRequest({ transaction }))
