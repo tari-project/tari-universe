@@ -23,6 +23,7 @@ mod fs;
 mod download_utils;
 mod progress_tracker;
 mod utils;
+mod tests;
 
 use commands::{
   call_wallet,
