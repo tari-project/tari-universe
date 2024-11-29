@@ -8,6 +8,7 @@ import {
 } from "./installedTapplets.types"
 import { invoke } from "@tauri-apps/api/core"
 import { tappletProvidersActions } from "../tappletProviders/tappletProviders.slice"
+import { getTappProviderId } from "../../components/ActiveTapplet"
 
 export const initializeAction = () => ({
   actionCreator: installedTappletsActions.initializeRequest,
@@ -36,7 +37,9 @@ export const deleteInstalledTappletAction = () => ({
 
       listenerApi.dispatch(installedTappletsActions.deleteInstalledTappletSuccess({}))
       listenerApi.dispatch(installedTappletsActions.initializeRequest({}))
-      listenerApi.dispatch(tappletProvidersActions.deleteTappProviderRequest({ tappletId: Number(tappletId) }))
+      listenerApi.dispatch(
+        tappletProvidersActions.deleteTappProviderRequest({ id: getTappProviderId({ installedTappletId: tappletId }) })
+      )
     } catch (error) {
       listenerApi.dispatch(installedTappletsActions.deleteInstalledTappletFailure({ errorMsg: error as string }))
     }

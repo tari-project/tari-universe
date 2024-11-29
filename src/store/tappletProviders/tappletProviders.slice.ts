@@ -11,11 +11,11 @@ import {
   InitTappletProvidersFailurePayload,
   InitTappletProvidersRequestPayload,
   InitTappletProvidersSuccessPayload,
-  TappletProvider,
   UpdateTappletProviderFailurePayload,
   UpdateTappletProviderRequestPayload,
   UpdateTappletProviderSuccessPayload,
 } from "./tappletProviders.types"
+import { TappletProvider } from "@provider/TappletProvider"
 
 export const tappletProvidersAdapter = createEntityAdapter<TappletProvider>()
 
@@ -35,7 +35,7 @@ const tappletProvidersSlice = createSlice({
     addTappProviderFailure: (_, _action: PayloadAction<AddTappletProviderFailurePayload>) => {},
     deleteTappProviderRequest: (_, _action: PayloadAction<DeleteTappletProviderRequestPayload>) => {},
     deleteTappProviderSuccess: (state, action: PayloadAction<DeleteTappletProviderSuccessPayload>) => {
-      tappletProvidersAdapter.removeOne(state, action.payload.tappletProviderId)
+      tappletProvidersAdapter.removeOne(state, action.payload.id)
     },
     deleteTappProviderFailure: (_, _action: PayloadAction<DeleteTappletProviderFailurePayload>) => {},
     updateTappProviderRequest: (_, _action: PayloadAction<UpdateTappletProviderRequestPayload>) => {},
@@ -43,7 +43,7 @@ const tappletProvidersSlice = createSlice({
       tappletProvidersAdapter.updateOne(state, {
         id: action.payload.tappletProvider.id,
         changes: {
-          provider: action.payload.tappletProvider.provider,
+          params: action.payload.tappletProvider.params,
         },
       })
     },

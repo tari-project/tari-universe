@@ -1,14 +1,9 @@
-import { TUInternalProvider } from "@provider/TUInternalProvider"
+import { TappletProvider } from "@provider/TappletProvider"
 import { EntityState } from "@reduxjs/toolkit"
 import { LaunchedTappResult, TappletPermissions } from "@type/tapplet"
 
-export type TappletProvider = {
-  id: number
-  provider: TUInternalProvider
-}
-
 export type TappletProvidersStoreState = {
-  tappletProviders: EntityState<TappletProvider, number>
+  tappletProviders: EntityState<TappletProvider, string>
 }
 
 export type InitTappletProvidersRequestPayload = {}
@@ -19,7 +14,7 @@ export type InitTappletProvidersSuccessPayload = {
   tappletProviders: TappletProvider[]
 }
 export type AddTappletProviderRequestPayload = {
-  installedTappletId: number
+  id: string
   launchedTappParams: LaunchedTappResult
 }
 export type AddTappletProviderSuccessPayload = {
@@ -30,17 +25,17 @@ export type AddTappletProviderFailurePayload = {
 }
 
 export type DeleteTappletProviderRequestPayload = {
-  tappletId: number
+  id: string
 }
 export type DeleteTappletProviderSuccessPayload = {
-  tappletProviderId: number
+  id: string
 }
 export type DeleteTappletProviderFailurePayload = {
   errorMsg: string
 }
 
 export type UpdateTappletProviderRequestPayload = {
-  tappletId: number
+  id: string
   permissions: TappletPermissions
 }
 export type UpdateTappletProviderSuccessPayload = {

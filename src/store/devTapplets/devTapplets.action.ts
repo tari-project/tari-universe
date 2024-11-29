@@ -3,6 +3,7 @@ import { devTappletsActions } from "./devTapplets.slice"
 import { AddDevTappletReqPayload, DeleteDevTappletReqPayload, InitDevTappletsReqPayload } from "./devTapplets.types"
 import { invoke } from "@tauri-apps/api/core"
 import { tappletProvidersActions } from "../tappletProviders/tappletProviders.slice"
+import { getTappProviderId } from "../../components/ActiveTapplet"
 
 export const initializeAction = () => ({
   actionCreator: devTappletsActions.initializeRequest,
@@ -31,7 +32,9 @@ export const deleteDevTappletAction = () => ({
 
       listenerApi.dispatch(devTappletsActions.deleteDevTappletSuccess({}))
       listenerApi.dispatch(devTappletsActions.initializeRequest({}))
-      listenerApi.dispatch(tappletProvidersActions.deleteTappProviderRequest({ tappletId: Number(item.id) }))
+      listenerApi.dispatch(
+        tappletProvidersActions.deleteTappProviderRequest({ id: getTappProviderId({ devTappletId: item.id }) })
+      )
     } catch (error) {
       listenerApi.dispatch(devTappletsActions.deleteDevTappletFailure({ errorMsg: error as string }))
     }

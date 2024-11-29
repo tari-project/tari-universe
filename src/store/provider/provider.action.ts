@@ -20,14 +20,10 @@ export const initializeAction = () => ({
   ) => {
     try {
       console.log("[store provider] INIT")
-      //TODO set default permissions
+      //TODO set default permissions - at the moment 'Admin' is ok
       let permissions = new TariPermissions()
       let optionalPermissions = new TariPermissions()
-      permissions.addPermission(new TariPermissionAccountInfo())
-      permissions.addPermission(new TariPermissionAccountList())
-      permissions.addPermission(new TariPermissionKeyList())
-      permissions.addPermission(new TariPermissionSubstatesRead())
-      permissions.addPermission(new TariPermissionTransactionSend())
+      permissions.addPermission("Admin")
 
       const params: WalletDaemonParameters = {
         permissions,

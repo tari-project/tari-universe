@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react"
-import { TUInternalProvider } from "@provider/TUInternalProvider"
 import { useDispatch } from "react-redux"
 import { transactionActions } from "../store/transaction/transaction.slice"
+import { TappletProvider } from "@provider/TappletProvider"
 
 type TappletProps = {
   source: string
-  provider: TUInternalProvider
+  provider: TappletProvider
 }
 
 export const Tapplet: React.FC<TappletProps> = ({ source, provider }) => {

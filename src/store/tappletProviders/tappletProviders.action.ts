@@ -4,12 +4,11 @@ import {
   AddTappletProviderRequestPayload,
   DeleteTappletProviderRequestPayload,
   InitTappletProvidersRequestPayload,
-  TappletProvider,
   UpdateTappletProviderRequestPayload,
 } from "./tappletProviders.types"
-import { TariPermissions, WalletDaemonParameters } from "@tari-project/tarijs"
-import { TUInternalProvider } from "@provider/TUInternalProvider"
+import { TariPermissions } from "@tari-project/tarijs"
 import { toPermission } from "@type/tariPermissions"
+import { TappletProvider, TappletProviderParams } from "@provider/TappletProvider"
 
 export const initializeAction = () => ({
   actionCreator: tappletProvidersActions.initializeRequest,
@@ -18,7 +17,7 @@ export const initializeAction = () => ({
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
     try {
-      listenerApi.dispatch(tappletProvidersActions.initializeSuccess({ tappletProviders: [] })) //TODO empty or fetch?
+      listenerApi.dispatch(tappletProvidersActions.initializeSuccess({ tappletProviders: [] }))
     } catch (error) {
       listenerApi.dispatch(tappletProvidersActions.initializeFailure({ errorMsg: error as string }))
     }
@@ -46,14 +45,12 @@ export const addTappProviderAction = () => ({
           optionalPermissions.addPermission(toPermission(p))
         )
       }
-      const params: WalletDaemonParameters = {
-        permissions: requiredPermissions,
-        optionalPermissions,
+      const params: TappletProviderParams = {
+        id: action.payload.id,
+        permissions: launchedTappParams.permissions,
       }
-      const provider: TappletProvider = {
-        id: action.payload.installedTappletId, //TODO find a way to distinguish installedTappledId and devTappletId (can the same)
-        provider: TUInternalProvider.build(params),
-      }
+      const provider: TappletProvider = TappletProvider.build(params)
+
       console.log("[store tapp provider] ADD TAPP PROVIDER", provider)
       listenerApi.dispatch(tappletProvidersActions.addTappProviderSuccess({ tappletProvider: provider }))
     } catch (error) {
@@ -68,10 +65,10 @@ export const deleteTappletProviderAction = () => ({
     action: PayloadAction<DeleteTappletProviderRequestPayload>,
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
-    const tappletProviderId = action.payload.tappletId
-    console.log("[store tapp provider] DELETE tapp ID ", tappletProviderId)
+    const id = action.payload.id
+    console.log("[store tapp provider] DELETE tapp ID ", id)
     try {
-      listenerApi.dispatch(tappletProvidersActions.deleteTappProviderSuccess({ tappletProviderId }))
+      listenerApi.dispatch(tappletProvidersActions.deleteTappProviderSuccess({ id }))
     } catch (error) {
       listenerApi.dispatch(tappletProvidersActions.deleteTappProviderFailure({ errorMsg: error as string }))
     }
@@ -84,21 +81,12 @@ export const updateTappletProviderAction = () => ({
     action: PayloadAction<UpdateTappletProviderRequestPayload>,
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
-    const id = action.payload.tappletId
-    let requiredPermissions = new TariPermissions()
-    let optionalPermissions = new TariPermissions()
-    if (action.payload.permissions) {
-      action.payload.permissions.requiredPermissions.map((p) => requiredPermissions.addPermission(toPermission(p)))
-      action.payload.permissions.optionalPermissions.map((p) => optionalPermissions.addPermission(toPermission(p)))
+    const params: TappletProviderParams = {
+      id: action.payload.id,
+      permissions: action.payload.permissions,
     }
-    const params: WalletDaemonParameters = {
-      permissions: requiredPermissions,
-      optionalPermissions,
-    }
-    const provider: TappletProvider = {
-      id,
-      provider: TUInternalProvider.build(params),
-    }
+    const provider: TappletProvider = TappletProvider.build(params)
+
     try {
       listenerApi.dispatch(tappletProvidersActions.updateTappProviderSuccess({ tappletProvider: provider }))
     } catch (error) {

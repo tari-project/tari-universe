@@ -12,8 +12,18 @@ import { tappletProvidersActions } from "../store/tappletProviders/tappletProvid
 import { RootState } from "../store/store"
 import { tappletProviderSelector } from "../store/tappletProviders/tappletProviders.selector"
 
-const selectTappProviderById = (state: RootState, id?: number) =>
+const selectTappProviderById = (state: RootState, id?: string) =>
   id ? tappletProviderSelector.getTappletProviderById(state, id) : null
+
+export type TappProviderIdParam = {
+  installedTappletId?: number | string
+  devTappletId?: number | string
+}
+export const getTappProviderId = (tappId: TappProviderIdParam): string => {
+  if (tappId.devTappletId) return `DTP${tappId.devTappletId}`
+  if (tappId.installedTappletId) return `TP${tappId.installedTappletId}`
+  return "undefined-id"
+}
 
 export function ActiveTapplet() {
   const { t } = useTranslation("components")
@@ -21,7 +31,8 @@ export function ActiveTapplet() {
   const dispatch = useDispatch()
   const [tappletAddress, setTappletAddress] = useState("")
   const installedTappletId = Number(id)
-  const tappProvider = useSelector((state: RootState) => selectTappProviderById(state, Number(id)))
+  const tappProviderId = getTappProviderId({ installedTappletId: installedTappletId })
+  const tappProvider = useSelector((state: RootState) => selectTappProviderById(state, tappProviderId))
 
   useEffect(() => {
     invoke("launch_tapplet", { installedTappletId })
@@ -29,11 +40,11 @@ export function ActiveTapplet() {
         const launchedTappParams: LaunchedTappResult = res
         setTappletAddress(launchedTappParams.endpoint)
         if (launchedTappParams.permissions) {
-          if (id != tappProvider?.id) {
+          if (!tappProvider) {
             console.log("DEV TAPP dispatch")
             dispatch(
               tappletProvidersActions.addTappProviderReq({
-                installedTappletId: Number(id),
+                id: tappProviderId,
                 launchedTappParams: {
                   endpoint: launchedTappParams.endpoint,
                   permissions: launchedTappParams.permissions,
@@ -45,7 +56,7 @@ export function ActiveTapplet() {
             // TODO check if update needed
             dispatch(
               tappletProvidersActions.updateTappProviderRequest({
-                tappletId: Number(id),
+                id: tappProviderId,
                 permissions: launchedTappParams.permissions,
               })
             )
@@ -72,7 +83,7 @@ export function ActiveTapplet() {
   return (
     <Box height="100%">
       {tappletAddress && tappProvider ? (
-        <Tapplet source={tappletAddress} provider={tappProvider.provider} />
+        <Tapplet source={tappletAddress} provider={tappProvider} />
       ) : (
         <Typography>{t("taplet-obtain-failure")}</Typography>
       )}

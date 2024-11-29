@@ -9,15 +9,17 @@ import { ErrorSource } from "../store/error/error.types"
 import { tappletProvidersActions } from "../store/tappletProviders/tappletProviders.slice"
 import { tappletProviderSelector } from "../store/tappletProviders/tappletProviders.selector"
 import { RootState } from "../store/store"
+import { getTappProviderId } from "./ActiveTapplet"
 
-const selectTappProviderById = (state: RootState, id?: number) =>
+const selectTappProviderById = (state: RootState, id?: string) =>
   id ? tappletProviderSelector.getTappletProviderById(state, id) : null
 
 export function ActiveDevTapplet() {
   let { state: devTapplet }: { state: DevTapplet } = useLocation()
   const dispatch = useDispatch()
   const [isVerified, setIsVerified] = useState<boolean>(false)
-  const tappProvider = useSelector((state: RootState) => selectTappProviderById(state, Number(devTapplet.id)))
+  const tappProviderId = getTappProviderId({ devTappletId: devTapplet.id })
+  const tappProvider = useSelector((state: RootState) => selectTappProviderById(state, tappProviderId))
   console.log("^^^ tp", tappProvider)
 
   useEffect(() => {
@@ -30,11 +32,11 @@ export function ActiveDevTapplet() {
           console.log("DEV TAPP config", config)
           console.log("DEV TAPP devTapplet", devTapplet)
           if (config?.permissions) {
-            if (Number(devTapplet.id) != tappProvider?.id) {
+            if (!tappProvider) {
               console.log("DEV TAPP dispatch")
               dispatch(
                 tappletProvidersActions.addTappProviderReq({
-                  installedTappletId: Number(devTapplet.id),
+                  id: tappProviderId,
                   launchedTappParams: {
                     endpoint: devTapplet?.endpoint,
                     permissions: config.permissions,
@@ -46,7 +48,7 @@ export function ActiveDevTapplet() {
               // TODO check if update needed
               dispatch(
                 tappletProvidersActions.updateTappProviderRequest({
-                  tappletId: Number(devTapplet.id),
+                  id: tappProviderId,
                   permissions: config.permissions,
                 })
               )
@@ -84,7 +86,7 @@ export function ActiveDevTapplet() {
 
   return (
     <Box height="100%">
-      {isVerified && tappProvider && <Tapplet source={devTapplet.endpoint} provider={tappProvider.provider} />}
+      {isVerified && tappProvider && <Tapplet source={devTapplet.endpoint} provider={tappProvider} />}
     </Box>
   )
 }
