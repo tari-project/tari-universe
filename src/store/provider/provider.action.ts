@@ -14,7 +14,6 @@ export const initializeAction = () => ({
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
     try {
-      console.log("[store provider] INIT")
       //TODO set default permissions - at the moment 'Admin' is ok
       let permissions = new TariPermissions()
       let optionalPermissions = new TariPermissions()

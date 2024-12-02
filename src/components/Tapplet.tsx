@@ -24,7 +24,6 @@ export const Tapplet: React.FC<TappletProps> = ({ source, provider }) => {
   }
 
   function handleMessage(event: MessageEvent) {
-    console.log("[Tapplet] handle message type", event.data.type)
     if (event.data.type === "request-parent-size") {
       if (tappletRef.current) {
         const height = tappletRef.current.offsetHeight
@@ -35,13 +34,11 @@ export const Tapplet: React.FC<TappletProps> = ({ source, provider }) => {
         provider?.sendWindowSizeMessage(tappletWindow, source)
       }
     } else if (event.data.type === "provider-call") {
-      console.log("[Tapplet] Tapplet", event.data)
       dispatch(transactionActions.initializeRequest({ provider, event }))
     }
   }
 
   useEffect(() => {
-    console.log("inisde useeffect")
     window.addEventListener("resize", sendWindowSize)
     window.addEventListener("message", handleMessage)
 

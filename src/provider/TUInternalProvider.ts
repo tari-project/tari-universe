@@ -56,14 +56,12 @@ export class TUInternalProvider implements TariProvider {
   }
 
   public async createFreeTestCoins(accountName?: string, amount = 1_000_000, fee?: number): Promise<Account> {
-    console.log("### free coins", accountName)
     const res = await this.client.createFreeTestCoins({
       account: (accountName && { Name: accountName }) || null,
       amount,
       max_fee: fee ?? null,
       key_id: null,
     })
-    console.log("### free coins response", res)
     return {
       account_id: res.account.key_index,
       address: (res.account.address as { Component: string }).Component,

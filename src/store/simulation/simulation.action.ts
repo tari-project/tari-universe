@@ -12,22 +12,8 @@ export const runTransactionSimulationAction = () => ({
   ) => {
     const { transactionId } = action.payload
     const state = listenerApi.getState() as RootState
-    const provider = state.provider.provider //TODO use tapplet provider not TUInternal
     const dispatch = listenerApi.dispatch
-    console.log("[store simulation] tx id", action.payload.transactionId)
-
     const { runSimulation } = state.transaction.entities[transactionId]
-
-    if (!provider) {
-      dispatch(
-        simulationActions.runSimulationFailure({
-          transactionId,
-          errorMsg: "Provider not found",
-          transaction: { status: TransactionStatus.InvalidTransaction, errorMsg: "Provider not found" },
-        })
-      )
-      return
-    }
 
     try {
       const simulationResult = await runSimulation()

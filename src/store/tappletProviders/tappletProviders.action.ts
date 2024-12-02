@@ -31,9 +31,7 @@ export const addTappProviderAction = () => ({
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
     try {
-      console.log("[store tapp provider]  ADD PROVIDER ACTION")
       const launchedTappParams = action.payload.launchedTappParams
-      console.log("[store tapp provider]  ADD PROVIDER LAUNCHED", launchedTappParams)
 
       let requiredPermissions = new TariPermissions()
       let optionalPermissions = new TariPermissions()
@@ -51,7 +49,6 @@ export const addTappProviderAction = () => ({
       }
       const provider: TappletProvider = TappletProvider.build(params)
 
-      console.log("[store tapp provider] ADD TAPP PROVIDER", provider)
       listenerApi.dispatch(tappletProvidersActions.addTappProviderSuccess({ tappletProvider: provider }))
     } catch (error) {
       listenerApi.dispatch(tappletProvidersActions.addTappProviderFailure({ errorMsg: error as string }))
@@ -66,7 +63,6 @@ export const deleteTappletProviderAction = () => ({
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
     const id = action.payload.id
-    console.log("[store tapp provider] DELETE tapp ID ", id)
     try {
       listenerApi.dispatch(tappletProvidersActions.deleteTappProviderSuccess({ id }))
     } catch (error) {

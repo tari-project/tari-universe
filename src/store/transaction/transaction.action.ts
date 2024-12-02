@@ -16,7 +16,6 @@ export const addTransactionAction = () => ({
     action: PayloadAction<TransactionRequestPayload>,
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
-    console.log("[store tx] addTxAction", action.payload.transaction)
     const { id } = action.payload.transaction
     const dispatch = listenerApi.dispatch
 
@@ -35,7 +34,6 @@ export const executeTransactionAction = () => ({
 
     try {
       submit()
-      console.log("[store tx] submit done", methodName)
       dispatch(transactionActions.sendTransactionSuccess({ id }))
     } catch (error) {
       let message = "Error while executing transaction"
@@ -92,12 +90,9 @@ export const initializeTransactionAction = () => ({
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
     try {
-      console.log("[store tx] INIT TRANSACTION WOW")
       const dispatch = listenerApi.dispatch
       const provider = action.payload.provider
       const event = action.payload.event
-      console.log("[store tx] init tx event", event)
-      console.log("[store tx] init tx provider", provider)
 
       if (!event.source) {
         dispatch(errorActions.showError({ message: "no-source-in-event", errorSource: ErrorSource.FRONTEND }))
@@ -109,10 +104,8 @@ export const initializeTransactionAction = () => ({
       }
 
       const { methodName, args, id } = event.data
-      console.log("[store tx] INIT TRANSACTION method", methodName)
 
       const runSimulation = async (): Promise<{ balanceUpdates: BalanceUpdate[]; txSimulation: TxSimulation }> => {
-        console.log("[store tx] RUN SIMUL provider", provider.id)
         if (methodName !== "submitTransaction") {
           return {
             balanceUpdates: [],
@@ -183,24 +176,19 @@ export const initializeTransactionAction = () => ({
       }
 
       const submit = async () => {
-        console.log("[store tx] RUN TX SUBMIT provider", provider.id)
         try {
           const result = await provider.runOne(methodName, args)
-          console.log("[store tx] SUBMIT: result provider action", result)
+
           if (event.source) {
-            console.log("[store tx] SUBMIT: provider action event")
             event.source.postMessage({ id, result, type: "provider-call" }, { targetOrigin: event.origin })
-            console.log("[store tx] SUBMIT: provider action event ok")
           }
         } catch (error) {
-          console.log("[store tx] SUBMIT: provider action event error")
           console.error(error)
           const e = typeof error === "string" ? error : "Provider send request error"
           dispatch(errorActions.showError({ message: e, errorSource: ErrorSource.FRONTEND }))
         }
       }
       const cancel = async () => {
-        console.log("[store tx] RUN TX CANCEL provider", provider.id)
         if (event.source) {
           event.source.postMessage(
             { id, result: {}, resultError: "Transaction was cancelled", type: "provider-call" },
@@ -218,10 +206,8 @@ export const initializeTransactionAction = () => ({
         id,
       }
       if (methodName === "submitTransaction") {
-        console.log("[store tx] tx action add tx", methodName)
         dispatch(transactionActions.addTransaction({ transaction }))
       } else {
-        console.log("[store tx] tx action send request", methodName)
         dispatch(transactionActions.sendTransactionRequest({ transaction }))
       }
     } catch (error) {

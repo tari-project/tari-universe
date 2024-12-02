@@ -16,20 +16,17 @@ export function ActiveDevTapplet() {
   const [isVerified, setIsVerified] = useState<boolean>(false)
   const tappProviderId = getTappProviderId({ devTappletId: devTapplet.id })
   const tappProvider = useSelector((state: RootState) => selectTappProviderById(state, tappProviderId))
-  console.log("[ActiveDEVTapplet] provider", tappProvider)
 
   useEffect(() => {
     const fetchTappletConfig = async () => {
       try {
         const config: TappletConfig = await (await fetch(`${devTapplet?.endpoint}/tapplet.config.json`)).json() //TODO add const as path to config
-        console.log("[ActiveDEVTapplet]")
+
         if (config?.packageName === devTapplet?.package_name) {
           setIsVerified(true)
-          console.log("[ActiveDEVTapplet] config", config)
-          console.log("[ActiveDEVTapplet] devTapplet", devTapplet)
+
           if (config?.permissions) {
             if (!tappProvider) {
-              console.log("[ActiveDEVTapplet] dispatch")
               dispatch(
                 tappletProvidersActions.addTappProviderReq({
                   id: tappProviderId,
