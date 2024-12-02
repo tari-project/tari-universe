@@ -2,7 +2,6 @@ import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "
 import { transactionActions } from "./transaction.slice"
 import { InitTransactionRequestPayload, Transaction, TransactionRequestPayload } from "./transaction.types"
 import { errorActions } from "../error/error.slice"
-import { RootState } from "../store"
 import { simulationActions } from "../simulation/simulation.slice"
 import { ErrorSource } from "../error/error.types"
 import { SubmitTransactionRequest, TransactionStatus } from "@tari-project/tarijs"
@@ -32,15 +31,7 @@ export const executeTransactionAction = () => ({
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
     const { id, submit, methodName } = action.payload.transaction
-    const state = listenerApi.getState() as RootState
-    const provider = state.provider.provider //TODO SHOULD BE USED TAPPLET PROVIDER NOT TUINTERNAL
     const dispatch = listenerApi.dispatch
-    console.log("[store tx] PROVIDER", provider)
-
-    if (!provider) {
-      dispatch(transactionActions.sendTransactionFailure({ id, errorMsg: "Provider not initialized" }))
-      return
-    }
 
     try {
       submit()
@@ -65,14 +56,7 @@ export const cancelTransactionAction = () => ({
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
     const { id, cancel } = action.payload.transaction
-    const state = listenerApi.getState() as RootState
-    const provider = state.provider.provider //TODO use tapplet provider not TUInternal
     const dispatch = listenerApi.dispatch
-
-    if (!provider) {
-      dispatch(transactionActions.sendTransactionFailure({ id, errorMsg: "Provider not initialized" }))
-      return
-    }
 
     try {
       cancel()
@@ -128,6 +112,7 @@ export const initializeTransactionAction = () => ({
       console.log("[store tx] INIT TRANSACTION method", methodName)
 
       const runSimulation = async (): Promise<{ balanceUpdates: BalanceUpdate[]; txSimulation: TxSimulation }> => {
+        console.log("[store tx] RUN SIMUL provider", provider.id)
         if (methodName !== "submitTransaction") {
           return {
             balanceUpdates: [],
@@ -198,6 +183,7 @@ export const initializeTransactionAction = () => ({
       }
 
       const submit = async () => {
+        console.log("[store tx] RUN TX SUBMIT provider", provider.id)
         try {
           const result = await provider.runOne(methodName, args)
           console.log("[store tx] SUBMIT: result provider action", result)
@@ -214,6 +200,7 @@ export const initializeTransactionAction = () => ({
         }
       }
       const cancel = async () => {
+        console.log("[store tx] RUN TX CANCEL provider", provider.id)
         if (event.source) {
           event.source.postMessage(
             { id, result: {}, resultError: "Transaction was cancelled", type: "provider-call" },
