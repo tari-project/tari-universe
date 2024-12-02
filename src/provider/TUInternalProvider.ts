@@ -22,14 +22,8 @@ import {
   WalletDaemonParameters,
 } from "@tari-project/tarijs"
 import { ListSubstatesResponse } from "@tari-project/tarijs/dist/providers"
-import { TUProviderMethod } from "../store/transaction/transaction.types"
 import { IPCRpcTransport } from "./ipc_transport"
 import { ComponentAccessRules } from "@tari-project/typescript-bindings"
-
-export type WindowSize = {
-  width: number
-  height: number
-}
 
 export class TUInternalProvider implements TariProvider {
   public providerName = "TUInternalProvider"
@@ -59,20 +53,6 @@ export class TUInternalProvider implements TariProvider {
   static build(params: WalletDaemonParameters): TUInternalProvider {
     const client = WalletDaemonClient.new(new IPCRpcTransport())
     return new TUInternalProvider(params, client)
-  }
-
-  public setWindowSize(width: number, height: number): void {
-    this.width = width
-    this.height = height
-  }
-
-  public sendWindowSizeMessage(tappletWindow: Window | null, targetOrigin: string): void {
-    tappletWindow?.postMessage({ height: this.height, width: this.width, type: "resize" }, targetOrigin)
-  }
-
-  async runOne(method: TUProviderMethod, args: any[]): Promise<any> {
-    let res = (this[method] as (...args: any) => Promise<any>)(...args)
-    return res
   }
 
   public async createFreeTestCoins(accountName?: string, amount = 1_000_000, fee?: number): Promise<Account> {
@@ -111,10 +91,6 @@ export class TUInternalProvider implements TariProvider {
       public_key: res.public_key,
       resources: [],
     }
-  }
-
-  public requestParentSize(): Promise<WindowSize> {
-    return new Promise<WindowSize>((resolve, _reject) => resolve({ width: this.width, height: this.height }))
   }
 
   public async getAccount(): Promise<Account> {

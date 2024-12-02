@@ -8,7 +8,7 @@ import {
 } from "./installedTapplets.types"
 import { invoke } from "@tauri-apps/api/core"
 import { tappletProvidersActions } from "../tappletProviders/tappletProviders.slice"
-import { getTappProviderId } from "../../components/ActiveTapplet"
+import { getTappProviderId } from "../../helpers/provider"
 
 export const initializeAction = () => ({
   actionCreator: installedTappletsActions.initializeRequest,

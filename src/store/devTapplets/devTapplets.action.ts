@@ -3,7 +3,7 @@ import { devTappletsActions } from "./devTapplets.slice"
 import { AddDevTappletReqPayload, DeleteDevTappletReqPayload, InitDevTappletsReqPayload } from "./devTapplets.types"
 import { invoke } from "@tauri-apps/api/core"
 import { tappletProvidersActions } from "../tappletProviders/tappletProviders.slice"
-import { getTappProviderId } from "../../components/ActiveTapplet"
+import { getTappProviderId } from "../../helpers/provider"
 
 export const initializeAction = () => ({
   actionCreator: devTappletsActions.initializeRequest,

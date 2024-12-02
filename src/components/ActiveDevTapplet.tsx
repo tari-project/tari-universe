@@ -7,12 +7,8 @@ import { useDispatch, useSelector } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
 import { ErrorSource } from "../store/error/error.types"
 import { tappletProvidersActions } from "../store/tappletProviders/tappletProviders.slice"
-import { tappletProviderSelector } from "../store/tappletProviders/tappletProviders.selector"
 import { RootState } from "../store/store"
-import { getTappProviderId } from "./ActiveTapplet"
-
-const selectTappProviderById = (state: RootState, id?: string) =>
-  id ? tappletProviderSelector.getTappletProviderById(state, id) : null
+import { getTappProviderId, selectTappProviderById } from "../helpers/provider"
 
 export function ActiveDevTapplet() {
   let { state: devTapplet }: { state: DevTapplet } = useLocation()
