@@ -6,7 +6,7 @@ use crate::{
   database::models::TappletVersion,
   error::{ Error::{ self, IOError, JsonParsingError, RequestError }, IOError::*, RequestError::* },
   hash_calculator::calculate_checksum,
-  interface::{ RegisteredTapplets, TappletAssets, TappletConfig, TappletPermissions, TariPermission },
+  interface::{ RegisteredTapplets, TappletAssets, TappletConfig, TappletPermissions },
 };
 use log::{ error, warn };
 use crate::constants::TAPPLETS_INSTALLED_DIR;
