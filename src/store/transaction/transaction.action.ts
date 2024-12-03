@@ -29,7 +29,7 @@ export const executeTransactionAction = () => ({
     action: PayloadAction<TransactionRequestPayload>,
     listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
   ) => {
-    const { id, submit, methodName } = action.payload.transaction
+    const { id, submit } = action.payload.transaction
     const dispatch = listenerApi.dispatch
 
     try {
@@ -142,7 +142,7 @@ export const initializeTransactionAction = () => ({
 
         let walletBalances: AccountsGetBalancesResponse
         try {
-          // const walletBalances: AccountsGetBalancesResponse = await invoke("get_balances", {}) //TODO this always fails so used another fct as below
+          //TODO check if this works at all
           walletBalances = await provider.client.accountsGetBalances({
             account: null,
             refresh: true,

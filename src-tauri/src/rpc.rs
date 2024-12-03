@@ -113,7 +113,7 @@ pub async fn make_request<T: Serialize>(
   let resp = builder.json(&body).send().await?.json::<JsonRpcResponse>().await?;
   match resp.result {
     JsonRpcAnswer::Result(result) => {
-      info!(target: LOG_TARGET, "👁️‍🗨️ JSON rpc request {:?} result: {:?}", method_name, result);
+      info!(target: LOG_TARGET, "👁️‍🗨️ JSON rpc request {:?} completed successfully", method_name);
       Ok(result)
     }
     JsonRpcAnswer::Error(error) => {

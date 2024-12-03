@@ -1,4 +1,4 @@
-import { List, ListItem, ListItemText, Paper, Stack, Typography } from "@mui/material"
+import { Paper, Stack, Typography } from "@mui/material"
 import { useSelector } from "react-redux"
 import { useTranslation } from "react-i18next"
 import { accountSelector } from "../store/account/account.selector"
@@ -28,13 +28,6 @@ export const Account: React.FC = () => {
             variant="caption"
             textAlign="left"
           >{`Nr of Tapplet Providers: ${tappProviders.ids.length} `}</Typography>
-          <List sx={{ width: "100%" }} dense>
-            {tappProviders.ids.map((item, index) => (
-              <ListItem key={index} dense sx={{ padding: "0px" }}>
-                <ListItemText primary={`${item}`} sx={{ margin: 0, padding: "0px" }} />
-              </ListItem>
-            ))}
-          </List>
         </Stack>
       </Paper>
     </>
