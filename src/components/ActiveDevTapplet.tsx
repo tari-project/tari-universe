@@ -25,40 +25,33 @@ export function ActiveDevTapplet() {
         if (config?.packageName === devTapplet?.package_name) {
           setIsVerified(true)
 
-          if (config?.permissions) {
-            if (!tappProvider) {
-              dispatch(
-                tappletProvidersActions.addTappProviderReq({
-                  id: tappProviderId,
-                  launchedTappParams: {
-                    endpoint: devTapplet?.endpoint,
-                    permissions: config.permissions,
-                  },
-                })
-              )
-            } else {
-              // not sure if we should update it every time but I dont think so
-              // TODO check if update needed
-              dispatch(
-                tappletProvidersActions.updateTappProviderRequest({
-                  id: tappProviderId,
-                  permissions: config.permissions,
-                })
-              )
-            }
-          } else {
+          if (!config?.permissions) {
             dispatch(
               errorActions.showError({
                 message: `failed-to-fetch-tapp-config | error-${"Tapplet permissions undefined"}`,
                 errorSource: ErrorSource.BACKEND,
               })
             )
+            return
           }
-        } else {
+
+          if (!tappProvider) {
+            dispatch(
+              tappletProvidersActions.addTappProviderReq({
+                id: tappProviderId,
+                launchedTappParams: {
+                  endpoint: devTapplet?.endpoint,
+                  permissions: config.permissions,
+                },
+              })
+            )
+            return
+          }
+
           dispatch(
-            errorActions.showError({
-              message: `manifest-package-name-mismatch | expectedPackageName-${devTapplet?.package_name} & receivedPackageName-${config?.packageName} & endpoint-${devTapplet?.endpoint}`,
-              errorSource: ErrorSource.BACKEND,
+            tappletProvidersActions.updateTappProviderRequest({
+              id: tappProviderId,
+              permissions: config.permissions,
             })
           )
         }

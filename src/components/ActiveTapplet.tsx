@@ -26,35 +26,36 @@ export function ActiveTapplet() {
       .then((res: any) => {
         const launchedTappParams: LaunchedTappResult = res
         setTappletAddress(launchedTappParams.endpoint)
-        if (launchedTappParams.permissions) {
-          if (!tappProvider) {
-            dispatch(
-              tappletProvidersActions.addTappProviderReq({
-                id: tappProviderId,
-                launchedTappParams: {
-                  endpoint: launchedTappParams.endpoint,
-                  permissions: launchedTappParams.permissions,
-                },
-              })
-            )
-          } else {
-            // not sure if we should update it every time but I dont think so
-            // TODO check if update needed
-            dispatch(
-              tappletProvidersActions.updateTappProviderRequest({
-                id: tappProviderId,
-                permissions: launchedTappParams.permissions,
-              })
-            )
-          }
-        } else {
+        
+        if (!launchedTappParams.permissions) {
           dispatch(
             errorActions.showError({
               message: `failed-to-fetch-tapp-config | error-${"Tapplet permissions undefined"}`,
               errorSource: ErrorSource.BACKEND,
             })
           )
+          return
         }
+
+        if (!tappProvider) {
+          dispatch(
+            tappletProvidersActions.addTappProviderReq({
+              id: tappProviderId,
+              launchedTappParams: {
+                endpoint: launchedTappParams.endpoint,
+                permissions: launchedTappParams.permissions,
+              },
+            })
+          )
+          return
+        }
+
+        dispatch(
+          tappletProvidersActions.updateTappProviderRequest({
+            id: tappProviderId,
+            permissions: launchedTappParams.permissions,
+          })
+        )
       })
       .catch((error: string) => dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND })))
 
