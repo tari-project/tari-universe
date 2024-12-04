@@ -1,14 +1,16 @@
 import { useEffect, useRef } from "react"
-import { useSelector } from "react-redux"
-import { providerSelector } from "../store/provider/provider.selector"
+import { useDispatch } from "react-redux"
+import { transactionActions } from "../store/transaction/transaction.slice"
+import { TappletProvider } from "@provider/TappletProvider"
 
 type TappletProps = {
   source: string
+  provider: TappletProvider
 }
 
-export const Tapplet: React.FC<TappletProps> = ({ source }) => {
+export const Tapplet: React.FC<TappletProps> = ({ source, provider }) => {
   const tappletRef = useRef<HTMLIFrameElement | null>(null)
-  const provider = useSelector(providerSelector.selectProvider)
+  const dispatch = useDispatch()
 
   function sendWindowSize() {
     if (tappletRef.current) {
@@ -21,7 +23,7 @@ export const Tapplet: React.FC<TappletProps> = ({ source }) => {
     }
   }
 
-  function responseSizeRequest(event: MessageEvent) {
+  function handleMessage(event: MessageEvent) {
     if (event.data.type === "request-parent-size") {
       if (tappletRef.current) {
         const height = tappletRef.current.offsetHeight
@@ -31,16 +33,18 @@ export const Tapplet: React.FC<TappletProps> = ({ source }) => {
         provider?.setWindowSize(width, height)
         provider?.sendWindowSizeMessage(tappletWindow, source)
       }
+    } else if (event.data.type === "provider-call") {
+      dispatch(transactionActions.initializeRequest({ provider, event }))
     }
   }
 
   useEffect(() => {
     window.addEventListener("resize", sendWindowSize)
-    window.addEventListener("message", responseSizeRequest)
+    window.addEventListener("message", handleMessage)
 
     return () => {
       window.removeEventListener("resize", sendWindowSize)
-      window.removeEventListener("message", responseSizeRequest)
+      window.removeEventListener("message", handleMessage)
     }
   }, [])
 

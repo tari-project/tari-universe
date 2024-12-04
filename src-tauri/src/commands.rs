@@ -31,7 +31,7 @@ use crate::{
     InstalledTappletWithName,
     LaunchedTappResult,
     RegisteredTappletWithVersion,
-    TariPermission,
+    TappletPermissions,
   },
   progress_tracker::ProgressTracker,
   rpc::{ account_create, balances, free_coins, make_request },
@@ -162,7 +162,7 @@ pub async fn launch_tapplet(
     }
   }
 
-  let permissions: Vec<TariPermission> = match get_tapp_permissions(tapplet_path.clone()) {
+  let permissions: TappletPermissions = match get_tapp_permissions(tapplet_path.clone()) {
     Ok(p) => p,
     Err(e) => {
       error!(target: LOG_TARGET,"Error getting permissions: {:?}", e);
@@ -281,6 +281,7 @@ pub async fn fetch_tapplets(app_handle: AppHandle, db_connection: State<'_, Data
   for tapplet_manifest in tapplets.registered_tapplets.values() {
     let inserted_tapplet = store.create(&CreateTapplet::from(tapplet_manifest))?;
 
+    // TODO uncomment if audit data in manifest
     // for audit_data in tapplet_manifest.metadata.audits.iter() {
     //   store.create(
     //     &(CreateTappletAudit {
@@ -448,8 +449,9 @@ pub async fn add_dev_tapplet(
     package_name: &manifest_res.package_name,
     display_name: &manifest_res.display_name,
   };
-
-  store.create(&new_dev_tapplet)
+  let dev_tapplet = store.create(&new_dev_tapplet);
+  info!(target: LOG_TARGET,"✅ Dev tapplet added to db successfully: {:?}", new_dev_tapplet);
+  dev_tapplet
 }
 
 #[tauri::command]

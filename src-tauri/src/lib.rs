@@ -70,7 +70,7 @@ async fn try_get_tokens() -> (String, String) {
   loop {
     match permission_token().await {
       Ok(tokens) => {
-        info!(target: LOG_TARGET, "✅ WALLET DAEMON permission token found: {:?}", tokens);
+        info!(target: LOG_TARGET, "✅ Wallet Daemon permission token found");
         return tokens;
       }
       Err(e) => {

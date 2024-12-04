@@ -21,11 +21,12 @@ export const Wallet: React.FC = () => {
 
   useEffect(() => {
     refreshAccount()
-  }, [provider])
+  }, [provider, currentAccount])
 
   const refreshAccount = useCallback(async () => {
+    if (!provider) return
     try {
-      const { accounts } = await provider.getAccountsList() //TODO fix to get value not empty array - https://github.com/tari-project/tari-universe/issues/141
+      const { accounts } = await provider.getAccountsList()
       setAccountsList(accounts)
     } catch (error) {
       console.error(error)
@@ -36,6 +37,7 @@ export const Wallet: React.FC = () => {
   }, [provider])
 
   async function handleCreateAccount(accountName: string) {
+    if (!provider) return
     try {
       await provider.createFreeTestCoins(accountName)
       dispatch(
@@ -51,7 +53,8 @@ export const Wallet: React.FC = () => {
     }
   }
 
-  async function get_free_coins() {
+  async function getFreeTestCoins() {
+    if (!provider) return
     try {
       const currentAccountName = currentAccount?.account.name ?? undefined
       await provider.createFreeTestCoins(currentAccountName)
@@ -63,7 +66,8 @@ export const Wallet: React.FC = () => {
     }
   }
 
-  async function get_balances() {
+  async function getBalances() {
+    if (!provider) return
     try {
       const accountAddress = substateIdToString(currentAccount?.account.address ?? null)
       const resp = await provider.getAccountBalances(accountAddress)
@@ -82,7 +86,11 @@ export const Wallet: React.FC = () => {
         {t("tari-wallet-daemon", { ns: "components" })}
       </Typography>
       <Box display="flex" flexDirection="column" gap={2} alignItems="center" py={4}>
-        <SelectAccount onSubmit={handleCreateAccount} accountsList={accountsList} />
+        <SelectAccount
+          onSubmit={handleCreateAccount}
+          accountsList={accountsList}
+          currentAccount={currentAccount ?? undefined}
+        />
         <Paper variant="outlined" elevation={0} sx={{ padding: 1, borderRadius: 2, width: "auto", minWidth: 200 }}>
           <Stack direction="column" justifyContent="flex-end">
             <Typography variant="caption" textAlign="left">{`Name: ${currentAccount?.account.name}`}</Typography>
@@ -91,10 +99,10 @@ export const Wallet: React.FC = () => {
             })}: ${substateIdToString(currentAccount?.account.address ?? null)}`}</Typography>
           </Stack>
         </Paper>
-        <Button onClick={get_free_coins} variant="contained" sx={{ width: 200 }}>
+        <Button onClick={getFreeTestCoins} variant="contained" sx={{ width: 200 }}>
           {t("get-free-coins", { ns: "components" })}
         </Button>
-        <Button onClick={get_balances} variant="contained" sx={{ width: 200 }}>
+        <Button onClick={getBalances} variant="contained" sx={{ width: 200 }}>
           {t("get-balances", { ns: "components" })}
         </Button>
       </Box>

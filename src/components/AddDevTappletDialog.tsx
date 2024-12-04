@@ -9,6 +9,8 @@ import DialogTitle from "@mui/material/DialogTitle"
 import { devTappletsActions } from "../store/devTapplets/devTapplets.slice"
 import { useDispatch } from "react-redux"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
+import { TabKey } from "../views/Tabs"
 
 export default function AddDevTappletDialog() {
   const { t } = useTranslation(["components", "common"])
@@ -16,6 +18,7 @@ export default function AddDevTappletDialog() {
   const [hasError, setHasError] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const onSubmitHandler = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -25,6 +28,7 @@ export default function AddDevTappletDialog() {
     try {
       dispatch(devTappletsActions.addDevTappletRequest({ endpoint }))
       handleClose()
+      navigate(`/${TabKey.INSTALLED_TAPPLETS}`)
     } catch (error) {
       setHasError(true)
       setErrorMsg(error as string)

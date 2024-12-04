@@ -1,10 +1,10 @@
 import { TUInternalProvider } from "@provider/TUInternalProvider"
-import { TariPermission } from "@tari-project/tarijs/dist/providers/tari_universe"
+import { TappletPermissions } from "@type/tapplet"
 
 export type ProviderStoreState = {
   isInitialized: boolean
   provider: TUInternalProvider | null
-  permissions: TariPermission[]
+  permissions: TappletPermissions
 }
 
 export type InitProviderRequestPayload = {}
@@ -16,10 +16,10 @@ export type InitProviderSuccessPayload = {
 }
 
 export type UpdatePermissionsRequestPayload = {
-  permissions: TariPermission[]
+  permissions: TappletPermissions
 }
 export type UpdatePermissionsSuccessPayload = {
-  permissions: TariPermission[]
+  permissions: TappletPermissions
 }
 export type UpdatePermissionsFailurePayload = {
   errorMsg: string

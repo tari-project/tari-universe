@@ -6,7 +6,7 @@ import { Wallet } from "./components/Wallet"
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
 import { TappletsRegistered } from "./components/TappletsRegistered"
 import { TappletsInstalled } from "./components/TappletsInstalled"
-import { ActiveDevTapplet } from "./components/DevTapplet"
+import { ActiveDevTapplet } from "./components/ActiveDevTapplet"
 import { Button, Grid, Stack } from "@mui/material"
 import React, { useEffect } from "react"
 import { useDispatch } from "react-redux"
@@ -22,12 +22,14 @@ import { invoke } from "@tauri-apps/api/core"
 import { errorActions } from "./store/error/error.slice"
 import { ErrorSource } from "./store/error/error.types"
 import { Account } from "./components/Account"
+import { accountActions } from "./store/account/account.slice"
 
 function App() {
   const { t } = useTranslation(["navigation", "components"])
   const dispatch = useDispatch()
   useEffect(() => {
     dispatch(providerActions.initializeRequest({}))
+    dispatch(accountActions.initializeRequest({}))
     dispatch(registeredTappletsActions.initializeRequest({}))
     dispatch(installedTappletsActions.initializeRequest({}))
     dispatch(devTappletsActions.initializeRequest({}))
@@ -62,7 +64,6 @@ function App() {
           <Stack direction="row" gap={4} width="100%" justifyContent="flex-start">
             <Account />
           </Stack>
-
           <Stack direction="row" gap={4} gridArea="1 / 2 / 2 / 5" width="100%" justifyContent="center">
             <Link to={TabKey.WALLET} className="nav-item">
               {t("wallet")}

@@ -6,9 +6,9 @@ use crate::{
   database::models::TappletVersion,
   error::{ Error::{ self, IOError, JsonParsingError, RequestError }, IOError::*, RequestError::* },
   hash_calculator::calculate_checksum,
-  interface::{ RegisteredTapplets, TappletAssets, TappletConfig, TariPermission },
+  interface::{ RegisteredTapplets, TappletAssets, TappletConfig, TappletPermissions },
 };
-use log::error;
+use log::{ error, warn };
 use crate::constants::TAPPLETS_INSTALLED_DIR;
 pub const LOG_TARGET: &str = "tari::universe";
 
@@ -153,15 +153,22 @@ pub fn check_files_and_validate_checksum(tapp: TappletVersion, tapp_dir: PathBuf
   Ok(is_checksum_valid)
 }
 
-pub fn get_tapp_permissions(tapp_path: PathBuf) -> Result<Vec<TariPermission>, Error> {
+pub fn get_tapp_permissions(tapp_path: PathBuf) -> Result<TappletPermissions, Error> {
   // tapp_dir = universe.tari/tapplets_installed/<tapplet_name>/<version>/package
   let tapp_dir: PathBuf = tapp_path.join("package");
   let tapp_config = tapp_dir.join("dist").join("tapplet.config.json");
   if !tapp_config.exists() {
-    return Err(IOError(FailedToGetFilePath));
+    warn!(target: LOG_TARGET, "❌ Failed to get Tapplet permissions. Config file not found.");
+    return Ok(TappletPermissions {
+      required_permissions: vec![],
+      optional_permissions: vec![],
+    });
   }
 
   let config = fs::read_to_string(tapp_config.clone()).unwrap_or_default();
   let tapplet: TappletConfig = serde_json::from_str(&config).map_err(|e| JsonParsingError(e))?;
-  Ok(tapplet.permissions)
+  Ok(TappletPermissions {
+    required_permissions: tapplet.permissions.required_permissions,
+    optional_permissions: tapplet.permissions.optional_permissions,
+  })
 }

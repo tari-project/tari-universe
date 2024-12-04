@@ -1,12 +1,15 @@
 import { TUInternalProvider } from "@provider/TUInternalProvider"
 import { BalanceUpdate, TxSimulation } from "../simulation/simulation.types"
 import { SubmitTransactionRequest } from "@tari-project/tarijs"
+import { TransactionEvent } from "@type/transaction"
+import { TappletProvider } from "@provider/TappletProvider"
 
 export type TransactionStatus = "pending" | "success" | "failure" | "cancelled"
 export type TUProviderMethod = Exclude<keyof TUInternalProvider, "runOne">
+export type TappletProviderMethod = Exclude<keyof TappletProvider, "runOne">
 
 export type Transaction = {
-  methodName: TUProviderMethod
+  methodName: TappletProviderMethod
   args: SubmitTransactionRequest[]
   id: number
   submit: () => void
@@ -24,4 +27,12 @@ export type TransactionFailurePayload = {
 }
 export type TransactionSuccessPayload = {
   id: number
+}
+
+export type InitTransactionRequestPayload = {
+  provider: TappletProvider
+  event: MessageEvent<TransactionEvent>
+}
+export type InitTransactionFailurePayload = {
+  errorMsg: string
 }

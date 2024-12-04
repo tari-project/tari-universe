@@ -98,6 +98,7 @@ pub async fn make_request<T: Serialize>(
 ) -> Result<serde_json::Value, anyhow::Error> {
   let address = SocketAddr::from_str(JSON_CONNECT_ADDRESS).unwrap();
   let url = format!("http://{}", address);
+  let method_name = method.clone();
   let client = reqwest::Client::new();
   let body = JsonRpcRequest {
     id: 0,
@@ -112,11 +113,11 @@ pub async fn make_request<T: Serialize>(
   let resp = builder.json(&body).send().await?.json::<JsonRpcResponse>().await?;
   match resp.result {
     JsonRpcAnswer::Result(result) => {
-      info!(target: LOG_TARGET, "👁️‍🗨️ JSON rpc request result: {:?}", result);
+      info!(target: LOG_TARGET, "👁️‍🗨️ JSON rpc request {:?} completed successfully", method_name);
       Ok(result)
     }
     JsonRpcAnswer::Error(error) => {
-      error!(target: LOG_TARGET, "🚨 JSON rpc request error: {:?}", error);
+      error!(target: LOG_TARGET, "🚨 JSON rpc request {:?} error: {:?}", method_name, error);
       Err(anyhow::Error::msg(error.to_string()))
     }
   }

@@ -19,20 +19,34 @@ import {
   TransactionResult,
   TransactionStatus,
   VaultBalances,
-  WalletDaemonParameters,
 } from "@tari-project/tarijs"
 import { ListSubstatesResponse } from "@tari-project/tarijs/dist/providers"
+import { TappletProviderMethod } from "../store/transaction/transaction.types"
 import { IPCRpcTransport } from "./ipc_transport"
 import { ComponentAccessRules } from "@tari-project/typescript-bindings"
+import { TappletPermissions } from "@type/tapplet"
 
-export class TUInternalProvider implements TariProvider {
-  public providerName = "TUInternalProvider"
-  params: WalletDaemonParameters
+export type WindowSize = {
+  width: number
+  height: number
+}
+
+export type TappletProviderParams = {
+  id: string
+  permissions: TappletPermissions
+  name?: string
+  onConnection?: () => void
+}
+
+export class TappletProvider implements TariProvider {
+  public providerName = "TappletProvider"
+  id: string
+  params: TappletProviderParams
   client: WalletDaemonClient
   isProviderConnected: boolean
 
   private constructor(
-    params: WalletDaemonParameters,
+    params: TappletProviderParams,
     connection: WalletDaemonClient,
     public width = 0,
     public height = 0
@@ -40,6 +54,7 @@ export class TUInternalProvider implements TariProvider {
     this.params = params
     this.client = connection
     this.isProviderConnected = true
+    this.id = params.id
   }
 
   public isConnected(): boolean {
@@ -50,9 +65,23 @@ export class TUInternalProvider implements TariProvider {
     return this.client
   }
 
-  static build(params: WalletDaemonParameters): TUInternalProvider {
+  static build(params: TappletProviderParams): TappletProvider {
     const client = WalletDaemonClient.new(new IPCRpcTransport())
-    return new TUInternalProvider(params, client)
+    return new TappletProvider(params, client)
+  }
+
+  public setWindowSize(width: number, height: number): void {
+    this.width = width
+    this.height = height
+  }
+
+  public sendWindowSizeMessage(tappletWindow: Window | null, targetOrigin: string): void {
+    tappletWindow?.postMessage({ height: this.height, width: this.width, type: "resize" }, targetOrigin)
+  }
+
+  async runOne(method: TappletProviderMethod, args: any[]): Promise<any> {
+    let res = (this[method] as (...args: any) => Promise<any>)(...args)
+    return res
   }
 
   public async createFreeTestCoins(accountName?: string, amount = 1_000_000, fee?: number): Promise<Account> {
@@ -89,6 +118,10 @@ export class TUInternalProvider implements TariProvider {
       public_key: res.public_key,
       resources: [],
     }
+  }
+
+  public requestParentSize(): Promise<WindowSize> {
+    return new Promise<WindowSize>((resolve, _reject) => resolve({ width: this.width, height: this.height }))
   }
 
   public async getAccount(): Promise<Account> {
@@ -160,7 +193,7 @@ export class TUInternalProvider implements TariProvider {
       },
       signing_key_index: req.account_id,
       autofill_inputs: [],
-      detect_inputs: false, //TODO check if works for 'false'
+      detect_inputs: true,
       proof_ids: [],
     } as TransactionSubmitRequest
 

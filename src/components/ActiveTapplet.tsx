@@ -3,35 +3,59 @@ import { invoke } from "@tauri-apps/api/core"
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { Tapplet } from "./Tapplet"
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { errorActions } from "../store/error/error.slice"
 import { useTranslation } from "react-i18next"
 import { ErrorSource } from "../store/error/error.types"
-import { providerActions } from "../store/provider/provider.slice"
 import { LaunchedTappResult } from "@type/tapplet"
+import { tappletProvidersActions } from "../store/tappletProviders/tappletProviders.slice"
+import { RootState } from "../store/store"
+import { getTappProviderId, selectTappProviderById } from "../helpers/provider"
 
 export function ActiveTapplet() {
   const { t } = useTranslation("components")
-  const [tappletAddress, setTappletAddress] = useState("")
   const { id } = useParams()
-  const installedTappletId = Number(id)
   const dispatch = useDispatch()
+  const [tappletAddress, setTappletAddress] = useState("")
+  const installedTappletId = Number(id)
+  const tappProviderId = getTappProviderId({ installedTappletId: installedTappletId })
+  const tappProvider = useSelector((state: RootState) => selectTappProviderById(state, tappProviderId))
 
   useEffect(() => {
     invoke("launch_tapplet", { installedTappletId })
       .then((res: any) => {
         const launchedTappParams: LaunchedTappResult = res
         setTappletAddress(launchedTappParams.endpoint)
-        if (launchedTappParams.permissions) {
-          dispatch(providerActions.updatePermissionsRequest({ permissions: launchedTappParams.permissions }))
-        } else {
+        
+        if (!launchedTappParams.permissions) {
           dispatch(
             errorActions.showError({
               message: `failed-to-fetch-tapp-config | error-${"Tapplet permissions undefined"}`,
               errorSource: ErrorSource.BACKEND,
             })
           )
+          return
         }
+
+        if (!tappProvider) {
+          dispatch(
+            tappletProvidersActions.addTappProviderReq({
+              id: tappProviderId,
+              launchedTappParams: {
+                endpoint: launchedTappParams.endpoint,
+                permissions: launchedTappParams.permissions,
+              },
+            })
+          )
+          return
+        }
+
+        dispatch(
+          tappletProvidersActions.updateTappProviderRequest({
+            id: tappProviderId,
+            permissions: launchedTappParams.permissions,
+          })
+        )
       })
       .catch((error: string) => dispatch(errorActions.showError({ message: error, errorSource: ErrorSource.BACKEND })))
 
@@ -45,7 +69,11 @@ export function ActiveTapplet() {
 
   return (
     <Box height="100%">
-      {tappletAddress ? <Tapplet source={tappletAddress} /> : <Typography>{t("taplet-obtain-failure")}</Typography>}
+      {tappletAddress && tappProvider ? (
+        <Tapplet source={tappletAddress} provider={tappProvider} />
+      ) : (
+        <Typography>{t("taplet-obtain-failure")}</Typography>
+      )}
     </Box>
   )
 }

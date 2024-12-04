@@ -2,6 +2,8 @@ import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "
 import { devTappletsActions } from "./devTapplets.slice"
 import { AddDevTappletReqPayload, DeleteDevTappletReqPayload, InitDevTappletsReqPayload } from "./devTapplets.types"
 import { invoke } from "@tauri-apps/api/core"
+import { tappletProvidersActions } from "../tappletProviders/tappletProviders.slice"
+import { getTappProviderId } from "../../helpers/provider"
 
 export const initializeAction = () => ({
   actionCreator: devTappletsActions.initializeRequest,
@@ -30,6 +32,9 @@ export const deleteDevTappletAction = () => ({
 
       listenerApi.dispatch(devTappletsActions.deleteDevTappletSuccess({}))
       listenerApi.dispatch(devTappletsActions.initializeRequest({}))
+      listenerApi.dispatch(
+        tappletProvidersActions.deleteTappProviderRequest({ id: getTappProviderId({ devTappletId: item.id }) })
+      )
     } catch (error) {
       listenerApi.dispatch(devTappletsActions.deleteDevTappletFailure({ errorMsg: error as string }))
     }
@@ -45,6 +50,7 @@ export const addDevTappletAction = () => ({
     const endpoint = action.payload.endpoint
     try {
       await invoke("add_dev_tapplet", { endpoint })
+
       listenerApi.dispatch(devTappletsActions.addDevTappletSuccess({}))
       listenerApi.dispatch(devTappletsActions.initializeRequest({}))
     } catch (error) {

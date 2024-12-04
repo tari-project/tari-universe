@@ -55,6 +55,14 @@ pub struct Audit {
   pub report_url: String,
 }
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct TappletPermissions {
+  #[serde(rename = "requiredPermissions")]
+  pub required_permissions: Vec<TariPermission>,
+  #[serde(rename = "optionalPermissions")]
+  pub optional_permissions: Vec<TariPermission>,
+}
+
 #[derive(Debug, serde::Deserialize)]
 pub struct TappletConfig {
   #[serde(rename = "packageName")]
@@ -62,7 +70,7 @@ pub struct TappletConfig {
   pub version: String,
   #[serde(rename = "supportedChain")]
   pub supported_chain: Vec<String>,
-  pub permissions: Vec<TariPermission>,
+  pub permissions: TappletPermissions,
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
@@ -82,5 +90,5 @@ pub enum TariPermission {
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct LaunchedTappResult {
   pub endpoint: String,
-  pub permissions: Vec<TariPermission>,
+  pub permissions: TappletPermissions,
 }
