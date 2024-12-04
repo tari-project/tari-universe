@@ -193,7 +193,7 @@ export class TappletProvider implements TariProvider {
       },
       signing_key_index: req.account_id,
       autofill_inputs: [],
-      detect_inputs: false, //TODO check if works for 'false'
+      detect_inputs: true,
       proof_ids: [],
     } as TransactionSubmitRequest
 
