@@ -131,7 +131,7 @@ jobs:
           args: ${{ matrix.args }}
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: tari-universe_${{ steps.build.outputs.appVersion }}_${{ matrix.platform }}
           path: "${{ join(fromJSON(steps.build.outputs.artifactPaths), '\n') }}"
