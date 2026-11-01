@@ -9,7 +9,7 @@ export type TappProviderIdParam = {
   devTappletId?: number | string
 }
 export const getTappProviderId = (tappId: TappProviderIdParam): string => {
-  if (tappId.devTappletId) return `DTP${tappId.devTappletId}`
-  if (tappId.installedTappletId) return `TP${tappId.installedTappletId}`
+  if (tappId.devTappletId !== undefined && tappId.devTappletId !== "") return `DTP${tappId.devTappletId}`
+  if (tappId.installedTappletId !== undefined && tappId.installedTappletId !== "") return `TP${tappId.installedTappletId}`
   return ""
 }

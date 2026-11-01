@@ -26,6 +26,6 @@ export function getFunctionOrMethod(instructions: object[]): InstructionWithArgs
 }
 
 export function getTransactionStatusName(status?: TransactionStatus): string {
-  if (!status) return ""
-  return TransactionStatus[status]
+  if (status === undefined || status === null) return ""
+  return TransactionStatus[status] ?? ""
 }

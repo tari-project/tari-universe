@@ -33,7 +33,7 @@ export const executeTransactionAction = () => ({
     const dispatch = listenerApi.dispatch
 
     try {
-      submit()
+      await submit()
       dispatch(transactionActions.sendTransactionSuccess({ id }))
     } catch (error) {
       let message = "Error while executing transaction"
@@ -57,7 +57,7 @@ export const cancelTransactionAction = () => ({
     const dispatch = listenerApi.dispatch
 
     try {
-      cancel()
+      await cancel()
       dispatch(transactionActions.sendTransactionSuccess({ id }))
     } catch (error) {
       let message = "Error while executing transaction"
@@ -151,6 +151,7 @@ export const initializeTransactionAction = () => ({
           console.error(error)
           const e = typeof error === "string" ? error : "Get balances error"
           dispatch(errorActions.showError({ message: e, errorSource: ErrorSource.FRONTEND }))
+          return { balanceUpdates: [], txSimulation }
         }
 
         const { up_substates } = txResult.result.Accept
@@ -184,8 +185,15 @@ export const initializeTransactionAction = () => ({
           }
         } catch (error) {
           console.error(error)
-          const e = typeof error === "string" ? error : "Provider send request error"
+          const e = error instanceof Error ? error.message : typeof error === "string" ? error : "Provider send request error"
+          if (event.source) {
+            event.source.postMessage(
+              { id, result: {}, resultError: e, type: "provider-call" },
+              { targetOrigin: event.origin }
+            )
+          }
           dispatch(errorActions.showError({ message: e, errorSource: ErrorSource.FRONTEND }))
+          throw error
         }
       }
       const cancel = async () => {
