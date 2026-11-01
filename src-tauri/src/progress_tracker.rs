@@ -78,12 +78,13 @@ impl ProgressTrackerInner {
 
   pub fn update_with_next_max(&self, title: String, title_params: Option<HashMap<String, String>>, progress: u64) {
     debug!(target: LOG_TARGET, "⏳️️ Progress: {}% {}", progress, title);
+    let span = self.next_max.saturating_sub(self.min) as f64;
     self.window
       .emit("message", SetupStatusEvent {
         event_type: "setup_status".to_string(),
         title,
         title_params,
-        progress: ((self.min as f64) + ((self.next_max - self.min) as f64) * ((progress as f64) / 100.0)) / 100.0,
+        progress: ((self.min as f64) + span * ((progress as f64) / 100.0)) / 100.0,
       })
       .inspect_err(|e| error!(target: LOG_TARGET, "❌ Could not emit event 'message': {:?}", e))
       .ok();

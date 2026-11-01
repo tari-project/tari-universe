@@ -14,7 +14,8 @@ import { resolveBackendErrorMessage } from "./ErrorSnackBar"
 import { metadataSelector } from "../store/metadata/metadata.selector"
 import { getFunctionOrMethod, getTransactionStatusName } from "../helpers/transaction"
 
-const selectSimulationById = (state: RootState, id?: number) => (id ? simulationsSelectors.selectById(state, id) : null)
+const selectSimulationById = (state: RootState, id?: number) =>
+  id !== undefined ? simulationsSelectors.selectById(state, id) : null
 
 export const TransactionConfirmationModal: React.FC = () => {
   const { t } = useTranslation(["components", "common"])
@@ -33,14 +34,14 @@ export const TransactionConfirmationModal: React.FC = () => {
   }
 
   useEffect(() => {
-    if (transaction?.id) {
-      dispatch(simulationActions.runSimulationRequest({ transactionId: transaction?.id }))
+    if (transaction?.id !== undefined) {
+      dispatch(simulationActions.runSimulationRequest({ transactionId: transaction.id }))
     }
   }, [transaction])
 
   const submitTransaction = async () => {
     if (!transaction) {
-      errorActions.showError({ message: "no-pending-transaction-found", errorSource: ErrorSource.FRONTEND })
+      dispatch(errorActions.showError({ message: "no-pending-transaction-found", errorSource: ErrorSource.FRONTEND }))
       return
     }
     dispatch(
@@ -87,7 +88,7 @@ export const TransactionConfirmationModal: React.FC = () => {
         <DialogContentText>
           {t("tx-simulation-status", { ns: "components" })}: {getTransactionStatusName(simulation?.transaction?.status)}
         </DialogContentText>
-        {simulation?.transaction.errorMsg && (
+        {simulation?.transaction?.errorMsg && (
           <DialogContentText>
             {t("tx-simulation-error-msg", { ns: "components" })}:{" "}
             {typeof simulation?.transaction?.errorMsg === "string"

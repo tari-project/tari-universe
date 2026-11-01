@@ -197,7 +197,9 @@ export class TappletProvider implements TariProvider {
       proof_ids: [],
     } as TransactionSubmitRequest
 
-    const res = await this.client.submitTransaction(params)
+    const res = req.is_dry_run
+      ? await this.client.submitTransactionDryRun(params)
+      : await this.client.submitTransaction(params)
     return { transaction_id: res.transaction_id }
   }
 
@@ -246,8 +248,8 @@ export class TappletProvider implements TariProvider {
     const res = await this.client.substatesList({
       filter_by_template,
       filter_by_type,
-      limit: limit ? BigInt(limit) : null,
-      offset: offset ? BigInt(offset) : null,
+      limit: limit !== null && limit !== undefined ? BigInt(limit) : null,
+      offset: offset !== null && offset !== undefined ? BigInt(offset) : null,
     })
     const substates = res.substates.map((s) => ({
       substate_id: substateIdToString(s.substate_id),

@@ -42,7 +42,7 @@ pub async fn download_file_with_retries(
 }
 
 async fn download_file(url: &str, destination: &Path, progress_tracker: ProgressTracker) -> Result<(), anyhow::Error> {
-  let response = reqwest::get(url).await?;
+  let response = reqwest::get(url).await?.error_for_status()?;
 
   // Ensure the directory exists
   if let Some(parent) = destination.parent() {
@@ -86,6 +86,9 @@ async fn update_progress(
 }
 
 fn calculate_progress(downloaded_size: u64, total_size: u64) -> u64 {
+  if total_size == 0 {
+    return 0;
+  }
   (((downloaded_size as f64) / (total_size as f64)) * 100.0).round() as u64
 }
 

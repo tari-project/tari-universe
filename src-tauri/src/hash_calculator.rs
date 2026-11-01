@@ -39,14 +39,14 @@ fn read_data(path: &Path, sha: usize) -> Result<String, Error> {
       }
     }
   } else {
-    if let Ok(mut file) = fs::File::open(&path) {
-      let mut data = Vec::new();
-      file
-        .read_to_end(&mut data)
-        .map_err(|_| IOError(FailedToReadFile { path: path.to_str().unwrap_or_default().to_string() }))?;
-      let strout = calculate_hash(&data, sha);
-      results.push(strout);
-    }
+    let path_str = path.to_str().unwrap_or_default().to_string();
+    let mut file = fs::File::open(path).map_err(|_| IOError(FailedToReadFile { path: path_str.clone() }))?;
+    let mut data = Vec::new();
+    file
+      .read_to_end(&mut data)
+      .map_err(|_| IOError(FailedToReadFile { path: path_str }))?;
+    let strout = calculate_hash(&data, sha);
+    results.push(strout);
   }
   Ok(results.join("\n"))
 }
