@@ -85,8 +85,10 @@ async fn download_file(url: &str, dest: PathBuf) -> Result<(), Error> {
     }
   } else if response.status().is_server_error() {
     error!(target: LOG_TARGET, "❌ Download server error! Status: {:?}", response.status());
+    return Err(RequestError(FailedToDownload { url: url.to_string() }));
   } else {
     error!(target: LOG_TARGET, "❌ Download failed! Unknown status. Server response: {:?}", response);
+    return Err(RequestError(FailedToDownload { url: url.to_string() }));
   }
 
   Ok(())
@@ -131,6 +133,8 @@ pub async fn fetch_tapp_registry_manifest() -> Result<RegisteredTapplets, Error>
 
   let manifest_res = reqwest
     ::get(&manifest_endpoint).await
+    .map_err(|_| RequestError(FetchManifestError { endpoint: manifest_endpoint.clone() }))?
+    .error_for_status()
     .map_err(|_| RequestError(FetchManifestError { endpoint: manifest_endpoint.clone() }))?
     .text().await
     .map_err(|_| RequestError(ManifestResponseError { endpoint: manifest_endpoint.clone() }))?;
